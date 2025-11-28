@@ -3,7 +3,7 @@ name: Backend CI
 on: [push]
 
 jobs:
-  build:
+  test:
 
     runs-on: ubuntu-latest
 
@@ -18,5 +18,8 @@ jobs:
         with:
           node-version: 'latest'
           check-latest: true
-      - run: npm ci
-      - run: npm test
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test
+
