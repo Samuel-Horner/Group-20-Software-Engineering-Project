@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Backend CI
 
 on: [push]
 
@@ -7,6 +7,10 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: ./backend
+
     steps:
       - uses: actions/checkout@v5
       - name: Use Node.js
@@ -14,6 +18,5 @@ jobs:
         with:
           node-version: 'latest'
           check-latest: true
-      - run: cd backend
       - run: npm ci
       - run: npm test
