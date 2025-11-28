@@ -1,5 +1,5 @@
 export default {
     PORT: 8080,
     URL: "localhost",
-    DEFAULT_PAGE: "index.html" // In public
+    DEFAULT_PAGE: "index.html"
 }

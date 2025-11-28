@@ -1,11 +1,9 @@
-import http from "http";
-import fs from "fs";
+import { createServer } from "http";
+import { createReadStream } from "fs";
 
-import config from "./config.js";
+import config from "../config.js";
 
-const port = 8080;
-
-function getMimeType(path) {
+export function getMimeType(path) {
     // https://stackoverflow.com/questions/680929/how-to-extract-extension-from-filename-string-in-javascript
     const extention_regex = /(?:\.([^.]+))?$/;
     const ext = extention_regex.exec(path)[1];
@@ -38,12 +36,12 @@ async function getHandler(req, res) {
     let relative_path = req.url; // Path traversal vulnerable?
     if (relative_path == undefined || relative_path == "/") { relative_path = config.DEFAULT_PAGE; }
     if (relative_path[0] == "/") { relative_path = relative_path.slice(1); } // Removing leading / 
-    const path = "./public/" + relative_path; // Injection vulnerable?
+    const path = "../public/" + relative_path; // Injection vulnerable?
 
     res.setHeader("Content-Type", getMimeType(path)); // Set mime type
 
     // Pipe file to client
-    const read_stream = fs.createReadStream(path);
+    const read_stream = createReadStream(path);
     read_stream.on("open", () => {
         console.log(`Piping file ${path}.`);
         read_stream.pipe(res);
@@ -68,22 +66,20 @@ async function errorHandler(res, code) {
     res.writeHead(code).end();
 }
 
-const server = http.createServer(async (req, res) => {
-    res.setHeader("Access-Control-Allow-Origin", "*")
+export function createHTTPServer() {
+    return createServer(async (req, res) => {
+        res.setHeader("Access-Control-Allow-Origin", "*")
 
-    switch (req.method) {
-        case "GET":
-            await getHandler(req, res);
-            break;
-        case "POST":
-            await postHandler(req, res);
-            break;
-        default:
-            await errorHandler(req, res, 405);
-            break;
-    }
-});
-
-server.listen(config.PORT, config.URL, () => {
-    console.log(`Server running at ${config.URL}:${config.PORT}.`);
-});
+        switch (req.method) {
+            case "GET":
+                await getHandler(req, res);
+                break;
+            case "POST":
+                await postHandler(req, res);
+                break;
+            default:
+                await errorHandler(req, res, 405);
+                break;
+        }
+    });
+}

@@ -1,0 +1,19 @@
+{
+    "name": "backend",
+    "version": "1.0.0",
+    "description": "This folder will contain all code to be ran on the backend",
+    "license": "ISC",
+    "author": "",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+        "start": "node index.js"
+    },
+    "devDependencies": {
+        "jest": "^30.2.0"
+    },
+    "jest": {
+        "transform": {}
+    }
+}
