@@ -244,8 +244,6 @@ body {
    CALL-TO-ACTION BUTTON
    
    Primary action button for the site.
-   Example: <a href="quiz.html" class="cta-button">Take Quiz</a>
-   
    Works on both <a> tags and <button> elements.
 ============================================================================ */
 .cta-button {
@@ -488,7 +486,7 @@ body {
    - .footer: Main footer container
    - .footer-content: Grid layout for footer sections
    - .footer-section: Individual column in footer
-   - .footer-bottom: Bottom section for copyright/legal text
+   - .footer-bottom: Bottom section for legal text
 ============================================================================ */
 .footer {
     background: var(--text-dark);
