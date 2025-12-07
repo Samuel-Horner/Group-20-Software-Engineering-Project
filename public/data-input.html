@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Data Input</title>
+        <link href="Styles.css" rel="stylesheet">
+    </head>
+
+    <body>
+        <div style="background-color: var(--text-dark); justify-content: space-between; align-items: center;">  
+            <!-- adds a grey background to it-->
+            <div class="nav-container">
+                <h1 class="nav-cta" style="max-width: 120px;">Logo</h1>
+                <h1 class="nav-cta" style="max-width: 240px;">Sign Up</h1>
+            </div>
+        </div>
+
+        <h1>This is the data input page</h1>
+    
+        <button class="cta-button" onclick="gotoMain()">Main page</button> 
+
+        <script>
+            function gotoMain() {
+                let url= "http://127.0.0.1:8080";
+                let a = document.createElement("a");
+                a.style = "visibility: hidden";
+                a.href = url;
+                a.click();
+                a.remove();
+            }
+        </script>
+
+    </body>
+
+
+</html>

@@ -36,7 +36,7 @@ async function getHandler(req, res) {
     let relative_path = req.url; // Path traversal vulnerable?
     if (relative_path == undefined || relative_path == "/") { relative_path = config.DEFAULT_PAGE; }
     if (relative_path[0] == "/") { relative_path = relative_path.slice(1); } // Removing leading / 
-    const path = "../public/" + relative_path; // Injection vulnerable?
+    const path = "public/" + relative_path; // Injection vulnerable?
 
     res.setHeader("Content-Type", getMimeType(path)); // Set mime type
 
