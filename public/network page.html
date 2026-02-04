@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Hobby Network – Connect</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="Styles.css" rel="stylesheet">
 </head>
 <body>
   <div class="app-shell">
@@ -137,7 +138,7 @@
               <span class="tag">Pottery</span>
               <span class="tag">Cooking</span>
             </div>
-            <button class="connect-btn">
+            <button class="connect-btn" data-name="Sarah Chen">
               <span class="connect-icon">👥</span>
               Connect
             </button>
@@ -170,7 +171,7 @@
               <span class="tag">3D Printing</span>
               <span class="tag">Gaming</span>
             </div>
-            <button class="connect-btn">
+            <button class="connect-btn" data-name="Marcus Johnson">
               <span class="connect-icon">👥</span>
               Connect
             </button>
@@ -201,7 +202,7 @@
               <span class="tag">Painting</span>
               <span class="tag">Pilates</span>
             </div>
-            <button class="connect-btn">
+            <button class="connect-btn" data-name="Emily Rodriguez">
               <span class="connect-icon">👥</span>
               Connect
             </button>
@@ -233,7 +234,7 @@
               <span class="tag">Cycling</span>
               <span class="tag">Photography</span>
             </div>
-            <button class="connect-btn">
+            <button class="connect-btn" data-name="David Kim">
               <span class="connect-icon">👥</span>
               Connect
             </button>
@@ -243,359 +244,380 @@
     </main>
   </div>
 
+<script>
+  // Make every "Connect" button go to chat.html?name=...
+  document.querySelectorAll(".connect-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const name = btn.dataset.name || "Unknown";
+      const url = `chat.html?name=${encodeURIComponent(name)}`;
+      window.location.href = url;
+    });
+  });
+</script>
+
   <!-- All CSS is here at the end -->
-  <style>
-    :root {
-      --bg-gradient-start: #f3f5ff;
-      --bg-gradient-end: #f7fbff;
-      --card-bg: #ffffff;
-      --primary: #18182f;
-      --accent: #6f4ff5;
-      --accent-soft: #f1ecff;
-      --accent-advanced: #f1e4ff;
-      --accent-beginner: #e3f7ec;
-      --border-subtle: #e1e4f0;
-      --text-muted: #8389a0;
-      --radius-lg: 18px;
-      --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.08);
+<style>
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+      "Ubuntu", "Cantarell", sans-serif;
+    background: var(--background);
+    color: var(--text-dark);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  .app-shell {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+  }
+
+  /* Header / Topbar */
+  .topbar {
+    padding: 12px 8px 24px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: var(--background-alt);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .brand-text h1 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 4px;
+  }
+
+  .brand-text p {
+    font-size: 13px;
+    color: var(--text-light);
+    max-width: 560px;
+  }
+
+  /* Main layout */
+  .layout {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 26px;
+    align-items: flex-start;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    background: var(--background);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 18px 18px 16px;
+    border: 1px solid var(--border-color);
+    position: sticky;
+    top: 18px;
+  }
+
+  .sidebar h2 {
+    font-size: 15px;
+    margin-bottom: 12px;
+    font-weight: 700;
+    color: var(--text-dark);
+  }
+
+  .filter-list {
+    list-style: none;
+    max-height: 420px;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+
+  .filter-list li + li {
+    margin-top: 6px;
+  }
+
+  .filter-list label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text-dark);
+    cursor: pointer;
+    padding: 8px 10px;
+    border-radius: 14px;
+    transition: background 0.2s ease, transform 0.06s ease;
+  }
+
+  .filter-list label:hover {
+    background: var(--background-alt);
+    transform: translateY(-1px);
+  }
+
+  .filter-list input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    accent-color: var(--primary-color);
+    cursor: pointer;
+  }
+
+  /* Content area */
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .search-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .search-box {
+    flex: 1 1 260px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 999px;
+    background: var(--background-alt);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+  }
+
+  .search-box input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+    background: transparent;
+    color: var(--text-dark);
+  }
+
+  .search-box input::placeholder {
+    color: var(--text-light);
+  }
+
+  .search-icon {
+    font-size: 16px;
+    opacity: 0.8;
+  }
+
+  .results-count {
+    font-size: 13px;
+    color: var(--text-light);
+    white-space: nowrap;
+  }
+
+  /* Cards grid */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+  }
+
+  .profile-card {
+    background: var(--background);
+    border-radius: 20px;
+    padding: 18px 18px 14px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .profile-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 4px;
+  }
+
+  .avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 999px;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid var(--background-alt);
+    box-shadow: var(--shadow);
+    background: var(--background-alt);
+  }
+
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .profile-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .profile-topline {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .profile-topline h3 {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-dark);
+  }
+
+  .location {
+    font-size: 13px;
+    color: var(--text-light);
+  }
+
+  /* Level pills */
+  .level {
+    align-self: flex-start;
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    border: 1px solid var(--border-color);
+    background: var(--background-alt);
+    color: var(--text-dark);
+  }
+
+  .level-intermediate {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.35);
+    color: var(--primary-dark);
+  }
+
+  .level-advanced {
+    background: rgba(20, 184, 166, 0.12);
+    border-color: rgba(20, 184, 166, 0.35);
+    color: #0f766e;
+  }
+
+  .level-beginner {
+    background: rgba(6, 182, 212, 0.12);
+    border-color: rgba(6, 182, 212, 0.35);
+    color: #0e7490;
+  }
+
+  .bio {
+    font-size: 13px;
+    color: var(--text-light);
+    line-height: 1.45;
+  }
+
+  /* Tag pills */
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 2px;
+  }
+
+  .tag {
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--background-alt);
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+  }
+
+  /* Connect button (matches site CTA vibe) */
+  .connect-btn {
+    margin-top: 10px;
+    width: 100%;
+    border: none;
+    cursor: pointer;
+    padding: 12px 16px;
+    border-radius: 999px;
+    background: var(--primary-color);
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.06s ease, box-shadow 0.12s ease,
+      background 0.12s ease;
+    box-shadow: var(--shadow);
+  }
+
+  .connect-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .connect-btn:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow);
+  }
+
+  .connect-icon {
+    font-size: 16px;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    .sidebar {
+      position: static;
+      order: 2;
     }
+  }
 
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
-      background: radial-gradient(circle at top, var(--bg-gradient-start), #fff);
-      min-height: 100vh;
-      color: var(--primary);
-      -webkit-font-smoothing: antialiased;
-    }
-
+  @media (max-width: 600px) {
     .app-shell {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px 16px 40px;
-    }
-
-    /* Header / Topbar */
-
-    .topbar {
-      padding: 12px 8px 24px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .brand-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 999px;
-      background: var(--accent-soft);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
+      padding-inline: 12px;
     }
 
     .brand-text h1 {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .brand-text p {
-      font-size: 13px;
-      color: var(--text-muted);
-      max-width: 520px;
-    }
-
-    /* Main layout */
-
-    .layout {
-      display: grid;
-      grid-template-columns: 260px minmax(0, 1fr);
-      gap: 26px;
-      align-items: flex-start;
-    }
-
-    /* Sidebar */
-
-    .sidebar {
-      background: var(--card-bg);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-soft);
-      padding: 18px 18px 16px;
-      border: 1px solid var(--border-subtle);
-      position: sticky;
-      top: 18px;
-    }
-
-    .sidebar h2 {
-      font-size: 15px;
-      margin-bottom: 12px;
-      font-weight: 600;
-    }
-
-    .filter-list {
-      list-style: none;
-      max-height: 420px;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-
-    .filter-list li + li {
-      margin-top: 6px;
-    }
-
-    .filter-list label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      color: #444a5f;
-      cursor: pointer;
-      padding: 4px 4px;
-      border-radius: 8px;
-      transition: background 0.15s ease;
-    }
-
-    .filter-list label:hover {
-      background: #f5f6fc;
-    }
-
-    .filter-list input[type="checkbox"] {
-      width: 14px;
-      height: 14px;
-      border-radius: 4px;
-      border: 1px solid var(--border-subtle);
-      accent-color: var(--accent);
-      cursor: pointer;
-    }
-
-    /* Content area */
-
-    .content {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .search-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .search-box {
-      flex: 1 1 260px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: #f4f6ff;
-      border: 1px solid rgba(148, 163, 184, 0.25);
-    }
-
-    .search-box input {
-      border: none;
-      outline: none;
-      width: 100%;
-      font-size: 14px;
-      background: transparent;
-    }
-
-    .search-icon {
-      font-size: 15px;
-      opacity: 0.7;
-    }
-
-    .results-count {
-      font-size: 13px;
-      color: var(--text-muted);
-      white-space: nowrap;
-    }
-
-    /* Cards */
-
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 18px;
+      font-size: 18px;
     }
 
     .profile-card {
-      background: var(--card-bg);
-      border-radius: 20px;
-      padding: 18px 18px 14px;
-      border: 1px solid var(--border-subtle);
-      box-shadow: var(--shadow-soft);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      padding: 16px 14px;
     }
+  }
+</style>
 
-    .profile-header {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 4px;
-    }
-
-    .avatar {
-      width: 56px;
-      height: 56px;
-      border-radius: 999px;
-      overflow: hidden;
-      flex-shrink: 0;
-      border: 2px solid #f4f2ff;
-    }
-
-    .avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .profile-main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .profile-topline {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-    }
-
-    .profile-topline h3 {
-      font-size: 15px;
-      font-weight: 600;
-    }
-
-    .location {
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-
-    .level {
-      align-self: flex-start;
-      font-size: 11px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-weight: 500;
-    }
-
-    .level-intermediate {
-      background: var(--accent-soft);
-      color: var(--accent);
-    }
-
-    .level-advanced {
-      background: var(--accent-advanced);
-      color: #8c3cf3;
-    }
-
-    .level-beginner {
-      background: var(--accent-beginner);
-      color: #208a49;
-    }
-
-    .bio {
-      font-size: 13px;
-      color: #4b4f60;
-      line-height: 1.45;
-    }
-
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 2px;
-    }
-
-    .tag {
-      font-size: 11px;
-      padding: 5px 10px;
-      border-radius: 999px;
-      background: #f5f6fc;
-      color: #4b4f60;
-      border: 1px solid rgba(148, 163, 184, 0.4);
-    }
-
-    .connect-btn {
-      margin-top: 10px;
-      width: 100%;
-      border: none;
-      cursor: pointer;
-      padding: 9px 14px;
-      border-radius: 999px;
-      background: #070714;
-      color: #ffffff;
-      font-size: 14px;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: transform 0.06s ease, box-shadow 0.06s ease,
-        background 0.12s ease;
-      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.4);
-    }
-
-    .connect-btn:hover {
-      background: #12122b;
-      transform: translateY(-1px);
-      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.5);
-    }
-
-    .connect-btn:active {
-      transform: translateY(0);
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.4);
-    }
-
-    .connect-icon {
-      font-size: 15px;
-    }
-
-    /* Responsive */
-
-    @media (max-width: 900px) {
-      .layout {
-        grid-template-columns: minmax(0, 1fr);
-      }
-
-      .sidebar {
-        position: static;
-        order: 2;
-      }
-    }
-
-    @media (max-width: 600px) {
-      .app-shell {
-        padding-inline: 12px;
-      }
-
-      .brand-text h1 {
-        font-size: 18px;
-      }
-
-      .profile-card {
-        padding: 16px 14px;
-      }
-    }
-  </style>
 </body>
 </html>
