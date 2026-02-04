@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat</title>
+    <link href="Styles.css" rel="stylesheet" />
+
+    <style>
+      /* Chat page styling using your existing theme variables from Styles.css */
+      .chat-shell {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px 16px 40px;
+      }
+
+      .chat-header {
+        background: var(--background);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        padding: 16px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .chat-title {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .chat-title h1 {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--text-dark);
+      }
+
+      .chat-title p {
+        font-size: 13px;
+        color: var(--text-light);
+      }
+
+      .back-link {
+        text-decoration: none;
+        font-weight: 700;
+        color: var(--primary-color);
+      }
+
+      .back-link:hover {
+        color: var(--primary-dark);
+      }
+
+      .chat-window {
+        background: var(--background);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        padding: 16px;
+        min-height: 420px;
+        max-height: 520px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .msg-row {
+        display: flex;
+      }
+
+      .msg-row.me {
+        justify-content: flex-end;
+      }
+
+      .msg {
+        max-width: 70%;
+        padding: 10px 12px;
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        background: var(--background-alt);
+        color: var(--text-dark);
+        box-shadow: var(--shadow);
+        font-size: 14px;
+        line-height: 1.4;
+        word-wrap: break-word;
+      }
+
+      .msg-row.me .msg {
+        background: rgba(16, 185, 129, 0.15); /* green tint */
+        border-color: rgba(16, 185, 129, 0.35);
+      }
+
+      .msg-meta {
+        margin-top: 6px;
+        font-size: 11px;
+        color: var(--text-light);
+      }
+
+      .composer {
+        margin-top: 14px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        background: var(--background);
+        border: 1px solid var(--border-color);
+        border-radius: 999px;
+        box-shadow: var(--shadow);
+        padding: 10px 12px;
+      }
+
+      .composer input {
+        border: none;
+        outline: none;
+        width: 100%;
+        font-size: 14px;
+        background: transparent;
+        color: var(--text-dark);
+      }
+
+      .send-btn {
+        border: none;
+        cursor: pointer;
+        padding: 10px 16px;
+        border-radius: 999px;
+        background: var(--primary-color);
+        color: white;
+        font-weight: 800;
+        box-shadow: var(--shadow);
+        transition: transform 0.06s ease, background 0.12s ease, box-shadow 0.12s ease;
+      }
+
+      .send-btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .send-btn:active {
+        transform: translateY(0);
+        box-shadow: var(--shadow);
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Optional: keep your existing top bar look -->
+    <div style="background-color: var(--text-dark); justify-content: space-between; align-items: center;">
+      <div class="nav-container">
+        <h1 class="nav-cta" style="max-width: 120px;">Logo</h1>
+        <h1 class="nav-cta" style="max-width: 240px;">Sign Up</h1>
+      </div>
+    </div>
+
+    <div class="chat-shell">
+      <div class="chat-header">
+        <div class="chat-title">
+          <h1 id="chatWithTitle">Chat</h1>
+          <p>Mock conversation — messages you type will appear below.</p>
+        </div>
+        <a class="back-link" href="network%20page.html">← Back</a>
+      </div>
+
+      <div id="chatWindow" class="chat-window"></div>
+
+      <form id="chatForm" class="composer">
+        <input id="msgInput" type="text" placeholder="Type a message..." autocomplete="off" />
+        <button class="send-btn" type="submit">Send</button>
+      </form>
+    </div>
+
+    <script>
+      // Read who we're chatting with from the URL: chat.html?name=Sarah%20Chen
+      const params = new URLSearchParams(window.location.search);
+      const chatName = params.get("name") || "Someone";
+
+      // If you renamed your file to network.html, update the back link.
+      // For now it points to: network%20page.html (matches your current filename)
+      document.getElementById("chatWithTitle").textContent = `Chat with ${chatName}`;
+
+      const chatWindow = document.getElementById("chatWindow");
+      const chatForm = document.getElementById("chatForm");
+      const msgInput = document.getElementById("msgInput");
+
+      // Storage key per person (so each profile has its own mock chat)
+      const storageKey = `mockChat_${chatName}`;
+
+      function timeNow() {
+        const d = new Date();
+        return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      }
+
+      function addMessage(text, who = "me", timestamp = timeNow()) {
+        const row = document.createElement("div");
+        row.className = `msg-row ${who}`;
+
+        const bubble = document.createElement("div");
+        bubble.className = "msg";
+        bubble.textContent = text;
+
+        const meta = document.createElement("div");
+        meta.className = "msg-meta";
+        meta.textContent = timestamp;
+
+        bubble.appendChild(meta);
+        row.appendChild(bubble);
+        chatWindow.appendChild(row);
+
+        // scroll to bottom
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+      }
+
+      function loadConversation() {
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) {
+          // Mock starter messages (optional)
+          addMessage(`Hey! I'm ${chatName}.`, "them");
+          addMessage("Hi! 👋", "me");
+          saveConversation();
+          return;
+        }
+
+        const msgs = JSON.parse(raw);
+        msgs.forEach((m) => addMessage(m.text, m.who, m.time));
+      }
+
+      function saveConversation() {
+        // Rebuild messages from DOM into localStorage
+        const msgs = [];
+        document.querySelectorAll(".msg-row").forEach((row) => {
+          const who = row.classList.contains("me") ? "me" : "them";
+          const bubble = row.querySelector(".msg");
+          const meta = row.querySelector(".msg-meta");
+          const time = meta ? meta.textContent : "";
+          // bubble text includes meta text; so take only the first text node
+          const text = bubble.childNodes[0]?.textContent?.trim() || "";
+          msgs.push({ who, text, time });
+        });
+        localStorage.setItem(storageKey, JSON.stringify(msgs));
+      }
+
+      chatForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const text = msgInput.value.trim();
+        if (!text) return;
+
+        addMessage(text, "me");
+        msgInput.value = "";
+        saveConversation();
+      });
+
+      loadConversation();
+      msgInput.focus();
+    </script>
+  </body>
+</html>
