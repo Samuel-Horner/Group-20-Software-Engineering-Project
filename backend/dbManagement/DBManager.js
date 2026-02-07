@@ -1,63 +1,70 @@
-
 const sqlite3 = require('sqlite3').verbose();
 const schema = require('./schema');
 
 class DBManager {
     constructor (dbpathNew=`./defaultDB.sqlite`) {
         this.dbpath = dbpathNew;
-        this.tableName,this.columns = schema.returnSchema();
+        const [tableName,...columns] = schema.returnSchema();
+        this.tableName = tableName;
+        this.columns = columns;
         this.dbConnect = null;
     }
 
-    establishConnection () {
-        const dbConnect = new sqlite3.Database(this.dbpath, (err) => {
-            if (err) {
-                console.error("Connection Failed:",err.message);
-                process.exit(1);
-            } console.log("Connection Established")
-        })
-        this.dbConnect = dbConnect
+    async establishConnection () {
+        let dbConnect = new sqlite3.Database(this.dbpath);
+        if (dbConnect) {this.dbConnect = dbConnect; return "establishConnection: Success";}
+        else {return "establishConnection: Failed";}
     }
 
-    dbpathChange (dbpathNew) {
+    async dbpathChange (dbpathNew) {
         this.dbpath = dbpathNew;
     }
 
-    initialiseSchema () {
+    async initialiseSchema () {
         if (!this.dbConnect) {this.dbConnect = this.establishConnection();}
-        db.run(`CREATE TABLE IF NOT EXISTS ${this.tableName} (${this.columns})`,[],(err) => {
-            if (err) {console.error("Failed to Initialise Schema:",err); process.exit(1);}
-            console.log("Schema Initialised");
-        });
-        return true;
+        return new Promise ((resolve,_) => {this.dbConnect.run(`CREATE TABLE IF NOT EXISTS ${this.tableName} (${this.columns});`,[],(err) => {
+            if (!err) {resolve("initialiseSchema: Success");}
+            else {resolve("initialiseSchema: "+err.message);}
+        })});
     }
 
-    dropSchema () {
+    async dropSchema () {
         if (!this.dbConnect) {this.dbConnect = this.establishConnection();}
-        db.run(`DROP TABLE ${this.tableName}`,[],(err) => {
-            if (err) {console.error("Failed to Drop Schema:",err.message); process.exit(1);}
-            console.log("Schema Dropped");
-        });
-        return true;
+        return new Promise ((resolve,_) => {this.dbConnect.run(`DROP TABLE ${this.tableName};`,[],(err) => {
+            if (!err) {resolve("dropSchema: Success");}
+            else {resolve("dropSchema: "+err.message);}
+        })});
     }
 
-    dbExecute (sqlCommand,params=[]) {
+    async dbExecute (sqlCommand,params=[]) {
         if (!this.dbConnect) {this.dbConnect = this.establishConnection();}
-        this.dbConnect.run(sqlCommand,params,(err) => {
-            if (err) {console.error("Failed to run SQL Execute:",err.message); process.exit(1);}
-            console.log("SQL Execute Succeeded");
-        })
-        return true
+        return new Promise ((resolve,_) => {
+            let leadCommand = sqlCommand.trim().split(/\s+/)[0];
+            if (leadCommand == "DROP") {resolve("dbExecute: custom_ERROR: Use 'dropSchema' to drop the table");}
+            else {
+                this.dbConnect.run(sqlCommand,params,(err) => {
+                    if (!err) {resolve("dbExecute: Success");}
+                    else {resolve("dbExecute: "+err.message);}
+                })
+            }});
     }
 
-    dbGet (sqlCommand,params=[]) {
+    async dbGet (sqlCommand,params=[]) {
         if (!this.dbConnect) {this.dbConnect = this.establishConnection();}
-        this.dbConnect.run(sqlCommand,params,(err,row) => {
-            if (err) {console.error("Failed to run SQL Get:",err.message); process.exit(1);}
-            console.log("SQL Get Succeeded");
-        })
-        return row
+        return new Promise ((resolve,_) => {
+            let leadCommand = sqlCommand.trim().split(/\s+/)[0];
+            if (!(leadCommand == "SELECT")) {resolve("dbExecute: custom_ERROR: sqlCommand only accepts 'SELECT'");}
+            else {
+                this.dbConnect.all(sqlCommand,params,(err,result) => {
+                    if (!err) {resolve(result);}
+                    else {resolve("dbGet: "+err.message);}
+                })
+            }});
     }
 }
 
 module.exports = DBManager;
+
+/*
+Test (with additional code) by running within the terminal (cd to folder first): node DBManager.js
+*/

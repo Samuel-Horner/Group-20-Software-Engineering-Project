@@ -1,7 +1,7 @@
 
-// Freely configurable, for initialising the table Name and Columns
+// Freely configurable, for establishing the table Name and Columns
 function returnSchema () {
-    return "users",[
+    return ["users",
     "username TEXT",
     "email TEXT",
     "takenQuiz BOOLEAN"
