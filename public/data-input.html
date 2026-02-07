@@ -1,36 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>Data Input</title>
-        <link href="Styles.css" rel="stylesheet">
-    </head>
+<head>
+    <meta charset="utf-8">
+    <title>Hobby Quiz - Find Your Path</title>
+    <link href="Styles.css" rel="stylesheet">
+    <style>
+        /* Specific overrides to match Simon's prototype layout */
+        body {
+            background-color: #f3f4f6; /* Light grey background for contrast */
+            padding-top: 100px; /* Space for fixed navbar */
+        }
 
-    <body>
-        <div style="background-color: var(--text-dark); justify-content: space-between; align-items: center;">  
-            <!-- adds a grey background to it-->
-            <div class="nav-container">
-                <h1 class="nav-cta" style="max-width: 120px;">Logo</h1>
-                <h1 class="nav-cta" style="max-width: 240px;">Sign Up</h1>
-            </div>
+        /* Styling the Prototype Header */
+        .proto-header {
+            background-color: var(--text-dark) !important;
+        }
+
+        .proto-logo {
+            background-color: var(--secondary-color);
+            color: var(--text-dark);
+            padding: 5px 15px;
+            font-weight: 800;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .proto-user-icon {
+            color: var(--secondary-color);
+            font-size: 2rem;
+        }
+
+        /* Question Box Styling - Matching the Image exactly */
+        .quiz-scroll-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            padding-bottom: 60px;
+        }
+
+        .question-box {
+            background: #e5e7eb; /* The light grey from the prototype */
+            width: 100%;
+            max-width: 900px;
+            padding: 60px 40px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg); /* Using your defined large shadow */
+            text-align: center;
+        }
+
+        .question-box h2 {
+            font-size: 2rem;
+            margin-bottom: 40px;
+            color: var(--text-dark);
+        }
+
+        .options-container {
+            display: flex;
+            justify-content: space-evenly;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .answer-input {
+            width: min(420px, 90%);
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            font-size: 1rem;
+            background: #fff;
+            color: var(--text-dark);
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        /* Centered Submit Button Container */
+        .submit-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin: 40px 0 100px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar proto-header">
+        <div class="nav-container">
+            <div class="proto-logo">Logo</div>
+            <div class="proto-user-icon">👤</div>
         </div>
+    </nav>
 
-        <h1>This is the data input page</h1>
-    
-        <button class="cta-button" onclick="gotoMain()">Main page</button> 
+    <main class="container">
+        <form id="quizForm" class="quiz-scroll-area">
+            
+            <div class="question-box">
+                <h2>Question description</h2>
+                <div class="options-container">
+                    <label class="option-label" for="q0">Answer (enter a number)</label>
+                    <input class="answer-input" id="q0" name="q0" type="text" inputmode="numeric" required placeholder="e.g. 1">
+                </div>
+            </div>
 
-        <script>
-            function gotoMain() {
-                let url= "http://127.0.0.1:8080";
-                let a = document.createElement("a");
-                a.style = "visibility: hidden";
-                a.href = url;
-                a.click();
-                a.remove();
-            }
-        </script>
+            <div class="question-box">
+                <h2>Question description</h2>
+                <div class="options-container">
+                    <label class="option-label" for="q1">Answer (enter a number)</label>
+                    <input class="answer-input" id="q1" name="q1" type="text" inputmode="numeric" required placeholder="e.g. 3">
+                </div>
+            </div>
 
-    </body>
+            <div class="submit-wrapper">
+                <button type="submit" class="cta-button">SUBMIT</button>
+            </div>
+        </form>
+    </main>
 
-
+    <script src="quiz-logic.js"></script>
+</body>
 </html>

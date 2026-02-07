@@ -42,25 +42,11 @@
 
         <script>
             function gotoDataInput() {
-                // Message server
-                // alert("Sending request for data input page ...");
-                let url= "http://127.0.0.1:8080/data-input.html";
-                let a = document.createElement("a");
-                a.style = "visibility: hidden";
-                a.href = url;
-                a.click();
-                a.remove();
+                window.location.href = "data-input.html";
             }
 
             function gotoCommunity() {
-                // Message server
-                // alert("Sending request for community page ...");
-                let url= "http://127.0.0.1:8080/network%20page.html";
-                let a = document.createElement("a");
-                a.style = "visibility: hidden";
-                a.href = url;
-                a.click();
-                a.remove();
+                window.location.href = "network%20page.html";
             }
         </script>
     </body>

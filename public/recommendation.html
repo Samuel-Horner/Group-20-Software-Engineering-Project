@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Hobby Recommendation</title>
+    <link href="Styles.css" rel="stylesheet">
+    <style>
+        body {
+            background: var(--background-alt);
+            padding: 80px 20px;
+        }
+
+        .rec-card {
+            max-width: 720px;
+            margin: 0 auto;
+            background: var(--background);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            padding: 36px 32px;
+            text-align: center;
+        }
+
+        .rec-title {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .rec-hobby {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin: 16px 0 24px;
+        }
+
+        .rec-actions {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .secondary-btn {
+            display: inline-block;
+            padding: 14px 28px;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+            background: var(--background);
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+            transition: all 0.2s ease;
+        }
+
+        .secondary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+    </style>
+</head>
+<body>
+    <div class="rec-card">
+        <h1 class="rec-title">Your Recommended Hobby</h1>
+        <p>Based on your quiz answers, we think you'll enjoy:</p>
+        <div id="hobbyName" class="rec-hobby">Loading...</div>
+        <div class="rec-actions">
+            <a class="cta-button" href="data-input.html">Retake Quiz</a>
+            <a class="secondary-btn" href="index.html">Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        function getCookie(name) {
+            const cookies = document.cookie ? document.cookie.split(";") : [];
+            for (const cookie of cookies) {
+                const [key, ...rest] = cookie.split("=");
+                if (key && key.trim() === name) {
+                    return decodeURIComponent(rest.join("=") || "");
+                }
+            }
+            return null;
+        }
+
+        function getQueryParam(name) {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                return params.get(name);
+            } catch (err) {
+                const query = window.location.search.replace(/^\?/, "");
+                for (const pair of query.split("&")) {
+                    const [key, value] = pair.split("=");
+                    if (decodeURIComponent(key || "") === name) {
+                        return decodeURIComponent(value || "");
+                    }
+                }
+                return null;
+            }
+        }
+
+        let storedHobby = getQueryParam("hobby");
+        if (!storedHobby) {
+            try {
+                storedHobby = localStorage.getItem("userHobby");
+            } catch (err) {
+                storedHobby = null;
+            }
+        }
+
+        if (!storedHobby) {
+            storedHobby = getCookie("userHobby");
+        }
+
+        const hobbyName = storedHobby || "No recommendation found. Please retake the quiz.";
+
+        const hobbyEl = document.getElementById("hobbyName");
+        if (hobbyEl) {
+            hobbyEl.textContent = hobbyName;
+        }
+    </script>
+</body>
+</html>
