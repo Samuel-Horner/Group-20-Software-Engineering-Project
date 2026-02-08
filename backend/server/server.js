@@ -1,28 +1,29 @@
 import { createServer } from "http";
 import { createReadStream } from "fs";
+import { URL } from "url";
+import path from "path";
 
 import config from "../config.js";
 
-export function getMimeType(path) {
-    // https://stackoverflow.com/questions/680929/how-to-extract-extension-from-filename-string-in-javascript
-    const extention_regex = /(?:\.([^.]+))?$/;
-    const ext = extention_regex.exec(path)[1];
+const qualified_url = `http://${config.URL}:${config.PORT}`;
+const public_directory = path.resolve("./public/");
 
+export function getMimeType(ext) {
     switch (ext) {
-        case "html":
+        case ".html":
             return "text/html"
-        case "css":
+        case ".css":
             return "text/css"
-        case "js":
+        case ".js":
             return "text/javascript"
-        case "json":
+        case ".json":
             return "application/json"
-        case "png":
+        case ".png":
             return "image/png"
-        case "jpg":
-        case "jpeg":
+        case ".jpg":
+        case ".jpeg":
             return "image/jpeg"
-        case "svg":
+        case ".svg":
             return "image/svg+xml"
         default:
             return "text/plain"
@@ -32,25 +33,36 @@ export function getMimeType(path) {
 async function getHandler(req, res) {
     console.log(`Recieved GET request for resource ${req.url}.`)
 
-    // Get Resource Path
-    let relative_path = req.url; // Path traversal vulnerable?
-    if (relative_path == undefined || relative_path == "/") { relative_path = config.DEFAULT_PAGE; }
-    if (relative_path[0] == "/") { relative_path = relative_path.slice(1); } // Removing leading / 
-    const path = "public/" + relative_path; // Injection vulnerable?
+    const url = new URL(req.url, qualified_url);
 
-    res.setHeader("Content-Type", getMimeType(path)); // Set mime type
+    if (url.pathname == "/") {
+        url.pathname = config.DEFAULT_PAGE;
+    }
+
+    let file_path_str = path.resolve(path.join(public_directory, url.pathname));
+
+    // Check for path traversal out of public directory.
+    // This is probably not good enough to prevent path traversal.
+    // TODO: Find a better mechanism for this.
+    if (!file_path_str.startsWith(public_directory)) {
+        console.error(`Invalid file path: ${file_path}`);
+        errorHandler(res, 404);
+    }
+
+    let file_path = path.parse(file_path_str);
+    res.setHeader("Content-Type", getMimeType(file_path.ext)); // Set mime type
 
     // Pipe file to client
-    const read_stream = createReadStream(path);
+    const read_stream = createReadStream(file_path_str);
     read_stream.on("open", () => {
-        console.log(`Piping file ${path}.`);
+        console.log(`Piping file ${file_path_str}.`);
         read_stream.pipe(res);
     });
     read_stream.on("end", () => {
         res.end();
     });
     read_stream.on("error", (err) => {
-        console.error(`Error reading file ${path}: ${err.message}`);
+        console.error(`Error reading file ${file_path_str}: ${err.message}`);
         errorHandler(res, 404);
     });
 }
