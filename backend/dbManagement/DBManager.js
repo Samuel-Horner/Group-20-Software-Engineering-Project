@@ -1,10 +1,10 @@
-const sqlite3 = require('sqlite3').verbose();
-const schema = require('./schema');
+import {returnSchema} from './schema.js';
+import sqlite3 from 'sqlite3';
 
-class DBManager {
-    constructor (dbpathNew=`./defaultDB.sqlite`) {
+export class DBManager {
+    constructor (dbpathNew="./defaultDB.sqlite") {
         this.dbpath = dbpathNew;
-        const [tableName,...columns] = schema.returnSchema();
+        const [tableName,...columns] = returnSchema();
         this.tableName = tableName;
         this.columns = columns;
         this.dbConnect = null;
@@ -62,8 +62,6 @@ class DBManager {
             }});
     }
 }
-
-module.exports = DBManager;
 
 /*
 Test (with additional code) by running within the terminal (cd to folder first): node DBManager.js

@@ -1,4 +1,4 @@
-const DBManager = require('./DBManager');
+import {DBManager} from './DBManager.js';
 
 describe('DBManager Tests', () => {
     const TestManager = new DBManager();
