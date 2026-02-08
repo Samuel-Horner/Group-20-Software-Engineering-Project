@@ -161,7 +161,7 @@
           <h1 id="chatWithTitle">Chat</h1>
           <p>Mock conversation — messages you type will appear below.</p>
         </div>
-        <a class="back-link" href="network%20page.html">← Back</a>
+        <a class="back-link" href="network_page.html">← Back</a>
       </div>
 
       <div id="chatWindow" class="chat-window"></div>
@@ -178,7 +178,7 @@
       const chatName = params.get("name") || "Someone";
 
       // If you renamed your file to network.html, update the back link.
-      // For now it points to: network%20page.html (matches your current filename)
+      // For now it points to: network_page.html (matches your current filename)
       document.getElementById("chatWithTitle").textContent = `Chat with ${chatName}`;
 
       const chatWindow = document.getElementById("chatWindow");
