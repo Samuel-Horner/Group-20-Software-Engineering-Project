@@ -6,7 +6,6 @@ import path from "path";
 import config from "../config.js";
 
 const qualified_url = `http://${config.URL}:${config.PORT}`;
-const public_directory = path.resolve("./public/");
 
 export function getMimeType(ext) {
     switch (ext) {
@@ -30,7 +29,7 @@ export function getMimeType(ext) {
     }
 }
 
-async function getHandler(req, res) {
+async function getHandler(public_directory, req, res) {
     console.log(`Recieved GET request for resource ${req.url}.`)
 
     const url = new URL(req.url, qualified_url);
@@ -45,7 +44,7 @@ async function getHandler(req, res) {
     // This is probably not good enough to prevent path traversal.
     // TODO: Find a better mechanism for this.
     if (!file_path_str.startsWith(public_directory)) {
-        console.error(`Invalid file path: ${file_path}`);
+        console.error(`Error, invalid file path: ${file_path}`);
         errorHandler(res, 404);
     }
 
@@ -67,24 +66,37 @@ async function getHandler(req, res) {
     });
 }
 
-async function postHandler(req, res) {
-    console.log(`Recieved POST request.`);
+let endpoints = {};
 
-    res.end();
+async function postHandler(req, res) {
+    console.log(`Recieved POST request for resource ${req.url}.`);
+    if (req.url in endpoints) {
+        endpoints[req.url](req, res);
+    } else {
+        console.error(`Error, no POST handler exists for resource ${req.url}.`);
+        errorHandler(res, 404);
+    }
 }
 
-async function errorHandler(res, code) {
+export function registerPOSTHandler(url, handler) {
+    if (url in endpoints) {
+        throw new Error("Url already registered.");
+    }
+    endpoints[url] = handler;
+}
+
+export async function errorHandler(res, code) {
     console.error(`HTTP Error ${code}`);
     res.writeHead(code).end();
 }
 
-export function createHTTPServer() {
+export function createHTTPServer(public_directory) {
     return createServer(async (req, res) => {
         res.setHeader("Access-Control-Allow-Origin", "*")
 
         switch (req.method) {
             case "GET":
-                await getHandler(req, res);
+                await getHandler(public_directory, req, res);
                 break;
             case "POST":
                 await postHandler(req, res);
