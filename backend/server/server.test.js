@@ -23,7 +23,7 @@ function readFile(file_path) {
     }
 }
 
-describe("Server module", () => {
+describe("Static server module", () => {
     test("Get mime type", () => {
         expect(getMimeType(".foo")).toBe("text/plain");
 
@@ -35,15 +35,26 @@ describe("Server module", () => {
         expect(getMimeType(".png")).toBe("image/png");
         expect(getMimeType(".svg")).toBe("image/svg+xml");
     });
+});
 
-    const server = createHTTPServer(public_directory);
-    server.listen(config.PORT, config.URL, () => {});
+describe("Server module", () => {
+    let server = null;
+
+    beforeAll(() => {
+        server = createHTTPServer(public_directory);
+        server.listen(config.PORT, config.URL, () => {});
+    });
 
     test("Get Request", async () => {
-        await expect(await getURL("")).toBe(readFile("index.html"));
-        await expect(await getURL("index.html")).toBe(readFile("index.html"));
-        await expect(await getURL("chat.html")).toBe(readFile("chat.html"));
-        await expect(await getURL("index.html?test=1")).toBe(readFile("index.html"));
-        await expect(await getURL("foo")).toBe(404);
+        await expect(getURL("")).resolves.toBe(readFile("index.html"));
+        await expect(getURL("index.html")).resolves.toBe(readFile("index.html"));
+        await expect(getURL("chat.html")).resolves.toBe(readFile("chat.html"));
+        await expect(getURL("index.html?test=1")).resolves.toBe(readFile("index.html"));
+        await expect(getURL("foo")).resolves.toBe(404);
+    });
+
+    afterAll(() => {
+        server.close();
     });
 });
+
