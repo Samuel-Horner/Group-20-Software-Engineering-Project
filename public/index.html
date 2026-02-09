@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>Hobby Reccomender</title> <!-- XyberBlaster-->
-        <link href="Styles.css" rel="stylesheet">
+        <link href="styles.css" rel="stylesheet">
     </head>
 
     <body>
@@ -42,11 +42,25 @@
 
         <script>
             function gotoDataInput() {
-                window.location.href = "data-input.html";
+                // Message server
+                // alert("Sending request for data input page ...");
+                let url= "./data_input.html";
+                let a = document.createElement("a");
+                a.style = "visibility: hidden";
+                a.href = url;
+                a.click();
+                a.remove();
             }
 
             function gotoCommunity() {
-                window.location.href = "network%20page.html";
+                // Message server
+                // alert("Sending request for community page ...");
+                let url= "./network_page.html";
+                let a = document.createElement("a");
+                a.style = "visibility: hidden";
+                a.href = url;
+                a.click();
+                a.remove();
             }
         </script>
     </body>
