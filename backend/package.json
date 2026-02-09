@@ -15,5 +15,8 @@
     },
     "jest": {
         "transform": {}
+    },
+    "dependencies": {
+        "sqlite3": "^5.1.7"
     }
 }

@@ -1,11 +1,9 @@
 
 // Freely configurable, for establishing the table Name and Columns
-function returnSchema () {
+export function returnSchema () {
     return ["users",
     "username TEXT",
     "email TEXT",
     "takenQuiz BOOLEAN"
     ];
 }
-
-module.exports = {returnSchema};
