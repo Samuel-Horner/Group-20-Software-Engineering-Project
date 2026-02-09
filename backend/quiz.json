@@ -1,0 +1,13 @@
+{
+  "quizId": "test-quiz-1",
+  "title": "Sample Quiz",
+  "description": "Test quiz data",
+  "questions": [
+    {
+      "id": 1,
+      "text": "What's your favourite hobby?",
+      "type": "multiple-choice",
+      "options": ["Reading", "Gaming", "Cooking", "Sports"]
+    }
+  ]
+}
