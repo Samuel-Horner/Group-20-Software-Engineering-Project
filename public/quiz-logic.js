@@ -24,7 +24,7 @@ document.getElementById('quizForm').addEventListener('submit', async function(e)
 
     } catch (error) {
         console.error("Backend Error:", error);
-        alert("Something went wrong with the recommendation. Please try again.");
+        alert(error?.message || "Something went wrong with the recommendation. Please try again.");
     }
 });
 
@@ -40,7 +40,8 @@ async function getHobbyReccomendation(data) {
 
     if (!response.ok) {
         const message = await response.text();
-        throw new Error(message || "Quiz API failed");
+        const finalMessage = message || `Quiz API failed (${response.status})`;
+        throw new Error(finalMessage);
     }
 
     const payload = await response.json();
