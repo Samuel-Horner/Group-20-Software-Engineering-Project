@@ -1,0 +1,113 @@
+openapi: 3.0.3
+info:
+  title: Group 20 Backend API
+  version: 1.0.0
+  description: API documentation for the quiz and recommendation endpoints.
+servers:
+  - url: http://127.0.0.1:8080
+paths:
+  /getQuiz:
+    post:
+      summary: Get quiz definition
+      description: Returns the quiz definition as JSON.
+      responses:
+        "200":
+          description: Quiz JSON payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quiz"
+        "500":
+          description: File read failure
+  /api/quiz:
+    post:
+      summary: Submit quiz answers
+      description: Validates quiz answers and returns a hobby recommendation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuizSubmission"
+      responses:
+        "200":
+          description: Recommendation payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recommendation"
+        "400":
+          description: Invalid or missing payload
+          content:
+            text/plain:
+              schema:
+                type: string
+        "501":
+          description: Recommendation engine not implemented
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  schemas:
+    Quiz:
+      type: object
+      additionalProperties: false
+      required:
+        - quizId
+        - title
+        - description
+        - questions
+      properties:
+        quizId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuizQuestion"
+    QuizQuestion:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - text
+        - type
+        - options
+      properties:
+        id:
+          type: integer
+          format: int32
+        text:
+          type: string
+        type:
+          type: string
+          enum:
+            - multiple-choice
+        options:
+          type: array
+          items:
+            type: string
+    QuizSubmission:
+      type: object
+      additionalProperties: false
+      required:
+        - answers
+      properties:
+        answers:
+          type: array
+          items:
+            type: integer
+            format: int32
+          minItems: 1
+    Recommendation:
+      type: object
+      additionalProperties: false
+      required:
+        - hobby
+      properties:
+        hobby:
+          type: string
