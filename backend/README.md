@@ -9,3 +9,7 @@ node backend/index.js
 ```
 
 Access the site at [https:local](http://localhost:8080/)
+
+## API documentation
+
+- OpenAPI spec: [backend/openapi.yaml](openapi.yaml)
