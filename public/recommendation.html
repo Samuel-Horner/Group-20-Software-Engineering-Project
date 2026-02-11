@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Your Hobby Recommendation</title>
     <link href="Styles.css" rel="stylesheet">
+    <script></script>
+    
     <style>
         body {
             background: var(--background-alt);
@@ -57,18 +59,57 @@
             transform: translateY(-2px);
             box-shadow: var(--shadow-lg);
         }
+
+        .scrolly-card {
+            max-width: 720px;
+            margin: 0 auto;
+            background: var(--background);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            padding: 36px 32px;
+            text-align: center;
+            /* animation: scroller 4s ease-in; */
+        }
+
+        @keyframes scroller {
+            from {opacity: 0;max-width: 500px;}
+            to {opacity: 1; max-width: 720px;}
+        }
+
+        .scrolly-card.in-view {
+            animation: scroller 5s ease-out;
+        }
     </style>
 </head>
 <body>
-    <div class="rec-card">
+
+    <script>
+        // Constants
+        const DESCRIPTIONS = {
+            "Reading": "Reading is the activity of comprehending written language contained within resources such as books, magazines and newspapers.\nThe act of reading is a great way to learn about interesting and fun stories as a pastime by reading fiction-books, or to learn about new skills, technologies, sciences, and more from educational non-fiction books.\nBook clubs are a great way to meet other people who enjoy this hobby. Reading can also be a comparatively inexpensive hobby depending on the books you read, as libraries are a crucial resource for using books without the high price of certain books getting in the way.",
+            "Gaming": "Gaming refers to the activity of playing video games or board games.\nConventions, and competitive tournaments can be used to meet fellow ‘gamers’ in person, while online-video games can let people play video games from around the world through an internet connection.\nBut while gaming can be a fun activity, it can also be expensive due to the high costs of gaming hardware and the video games themselves.",
+            "Cooking": "Cooking is the activity of creating food. Recipe books are a good way to get started, as they provide step-by-step examples of how to make meals.\nYeah, that’s about it.",
+            "Sports":  "Sports is a wide range of games involving physical exertion, which makes it a healthy hobby to pick up.\nExamples of sports are football, tennis, rugby, basketball, cricket."
+        }
+    </script>
+
+    <div class="rec-card" style="margin-bottom: 10rem;">
         <h1 class="rec-title">Your Recommended Hobby</h1>
         <p>Based on your quiz answers, we think you'll enjoy:</p>
         <div id="hobbyName" class="rec-hobby">Loading...</div>
-        <div class="rec-actions">
-            <a class="cta-button" href="data-input.html">Retake Quiz</a>
-            <a class="secondary-btn" href="index.html">Back to Home</a>
-        </div>
     </div>
+
+    <!-- Information on the hobby -->
+    <div class="scrolly-card animate">
+        <h1 id="scrolly-title" class="rec-title">Hobby 1</h1>
+        <p id="scrolly-description"></p> 
+        <div class="rec-actions">
+            <a class="cta-button" href="data_input.html">Retake Quiz</a>
+            <a class="secondary-btn" href="index.html">Back to Home</a>
+        </div> 
+    </div>
+
+
 
     <script>
         function getCookie(name) {
@@ -117,6 +158,27 @@
         if (hobbyEl) {
             hobbyEl.textContent = hobbyName;
         }
+
+        //-----------------------------------------------------------
+        // Adds 'in-view' attribute to the class to see if it is in view.
+        document.addEventListener("DOMContentLoaded", () => {
+            let intObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                    }
+                })
+            });
+            // Add observer to each element with the .animate class 
+            let animElems = document.querySelectorAll(".animate");
+            animElems.forEach( (elem) => intObserver.observe(elem));
+        });
+
+        // Update the description and appearence of the webpage based on the reccomended hobby
+        let _hobbyName = "Reading";
+        let descr = DESCRIPTIONS[_hobbyName];
+        document.getElementById("scrolly-title").innerHTML = _hobbyName;
+        document.getElementById("scrolly-description").innerHTML = descr;
     </script>
 </body>
 </html>
