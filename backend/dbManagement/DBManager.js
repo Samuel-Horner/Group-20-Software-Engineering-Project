@@ -2,9 +2,9 @@ import {returnSchema} from './schema.js';
 import sqlite3 from 'sqlite3';
 
 export class DBManager {
-    constructor (dbpathNew="./defaultDB.sqlite") {
+    constructor (schema = returnSchema(), dbpathNew="./defaultDB.sqlite") {
         this.dbpath = dbpathNew;
-        const [tableName,...columns] = returnSchema();
+        const [tableName,...columns] = schema;
         this.tableName = tableName;
         this.columns = columns;
         this.dbConnect = null;

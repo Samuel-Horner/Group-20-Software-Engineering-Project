@@ -4,6 +4,8 @@ import fs from "fs";
 import { createHTTPServer, registerPOSTHandler } from "./server/server.js";
 import config from "./config.js"
 
+import "./dbManagement/index.js"
+
 const public_directory = path.resolve("./public/");
 const server = createHTTPServer(public_directory);
 
