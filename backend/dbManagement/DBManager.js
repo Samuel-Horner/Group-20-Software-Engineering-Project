@@ -1,10 +1,8 @@
-import {returnSchema} from './schema.js';
 import sqlite3 from 'sqlite3';
 
 export class DBManager {
-    constructor (schema = returnSchema(), dbpathNew="./defaultDB.sqlite") {
+    constructor (dbpathNew="./defaultDB.sqlite") {
         this.dbpath = dbpathNew;
-        const [tableName,...columns] = schema;
         this.tableName = tableName;
         this.columns = columns;
         this.dbConnect = null;
@@ -18,22 +16,6 @@ export class DBManager {
 
     async dbpathChange (dbpathNew) {
         this.dbpath = dbpathNew;
-    }
-
-    async initialiseSchema () {
-        if (!this.dbConnect) {this.dbConnect = this.establishConnection();}
-        return new Promise ((resolve,_) => {this.dbConnect.run(`CREATE TABLE IF NOT EXISTS ${this.tableName} (${this.columns});`,[],(err) => {
-            if (!err) {resolve("initialiseSchema: Success");}
-            else {resolve("initialiseSchema: "+err.message);}
-        })});
-    }
-
-    async dropSchema () {
-        if (!this.dbConnect) {this.dbConnect = this.establishConnection();}
-        return new Promise ((resolve,_) => {this.dbConnect.run(`DROP TABLE ${this.tableName};`,[],(err) => {
-            if (!err) {resolve("dropSchema: Success");}
-            else {resolve("dropSchema: "+err.message);}
-        })});
     }
 
     async dbExecute (sqlCommand,params=[]) {
