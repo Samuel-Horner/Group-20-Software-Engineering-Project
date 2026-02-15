@@ -11,6 +11,5 @@ export async function init() {
     await manager.dbExecute(`PRAGMA foreign_keys = ON;`);
 
     await hobby_set.init(manager);
-
     await training_set.init("./backend/data/training_set.csv", manager);
 }
