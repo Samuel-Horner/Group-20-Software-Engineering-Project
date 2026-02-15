@@ -1,18 +1,18 @@
-import {returnSchema} from './schema.js';
 import sqlite3 from 'sqlite3';
 
 export class DBManager {
     constructor (dbpathNew="./defaultDB.sqlite") {
         this.dbpath = dbpathNew;
-        const [tableName,...columns] = returnSchema();
-        this.tableName = tableName;
-        this.columns = columns;
         this.dbConnect = null;
     }
 
     async establishConnection () {
         let dbConnect = new sqlite3.Database(this.dbpath);
-        if (dbConnect) {this.dbConnect = dbConnect; return "establishConnection: Success";}
+        if (dbConnect) {
+            this.dbConnect = dbConnect;
+            this.dbConnect.on("trace", str => console.log(`DB: ${str}`)); 
+            return "establishConnection: Success";
+    }
         else {return "establishConnection: Failed";}
     }
 
@@ -20,33 +20,14 @@ export class DBManager {
         this.dbpath = dbpathNew;
     }
 
-    async initialiseSchema () {
-        if (!this.dbConnect) {this.dbConnect = this.establishConnection();}
-        return new Promise ((resolve,_) => {this.dbConnect.run(`CREATE TABLE IF NOT EXISTS ${this.tableName} (${this.columns});`,[],(err) => {
-            if (!err) {resolve("initialiseSchema: Success");}
-            else {resolve("initialiseSchema: "+err.message);}
-        })});
-    }
-
-    async dropSchema () {
-        if (!this.dbConnect) {this.dbConnect = this.establishConnection();}
-        return new Promise ((resolve,_) => {this.dbConnect.run(`DROP TABLE ${this.tableName};`,[],(err) => {
-            if (!err) {resolve("dropSchema: Success");}
-            else {resolve("dropSchema: "+err.message);}
-        })});
-    }
-
     async dbExecute (sqlCommand,params=[]) {
         if (!this.dbConnect) {this.dbConnect = this.establishConnection();}
         return new Promise ((resolve,_) => {
-            let leadCommand = sqlCommand.trim().split(/\s+/)[0];
-            if (leadCommand == "DROP") {resolve("dbExecute: custom_ERROR: Use 'dropSchema' to drop the table");}
-            else {
-                this.dbConnect.run(sqlCommand,params,(err) => {
-                    if (!err) {resolve("dbExecute: Success");}
-                    else {resolve("dbExecute: "+err.message);}
-                })
-            }});
+            this.dbConnect.run(sqlCommand,params,(err) => {
+                if (!err) {resolve("dbExecute: Success");}
+                else {resolve("dbExecute: "+err.message);}
+            });
+        });
     }
 
     async dbGet (sqlCommand,params=[]) {
@@ -60,6 +41,10 @@ export class DBManager {
                     else {resolve("dbGet: "+err.message);}
                 })
             }});
+    }
+
+    async dbClose () {
+        await this.dbConnect.close();
     }
 }
 
