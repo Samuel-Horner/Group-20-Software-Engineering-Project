@@ -26,7 +26,7 @@
       <!-- Sidebar filters -->
       <aside class="sidebar">
         <h2>Filter by Hobbies</h2>
-        <ul class="filter-list">
+        <ul class="filter-list" id="hobby-filter-list">
           <li>
             <label>
               <input type="checkbox" />
@@ -103,15 +103,16 @@
           <div class="search-box">
             <span class="search-icon">🔍</span>
             <input
+              id="network-search-input"
               type="text"
               placeholder="Search by name, location, or interests..."
             />
           </div>
-          <p class="results-count">8 people found</p>
+          <p class="results-count" id="results-count">8 people found</p>
         </div>
 
         <!-- Cards grid -->
-        <div class="cards-grid">
+        <div class="cards-grid" id="cards-grid">
           <!-- Card 1 -->
           <article class="profile-card">
             <header class="profile-header">
@@ -244,16 +245,7 @@
     </main>
   </div>
 
-<script>
-  // Make every "Connect" button go to chat.html?name=...
-  document.querySelectorAll(".connect-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const name = btn.dataset.name || "Unknown";
-      const url = `chat.html?name=${encodeURIComponent(name)}`;
-      window.location.href = url;
-    });
-  });
-</script>
+<script src="network-page.js"></script>
 
   <!-- All CSS is here at the end -->
 <style>

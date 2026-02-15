@@ -79,4 +79,4 @@ async function init() {
     console.log(await getTrainingSet());
 }
 
-init();
+export const initPromise = init();

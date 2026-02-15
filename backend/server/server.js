@@ -6,6 +6,8 @@ import path from "path";
 import config from "../config.js";
 
 const qualified_url = `http://${config.URL}:${config.PORT}`;
+const getEndpoints = {};
+const postEndpoints = {};
 
 export function getMimeType(ext) {
     switch (ext) {
@@ -33,6 +35,10 @@ async function getHandler(public_directory, req, res) {
     console.log(`Recieved GET request for resource ${req.url}.`)
 
     const url = new URL(req.url, qualified_url);
+    if (url.pathname in getEndpoints) {
+        await getEndpoints[url.pathname](req, res, url);
+        return;
+    }
 
     if (url.pathname == "/") {
         url.pathname = config.DEFAULT_PAGE;
@@ -44,8 +50,9 @@ async function getHandler(public_directory, req, res) {
     // This is probably not good enough to prevent path traversal.
     // TODO: Find a better mechanism for this.
     if (!file_path_str.startsWith(public_directory)) {
-        console.error(`Error, invalid file path: ${file_path}`);
-        errorHandler(res, 404);
+        console.error(`Error, invalid file path: ${file_path_str}`);
+        await errorHandler(res, 404);
+        return;
     }
 
     let file_path = path.parse(file_path_str);
@@ -66,23 +73,29 @@ async function getHandler(public_directory, req, res) {
     });
 }
 
-let endpoints = {};
-
 async function postHandler(req, res) {
     console.log(`Recieved POST request for resource ${req.url}.`);
-    if (req.url in endpoints) {
-        endpoints[req.url](req, res);
+    const url = new URL(req.url, qualified_url);
+    if (url.pathname in postEndpoints) {
+        await postEndpoints[url.pathname](req, res, url);
     } else {
         console.error(`Error, no POST handler exists for resource ${req.url}.`);
-        errorHandler(res, 404);
+        await errorHandler(res, 404);
     }
 }
 
-export function registerPOSTHandler(url, handler) {
-    if (url in endpoints) {
+export function registerGETHandler(url, handler) {
+    if (url in getEndpoints || url in postEndpoints) {
         throw new Error("Url already registered.");
     }
-    endpoints[url] = handler;
+    getEndpoints[url] = handler;
+}
+
+export function registerPOSTHandler(url, handler) {
+    if (url in postEndpoints || url in getEndpoints) {
+        throw new Error("Url already registered.");
+    }
+    postEndpoints[url] = handler;
 }
 
 export async function errorHandler(res, code) {
@@ -102,7 +115,7 @@ export function createHTTPServer(public_directory) {
                 await postHandler(req, res);
                 break;
             default:
-                await errorHandler(req, res, 405);
+                await errorHandler(res, 405);
                 break;
         }
     });
