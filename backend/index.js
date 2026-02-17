@@ -4,7 +4,7 @@ import fs from "fs";
 import { createHTTPServer, registerPOSTHandler } from "./server/server.js";
 import config from "./config.js"
 
-import "./dbManagement/index.js"
+import { init as dbInit} from "./dbManagement/index.js"
 
 const public_directory = path.resolve("./public/");
 const server = createHTTPServer(public_directory);
@@ -68,6 +68,9 @@ registerPOSTHandler("/api/quiz", (req, res) => {
         res.writeHead(500).end();
     });
 });
+
+// Initialise database
+dbInit();
 
 server.listen(config.PORT, config.URL, () => {
     console.log(`Server listenning at ${config.URL}:${config.PORT}.`);
