@@ -1,6 +1,6 @@
 import csv from "csvtojson";
-
-import { manager, addHobby } from "./index.js"
+import hobby_set from "./hobby_set.js"
+import { manager } from "./index.js"
 
 // Training set structure:
 // Questions: (1-5, normalised to -1, 1)
@@ -46,25 +46,25 @@ CREATE TABLE IF NOT EXISTS TrainingSetTable (
 /**
  * Loads the training set from a CSV file.
  * @param {string} path 
- * @returns A passed array, of the form [[["hobby1", "hobby2"], 1, 2, 3, ...], [...], [...], ...]
+ * @returns A passed array, of the form [[["hobby1", "hobby2"], -1, -0.5, 0, ...], [...], [...], ...]
  */
-async function loadTrainingSetFromCSV(path) {
+export async function loadTrainingSetFromCSV(path) {
     let data = await csv({
         output: "csv",
-        trim:true
+        trim: true
     }).fromFile(path);
+
+
 
     // Maps array of the form:
     // [ "item1, Item2  ", 1, 2, 3, ...]
     // To:
-    // [ ["item1", "item2"], 0.2, 0.4, 0.6, ...]
-    console.log(data);
-
+    // [ ["item1", "item2"], -1, -0.5, 0, ...]
     return data.map(row => row.splice(1))
-                .map(row => [row.shift().split(",")
-                .map(str => str.toLowerCase().trim().replace(".", ""))]
-                    .concat(row.map(value => (value - 2.5) / 2.5)
-                ));
+        .map(row => [row.shift().split(",")
+            .map(str => str.toLowerCase().trim().replace(".", ""))]
+            .concat(row.map(value => (value - 3) / 2)
+            ));
 }
 
 /**
@@ -76,7 +76,7 @@ export async function load(path) {
     training_data.forEach(row => {
         const hobbies = row.shift();
         hobbies.forEach(async hobby => {
-            const id = await addHobby(hobby);
+            const id = await hobby_set.add(hobby);
             await manager.dbExecute(`
                 INSERT INTO TrainingSetTable (
                     HobbyID,
@@ -131,17 +131,16 @@ export async function get() {
 
 /**
  * Initilaises the training set database, loading survey data from
- * ./backend/data/traning_set.csv
  * 
  * Relies on the HobbyDB being initiliased.
  */
-export async function init() {
+export async function init(path) {
     await manager.dbExecute(training_set_table_schema);
 
     // Load training set from CSV
     const training_set_populated = (await manager.dbGet(`SELECT RecordID FROM TrainingSetTable;`)).length != 0;
     if (!training_set_populated) {
-        await load("./backend/data/training_set.csv");
+        await load(path);
     }
 }
 
