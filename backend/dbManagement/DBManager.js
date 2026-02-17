@@ -10,10 +10,9 @@ export class DBManager {
         let dbConnect = new sqlite3.Database(this.dbpath);
         if (dbConnect) {
             this.dbConnect = dbConnect;
-            this.dbConnect.on("trace", str => console.log(`DB: ${str}`)); 
+            this.dbConnect.on("trace", str => console.log(`DB: ${str}`));
             return "establishConnection: Success";
-    }
-        else {return "establishConnection: Failed";}
+        } else {return "establishConnection: Failed";}
     }
 
     async dbpathChange (dbpathNew) {
@@ -21,7 +20,7 @@ export class DBManager {
     }
 
     async dbExecute (sqlCommand,params=[]) {
-        if (!this.dbConnect) {this.dbConnect = this.establishConnection();}
+        if (!this.dbConnect) {this.establishConnection();}
         return new Promise ((resolve,_) => {
             this.dbConnect.run(sqlCommand,params,(err) => {
                 if (!err) {resolve("dbExecute: Success");}
@@ -31,7 +30,7 @@ export class DBManager {
     }
 
     async dbGet (sqlCommand,params=[]) {
-        if (!this.dbConnect) {this.dbConnect = this.establishConnection();}
+        if (!this.dbConnect) {this.establishConnection();}
         return new Promise ((resolve,_) => {
             let leadCommand = sqlCommand.trim().split(/\s+/)[0];
             if (!(leadCommand == "SELECT")) {resolve("dbExecute: custom_ERROR: sqlCommand only accepts 'SELECT'");}
