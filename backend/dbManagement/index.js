@@ -15,7 +15,7 @@ export const manager = new DBManager("./backend/data/dev.db");
  * Attempts to add a hobby to the hobby database.
  * If it already exists, does nothing and returns the HobbyID.
  *
- *  Returns HobbyID.
+ * @returns HobbyID
  * @param {String} name 
  */
 export async function addHobby(name) {

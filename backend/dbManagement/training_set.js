@@ -57,12 +57,14 @@ async function loadTrainingSetFromCSV(path) {
     // Maps array of the form:
     // [ "item1, Item2  ", 1, 2, 3, ...]
     // To:
-    // [ ["item1", "item2"], 1, 2, 3, ...]
+    // [ ["item1", "item2"], 0.2, 0.4, 0.6, ...]
     console.log(data);
 
     return data.map(row => row.splice(1))
                 .map(row => [row.shift().split(",")
-                .map(str => str.toLowerCase().trim().replace(".", ""))].concat(row));
+                .map(str => str.toLowerCase().trim().replace(".", ""))]
+                    .concat(row.map(value => (value - 2.5) / 2.5)
+                ));
 }
 
 /**
