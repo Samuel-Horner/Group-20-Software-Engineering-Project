@@ -54,15 +54,17 @@ export async function loadTrainingSetFromCSV(path) {
         trim: true
     }).fromFile(path);
 
-
-
     // Maps array of the form:
     // [ "item1, Item2  ", 1, 2, 3, ...]
     // To:
     // [ ["item1", "item2"], -1, -0.5, 0, ...]
+    // console.log(data[0].splice(1).shift().split(/[,]|(and)/g));
+    
     return data.map(row => row.splice(1))
-        .map(row => [row.shift().split(",")
-            .map(str => str.toLowerCase().trim().replace(".", ""))]
+        .map(row => [row.shift().toLowerCase().split(/[,]|(\sand)/g)
+                .filter(str => str)
+                .map(str => str.replace(/\W/g, ''))
+            ]
             .concat(row.map(value => (value - 3) / 2)
             ));
 }
