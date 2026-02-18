@@ -2,6 +2,7 @@ import path from "path";
 import fs from "fs";
 
 import { createHTTPServer, registerPOSTHandler } from "./server/server.js";
+import {spawn} from 'child_process'
 import config from "./config.js"
 
 import { init as dbInit} from "./dbManagement/index.js"
@@ -9,8 +10,42 @@ import { init as dbInit} from "./dbManagement/index.js"
 const public_directory = path.resolve("./public/");
 const server = createHTTPServer(public_directory);
 
+// This function ONLY WORKS IF YOU RUN IT FROM ROOT
 async function getHobbyReccomendation(answers) {
-    throw new Error("Recommendation engine not implemented");
+    // python dbManagement/reccomendation/model_predictor.py --input [1,4,1,2,4,2,3,3,1,2,4,5,5,4,2]
+    let input = (answers.length === 15) ? answers : [1,4,1,2,4,2,3,3,1,2,4,5,5,4,2]; // Have a default value if the input is wrong
+    const args = ['backend/dbManagement/reccomendation/model_predictor.py', '--input', JSON.stringify(input)];
+
+    const process = spawn('python', args)
+    process.stdout.setEncoding('utf-8');
+
+    // Wait until the python script has resolved until we can return the prediction
+    return new Promise( (resolve, reject) => {
+        process.stdout.on('data', (msg) => {
+            // console.log(`Recieved: ${msg}`);
+            let obj = JSON.parse(msg);
+
+            let classes = obj["classes"]; let predictions = obj["prediction"];
+            // console.log(classes, predictions);
+            let pairs = predictions.map( (p,idx) => [p, classes[idx]] ); // remember the original locations
+
+            // Return the most likely class as the prediction, descending order of probability 
+            const sorted = pairs.sort( (a,b) => {return b[0] - a[0] })
+            // let bestClass = classes[sorted[0][1]];
+            let bestClasses = sorted.slice(0,5)
+
+            console.log("sorted:", sorted);
+            console.log("best:", bestClasses);
+
+            let result = JSON.stringify(bestClasses);
+            resolve(result)
+        });
+
+        process.stderr.on('data', (err) => {
+            console.error(err.toString());
+            reject(err);
+        });
+    })
 }
 
 registerPOSTHandler("/getQuiz", async (req, res) => {

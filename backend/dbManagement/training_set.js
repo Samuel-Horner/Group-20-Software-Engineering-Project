@@ -59,16 +59,16 @@ export async function loadTrainingSetFromCSV(path) {
     // Maps array of the form:
     // [ "item1, Item2  ", 1, 2, 3, ...]
     // To:
-    // [ ["item1", "item2"], -1, -0.5, 0, ...]
+    // [ ["item1", "item2"], 1, 2, 3, ...]
     return data.map(row => row.splice(1))
-        .map(row => [row.shift().split(",")
-            .map(str => str.toLowerCase().trim().replace(".", ""))]
-            .concat(row.map(value => (value - 3) / 2)
-            ));
+        .map(row => [row.shift().toLowerCase().split(/\s*,\s*|\s+(?:and|or)\s+/)  // 1 or more white space around the and/or,  or just any ','
+            .map(str => str.trim().replace(".",""))] //str.toLowerCase().trim().replace(".", ""))]
+            .concat(row.map(value=>value*1))//  .concat(row.map(value => (value - 3) / 2))
+            );
 }
 
 /**
- * Initialises the training set, loading from a CSV file.
+ * Initialises the training set, load0ing from a CSV file.
  */
 export async function load(path) {
     const training_data = await loadTrainingSetFromCSV(path);
