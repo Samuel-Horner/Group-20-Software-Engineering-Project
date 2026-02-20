@@ -1,0 +1,49 @@
+/* ============================================================================
+   LIGHT THEME COLOUR PALETTE
+
+   Light mode colour variables.
+   Link this stylesheet before Styles.css to apply the light theme.
+
+   USAGE:
+   - Buttons and CTAs: var(--primary-color)
+   - Text: var(--text-dark) or var(--text-light)
+   - Backgrounds: var(--background) or var(--background-alt)
+   - Shadows: var(--shadow) or var(--shadow-lg)
+============================================================================ */
+:root {
+    /* Primary colours */
+    --primary-color: #10b981;
+    --primary-dark: #059669;
+    --primary-light: #34d399;
+    --secondary-color: #14b8a6;
+    --accent-color: #06b6d4;
+
+    /* Text colours */
+    --text-dark: #1f2937;
+    --text-light: #6b7280;
+
+    /* Background colours */
+    --background: #ffffff;
+    --background-alt: #f0fdf4;
+
+    /* Borders and shadows */
+    --border-color: #e5e7eb;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    /* Navbar */
+    --navbar-bg: rgba(255, 255, 255, 0.95);
+    --navbar-bg-scrolled: rgba(255, 255, 255, 0.98);
+
+    /* Cards */
+    --card-bg: #ffffff;
+
+    /* Header bar and footer */
+    --header-bg: #1f2937;
+    --header-text: #ffffff;
+    --footer-bg: #1f2937;
+
+    /* Buttons and inputs */
+    --cta-bg: #ffffff;
+    --input-bg: #ffffff;
+}
