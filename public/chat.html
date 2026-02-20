@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chat</title>
+    <title>HobbyMatch – Chat</title>
+    <link id="theme-stylesheet" href="light.css" rel="stylesheet" />
     <link href="styles.css" rel="stylesheet" />
 
     <style>
@@ -11,7 +12,7 @@
       .chat-shell {
         max-width: 900px;
         margin: 0 auto;
-        padding: 20px 16px 40px;
+        padding: 100px 16px 40px;
       }
 
       .chat-header {
@@ -147,13 +148,17 @@
   </head>
 
   <body>
-    <!-- Optional: keep your existing top bar look -->
-    <div style="background-color: var(--text-dark); justify-content: space-between; align-items: center;">
-      <div class="nav-container">
-        <h1 class="nav-cta" style="max-width: 120px;">Logo</h1>
-        <h1 class="nav-cta" style="max-width: 240px;">Sign Up</h1>
-      </div>
-    </div>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">HobbyMatch</div>
+            <ul class="nav-links">
+                <li><a href="index_new.html">Home</a></li>
+                <li><a href="community.html">Community</a></li>
+                <li><a href="network_page.html">Connect</a></li>
+                <li><a href="data_input.html" class="nav-cta">Take Quiz</a></li>
+            </ul>
+        </div>
+    </nav>
 
     <div class="chat-shell">
       <div class="chat-header">
@@ -255,5 +260,30 @@
       loadConversation();
       msgInput.focus();
     </script>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>HobbyMatch</h4>
+                    <p>Connecting people with their perfect hobbies</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index_new.html">Home</a></li>
+                        <li><a href="community.html">Community</a></li>
+                        <li><a href="network_page.html">Connect</a></li>
+                        <li><a href="data_input.html">Take Quiz</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>University of Bath<br>Bath, UK</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="sidebar.js"></script>
   </body>
 </html>
