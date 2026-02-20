@@ -62,8 +62,8 @@ export async function loadTrainingSetFromCSV(path) {
     // [ ["item1", "item2"], 1, 2, 3, ...]
     return data.map(row => row.splice(1))
         .map(row => [row.shift().toLowerCase().split(/\s*,\s*|\s+(?:and|or)\s+/)  // 1 or more white space around the and/or,  or just any ','
-            .map(str => str.trim().replace(".",""))] //str.toLowerCase().trim().replace(".", ""))]
-            .concat(row.map(value=>value*1))//  .concat(row.map(value => (value - 3) / 2))
+            .map(str => str.trim().replace(".",""))]
+            .concat(row.map(value=> Number(value)))
             );
 }
 

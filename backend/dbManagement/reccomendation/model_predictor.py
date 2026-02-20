@@ -1,5 +1,5 @@
 from sklearn.neural_network import MLPClassifier
-from sklearn.preprocessing import LabelBinarizer
+import sys
 import json
 import argparse
 import numpy as np
@@ -25,6 +25,12 @@ def softmax(prob_distn: np.ndarray, temperature: float) -> np.ndarray:
 with open("backend/dbManagement/reccomendation/model.json", "r") as f:
     data = json.load(f)
 
+    # Check if input is the correct size
+    if data["n_features_in"] != len(x):
+        err = "Input to hobby reccomendation has length {}, when length {} is needed".format(len(x), data["n_features_in"])
+        sys.stderr.write(err)
+        sys.exit(1) # Exit with error code 1
+        
     hidden_layers= data["hidden_layers"]
     model = MLPClassifier(max_iter=10_000, hidden_layer_sizes=hidden_layers, random_state=1, activation='logistic',solver='adam')
     

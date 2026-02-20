@@ -11,10 +11,11 @@ const public_directory = path.resolve("./public/");
 const server = createHTTPServer(public_directory);
 
 // This function ONLY WORKS IF YOU RUN IT FROM ROOT
+// Example:   getHobbyReccomendation([1,4,1,2,4,2,3,3,1,2,4,5,5,4,2]);
+// Returns: The probabilities of the inputs most likely classes in [probability, class] pairs 
+//         -> Example: [ [0.5, "Football"], [0.2, "Games"], ... ] 
 async function getHobbyReccomendation(answers) {
-    // python dbManagement/reccomendation/model_predictor.py --input [1,4,1,2,4,2,3,3,1,2,4,5,5,4,2]
-    let input = (answers.length === 15) ? answers : [1,4,1,2,4,2,3,3,1,2,4,5,5,4,2]; // Have a default value if the input is wrong
-    const args = ['backend/dbManagement/reccomendation/model_predictor.py', '--input', JSON.stringify(input)];
+    const args = ['backend/dbManagement/reccomendation/model_predictor.py', '--input', JSON.stringify(answers)];
 
     const process = spawn('python', args)
     process.stdout.setEncoding('utf-8');
@@ -42,10 +43,9 @@ async function getHobbyReccomendation(answers) {
         });
 
         process.stderr.on('data', (err) => {
-            console.error(err.toString());
-            reject(err);
+            reject(new Error(err));
         });
-    })
+    });
 }
 
 registerPOSTHandler("/getQuiz", async (req, res) => {
