@@ -15,7 +15,6 @@ document.getElementById('quizForm').addEventListener('submit', async function(e)
 
     try {
         const resultHobby = await getHobbyReccomendation(answers);
-
         localStorage.setItem('userHobby', resultHobby);
         document.cookie = `userHobby=${encodeURIComponent(resultHobby)}; path=/; max-age=86400`;
 
@@ -45,5 +44,6 @@ async function getHobbyReccomendation(data) {
     }
 
     const payload = await response.json();
+
     return payload.hobby;
 }
