@@ -1,0 +1,50 @@
+/* ============================================================================
+   DARK THEME COLOUR PALETTE
+
+   Dark mode colour variables.
+   Link this stylesheet before Styles.css to apply the dark theme.
+   Swap with light.css to toggle between themes.
+
+   USAGE:
+   - Buttons and CTAs: var(--primary-color)
+   - Text: var(--text-dark) or var(--text-light)
+   - Backgrounds: var(--background) or var(--background-alt)
+   - Shadows: var(--shadow) or var(--shadow-lg)
+============================================================================ */
+:root {
+    /* Primary colours — brighter variants for contrast on dark backgrounds */
+    --primary-color: #34d399;
+    --primary-dark: #10b981;
+    --primary-light: #6ee7b7;
+    --secondary-color: #2dd4bf;
+    --accent-color: #22d3ee;
+
+    /* Text colours — inverted for dark backgrounds */
+    --text-dark: #f3f4f6;
+    --text-light: #9ca3af;
+
+    /* Background colours — dark grays */
+    --background: #111827;
+    --background-alt: #1f2937;
+
+    /* Borders and shadows */
+    --border-color: #374151;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+
+    /* Navbar */
+    --navbar-bg: rgba(17, 24, 39, 0.95);
+    --navbar-bg-scrolled: rgba(17, 24, 39, 0.98);
+
+    /* Cards */
+    --card-bg: #283548;
+
+    /* Header bar and footer */
+    --header-bg: #1e293b;
+    --header-text: #e2e8f0;
+    --footer-bg: #0f172a;
+
+    /* Buttons and inputs */
+    --cta-bg: #1f2937;
+    --input-bg: #374151;
+}

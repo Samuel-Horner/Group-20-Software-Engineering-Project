@@ -46,8 +46,8 @@ describe("Server module", () => {
     });
 
     test("Get Request", async () => {
-        await expect(getURL("")).resolves.toBe(readFile("index.html"));
-        await expect(getURL("index.html")).resolves.toBe(readFile("index.html"));
+        await expect(getURL("")).resolves.toBe(readFile(config.DEFAULT_PAGE));
+        await expect(getURL(config.DEFAULT_PAGE)).resolves.toBe(readFile(config.DEFAULT_PAGE));
         await expect(getURL("chat.html")).resolves.toBe(readFile("chat.html"));
         await expect(getURL("index.html?test=1")).resolves.toBe(readFile("index.html"));
         await expect(getURL("foo")).resolves.toBe(404);

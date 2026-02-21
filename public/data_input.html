@@ -2,30 +2,13 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>Data Input</title>
+        <title>HobbyMatch – Take Quiz</title>
+        <link id="theme-stylesheet" href="light.css" rel="stylesheet">
         <link href="styles.css" rel="stylesheet">
     </head>
 
     <style>
-        .proto-header {
-            background-color: var(--text-dark) !important;
-        }
-
-        .proto-logo {
-            background-color: var(--secondary-color);
-            color: var(--text-dark);
-            padding: 5px 15px;
-            font-weight: 800;
-            border-radius: 4px;
-            text-transform: uppercase;
-        }
-
-        .proto-user-icon {
-            color: var(--secondary-color);
-            font-size: 2rem;
-        }
-
-        .quiz-scroll-area {
+.quiz-scroll-area {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -34,7 +17,7 @@
         }
 
         .question-box {
-            background: #e5e7eb;
+            background: var(--background-alt);
             width: 100%;
             max-width: 900px;
             padding: 60px 40px;
@@ -63,7 +46,7 @@
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow);
             font-size: 1rem;
-            background: #fff;
+            background: var(--input-bg);
             color: var(--text-dark);
         }
 
@@ -73,6 +56,7 @@
             gap: 10px;
             font-size: 1.1rem;
             cursor: pointer;
+            color: var(--text-dark);
         }
 
 
@@ -86,10 +70,15 @@
 </head>
 
 <body>
-    <nav class="navbar proto-header">
+    <nav class="navbar">
         <div class="nav-container">
-            <div class="proto-logo">Logo</div>
-            <div class="proto-user-icon">👤</div>
+            <div class="logo">HobbyMatch</div>
+            <ul class="nav-links">
+                <li><a href="index_new.html">Home</a></li>
+                <li><a href="community.html">Community</a></li>
+                <li><a href="network_page.html">Connect</a></li>
+                <li><a href="data_input.html" class="nav-cta">Take Quiz</a></li>
+            </ul>
         </div>
     </nav>
 
@@ -104,25 +93,37 @@
                 </div>
             </div>
 
-        <script>
-            function gotoMain() {
-                let url= "./index.html";
-                let a = document.createElement("a");
-                a.style = "visibility: hidden";
-                a.href = url;
-                a.click();
-                a.remove();
-            }
-        </script>
-
-    </body>
-
             <div class="submit-wrapper">
                 <button type="submit" class="cta-button">SUBMIT</button>
             </div>
         </form>
     </main>
 
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>HobbyMatch</h4>
+                    <p>Connecting people with their perfect hobbies</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index_new.html">Home</a></li>
+                        <li><a href="community.html">Community</a></li>
+                        <li><a href="network_page.html">Connect</a></li>
+                        <li><a href="data_input.html">Take Quiz</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>University of Bath<br>Bath, UK</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
     <script src="quiz-logic.js"></script>
+    <script src="sidebar.js"></script>
 </body>
 </html>
