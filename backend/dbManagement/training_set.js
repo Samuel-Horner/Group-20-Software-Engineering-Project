@@ -54,8 +54,6 @@ export async function loadTrainingSetFromCSV(path) {
         trim: true
     }).fromFile(path);
 
-
-
     // Maps array of the form:
     // [ "item1, Item2  ", 1, 2, 3, ...]
     // To:
