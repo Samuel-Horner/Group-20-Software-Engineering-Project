@@ -4,16 +4,17 @@ import fs from "fs";
 import { createHTTPServer, registerPOSTHandler } from "./server/server.js";
 import config from "./config.js"
 
-const public_directory = path.resolve("./public/");
+const public_directory = path.resolve("../public/");
 const server = createHTTPServer(public_directory);
 
 async function getHobbyReccomendation(answers) {
-    throw new Error("Recommendation engine not implemented");
+    return "Gaming";
 }
+
 
 registerPOSTHandler("/getQuiz", async (req, res) => {
     try {
-        const quizPath = path.resolve("./backend/quiz.json");
+        const quizPath = path.resolve("./quiz.json");
         res.setHeader("Content-Type", "application/json");
 
         const readStream = fs.createReadStream(quizPath);
