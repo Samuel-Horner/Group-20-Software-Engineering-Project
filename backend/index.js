@@ -17,7 +17,7 @@ const server = createHTTPServer(public_directory);
 async function getHobbyReccomendation(answers) {
     const args = ['backend/dbManagement/reccomendation/model_predictor.py', '--input', JSON.stringify(answers)];
 
-    const process = spawn('python', args)
+    const process = spawn('python', args);
     process.stdout.setEncoding('utf-8');
 
     // Wait until the python script has resolved until we can return the prediction
@@ -38,20 +38,20 @@ async function getHobbyReccomendation(answers) {
             console.log("sorted:", sorted);
             console.log("best:", bestClasses);
 
-            let result = JSON.stringify(bestClasses);
-            resolve(result)
+            resolve(bestClasses)
         });
 
         process.stderr.on('data', (err) => {
+            console.error(`${err}`);
             reject(new Error(err));
         });
     });
 }
 
 
-registerPOSTHandler("/getQuiz", async (req, res) => {
+registerPOSTHandler("/getquiz", async (req, res) => {
     try {
-        const quizPath = path.resolve("./quiz.json");
+        const quizPath = path.resolve("./backend/quiz.json");
         res.setHeader("Content-Type", "application/json");
 
         const readStream = fs.createReadStream(quizPath);
@@ -78,6 +78,7 @@ registerPOSTHandler("/api/quiz", (req, res) => {
     req.on("end", async () => {
         try {
             const payload = body ? JSON.parse(body) : {};
+
             const rawAnswers = Array.isArray(payload.answers) ? payload.answers : [];
             const answers = rawAnswers.map((value) => Number.parseInt(String(value), 10));
 

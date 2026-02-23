@@ -104,8 +104,9 @@ async function getHobbyReccomendation(answers) {
     throw new Error(msg || `Quiz API failed (${res.status})`);
   }
 
-  const payload = await res.json();
-  return payload.hobby; // backend returns { hobby: "...", ... }
+  const payload = await res.json(); // backend returns {"hobby": "[[x, \"hobby_name\"], [y, \"hobby_name\"]]"}. First hobby is the most likely
+  alert(JSON.stringify(payload));
+  return payload.hobby[0][1]; 
 }
 
 formEl.addEventListener("submit", async (e) => {
