@@ -1,127 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>Data Input</title>
-        <link href="styles.css" rel="stylesheet">
-    </head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quiz</title>
+  <link href="styles.css" rel="stylesheet">
 
-        .proto-header {
-            background-color: var(--text-dark) !important;
-        }
+  <style>
+    .quiz-page {
+      padding-top: 94px;
+    }
 
-        .proto-logo {
-            background-color: var(--secondary-color);
-            color: var(--text-dark);
-            padding: 5px 15px;
-            font-weight: 800;
-            border-radius: 4px;
-            text-transform: uppercase;
-        }
+    .quiz-header {
+      padding: 20px 0 10px 0;
+      text-align: center;
+    }
 
-        .proto-user-icon {
-            color: var(--secondary-color);
-            font-size: 2rem;
-        }
+    .quiz-header h1 {
+      color: var(--text-dark);
+      margin-bottom: 8px;
+    }
 
-        .quiz-scroll-area {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 40px;
-            padding-bottom: 60px;
-        }
+    .quiz-header p {
+      color: var(--text-light);
+    }
 
-        .question-box {
-            background: #e5e7eb;
-            width: 100%;
-            max-width: 900px;
-            padding: 60px 40px;
-            border-radius: 8px;
-            box-shadow: var(--shadow-lg);
-            text-align: center;
-        }
+    .quiz-error {
+      display: none;
+      text-align: center;
+      color: #b91c1c;
+      margin-top: 10px;
+      font-weight: 600;
+    }
 
-        .question-box h2 {
-            font-size: 2rem;
-            margin-bottom: 40px;
-            color: var(--text-dark);
-        }
+    .quiz-scroll-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      padding: 30px 0 60px 0;
+      width: 100%;
+    }
 
-        .options-container {
-            display: flex;
-            justify-content: space-evenly;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
+    #quizQuestions {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
 
-        .answer-input {
-            width: min(420px, 90%);
-            padding: 12px 14px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow);
-            font-size: 1rem;
-            background: #fff;
-            color: var(--text-dark);
-        }
+    .question-box {
+      background: var(--background-alt);
+      width: 100%;
+      max-width: 900px;
+      padding: 55px 40px;
+      border-radius: 14px;
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+      border: 1px solid var(--border-color);
+    }
 
-        .option-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.1rem;
-            cursor: pointer;
-        }
+    .question-box h2 {
+      font-size: 1.8rem;
+      margin-bottom: 24px;
+      color: var(--text-dark);
+    }
 
+    .scale-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
 
-        .submit-wrapper {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            margin: 40px 0 100px 0;
-        }
-    </style>
+    .scale-label {
+      color: var(--text-light);
+      font-weight: 700;
+      font-size: 1.05rem;
+      white-space: nowrap;
+      min-width: 95px;
+    }
+
+    .options-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 22px;
+    }
+
+    .option-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      background: var(--background);
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      color: var(--text-dark);
+    }
+
+    .option-label input {
+      transform: scale(1.1);
+      accent-color: var(--primary-color);
+    }
+
+    .submit-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin: 10px 0 80px 0;
+    }
+
+    .quiz-user-icon {
+      color: var(--text-dark);
+      font-size: 1.3rem;
+    }
+
+    @media (max-width: 768px) {
+      .question-box {
+        padding: 36px 22px;
+      }
+
+      .question-box h2 {
+        font-size: 1.45rem;
+      }
+
+      .scale-row {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .scale-label {
+        min-width: 0;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <nav class="navbar proto-header">
-        <div class="nav-container">
-            <div class="proto-logo">Logo</div>
-            <div class="proto-user-icon">👤</div>
-        </div>
-    </nav>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">Logo</div>
+      <div class="quiz-user-icon">&#128100;</div>
+    </div>
+  </nav>
 
-    <main class="container">
-        <form id="quizForm" class="quiz-scroll-area">
-            
-            <div class="question-box">
-                <h2>Question description</h2>
-                <div class="options-container">
-                    <label class="option-label" for="q0">Answer (enter a number)</label>
-                    <input class="answer-input" id="q0" name="q0" type="text" inputmode="numeric" required placeholder="e.g. 1">
-                </div>
-            </div>
+  <main class="container quiz-page">
+    <header class="quiz-header">
+      <h1 id="quizTitle">Loading quiz...</h1>
+      <p id="quizDescription"></p>
+      <div id="quizError" class="quiz-error"></div>
+    </header>
 
-        <script>
-            function gotoMain() {
-                let url= "./index.html";
-                let a = document.createElement("a");
-                a.style = "visibility: hidden";
-                a.href = url;
-                a.click();
-                a.remove();
-            }
-        </script>
+    <form id="quizForm" class="quiz-scroll-area">
+      <div id="quizQuestions"></div>
 
-    </body>
+      <div class="submit-wrapper">
+        <button type="submit" class="cta-button">SUBMIT</button>
+      </div>
+    </form>
+  </main>
 
-            <div class="submit-wrapper">
-                <button type="submit" class="cta-button">SUBMIT</button>
-            </div>
-        </form>
-    </main>
-
-    <script src="quiz-logic.js"></script>
+  <script src="quiz-logic.js"></script>
 </body>
 </html>
