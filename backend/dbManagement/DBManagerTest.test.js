@@ -1,3 +1,5 @@
+import fs from "fs";
+
 import {DBManager} from './DBManager.js';
 
 const schema = `
@@ -9,6 +11,10 @@ CREATE TABLE IF NOT EXISTS users (
 `;
 
 describe('DBManager Tests', () => {
+    afterAll(() => {
+        fs.rmSync("./data/test.db");
+    });
+
     // Database Initialization Test
     test('Initialization', async () => {
         const TestManager = new DBManager("./data/test.db");

@@ -1,6 +1,8 @@
+import fs from "fs";
+
 import csv from "csvtojson";
+
 import hobby_set from "./hobby_set.js"
-import { manager } from "./index.js"
 
 // Training set structure:
 // Questions: (1-5, normalised to -1, 1)
@@ -46,7 +48,7 @@ CREATE TABLE IF NOT EXISTS TrainingSetTable (
 /**
  * Loads the training set from a CSV file.
  * @param {string} path 
- * @returns A passed array, of the form [[["hobby1", "hobby2"], -1, -0.5, 0, ...], [...], [...], ...]
+ * @returns A passed array, of the form [[["hobby1", "hobby2"], 1, 2, 3, ...], [...], [...], ...]
  */
 export async function loadTrainingSetFromCSV(path) {
     let data = await csv({
@@ -66,15 +68,17 @@ export async function loadTrainingSetFromCSV(path) {
 }
 
 /**
- * Initialises the training set, load0ing from a CSV file.
+ * Initialises the training set, loading from a CSV file.
  */
-export async function load(path) {
+export async function load(path, manager) {
     const training_data = await loadTrainingSetFromCSV(path);
 
-    training_data.forEach(row => {
+    for (const row of training_data) {
         const hobbies = row.shift();
-        hobbies.forEach(async hobby => {
-            const id = await hobby_set.add(hobby);
+        
+        for (const hobby of hobbies) {
+            const id = await hobby_set.add(hobby, manager);
+            console.error(id);
             await manager.dbExecute(`
                 INSERT INTO TrainingSetTable (
                     HobbyID,
@@ -95,14 +99,14 @@ export async function load(path) {
                     Question15
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             `, [id, ...row]);
-        });
-    });
+        }
+    }
 }
 
 /**
  * @returns All records from the training set  DB
  */
-export async function get() {
+export async function get(manager) {
     return await manager.dbGet(`
         SELECT 
             TrainingSetTable.HobbyID,
@@ -123,7 +127,8 @@ export async function get() {
             TrainingSetTable.Question14,
             TrainingSetTable.Question15
         FROM TrainingSetTable
-        JOIN HobbyTable;
+        JOIN HobbyTable
+        ON HobbyTable.HobbyID = TrainingSetTable.HobbyID;
     `);
 }
 
@@ -132,13 +137,17 @@ export async function get() {
  * 
  * Relies on the HobbyDB being initiliased.
  */
-export async function init(path) {
+export async function init(path, manager) {
+    if (!fs.existsSync(path)) {
+        throw new Error(`No file at "${path}" exists.`);
+    }
+
     await manager.dbExecute(training_set_table_schema);
 
     // Load training set from CSV
     const training_set_populated = (await manager.dbGet(`SELECT RecordID FROM TrainingSetTable;`)).length != 0;
     if (!training_set_populated) {
-        await load(path);
+        await load(path, manager);
     }
 }
 

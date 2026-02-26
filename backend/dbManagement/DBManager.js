@@ -15,10 +15,6 @@ export class DBManager {
         } else {return "establishConnection: Failed";}
     }
 
-    async dbpathChange (dbpathNew) {
-        this.dbpath = dbpathNew;
-    }
-
     async dbExecute (sqlCommand,params=[]) {
         if (!this.dbConnect) {this.establishConnection();}
         return new Promise ((resolve,_) => {
