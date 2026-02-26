@@ -1,129 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>HobbyMatch – Take Quiz</title>
-        <link id="theme-stylesheet" href="light.css" rel="stylesheet">
-        <link href="styles.css" rel="stylesheet">
-    </head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quiz</title>
+  <link href="styles.css" rel="stylesheet">
 
-    <style>
-.quiz-scroll-area {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 40px;
-            padding-bottom: 60px;
-        }
-
-        .question-box {
-            background: var(--background-alt);
-            width: 100%;
-            max-width: 900px;
-            padding: 60px 40px;
-            border-radius: 8px;
-            box-shadow: var(--shadow-lg);
-            text-align: center;
-        }
-
-        .question-box h2 {
-            font-size: 2rem;
-            margin-bottom: 40px;
-            color: var(--text-dark);
-        }
-
-        .options-container {
-            display: flex;
-            justify-content: space-evenly;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .answer-input {
-            width: min(420px, 90%);
-            padding: 12px 14px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow);
-            font-size: 1rem;
-            background: var(--input-bg);
-            color: var(--text-dark);
-        }
-
-        .option-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            color: var(--text-dark);
-        }
-
-
-        .submit-wrapper {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            margin: 40px 0 100px 0;
-        }
-    </style>
+  <style>
+    .quiz-header { padding: 30px 0 10px 0; text-align: center; }
+    .quiz-error { display: none; text-align: center; color: #b91c1c; margin-top: 10px; font-weight: 600; }
+    .quiz-scroll-area { display: flex; flex-direction: column; align-items: center; gap: 40px; padding: 30px 0 60px 0; }
+    .question-box { background: #e5e7eb; width: 100%; max-width: 900px; padding: 55px 40px; border-radius: 8px; box-shadow: var(--shadow-lg); text-align: center; }
+    .question-box h2 { font-size: 1.8rem; margin-bottom: 24px; color: var(--text-dark); }
+    .scale-labels { display: flex; justify-content: space-between; gap: 10px; max-width: 520px; margin: 0 auto 14px auto; color: var(--text-light); font-weight: 600; font-size: 0.95rem; }
+    .options-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 22px; }
+    .option-label { display: flex; align-items: center; gap: 10px; font-size: 1.1rem; cursor: pointer; background: rgba(255, 255, 255, 0.75); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 999px; box-shadow: var(--shadow); }
+    .option-label input { transform: scale(1.1); }
+    .submit-wrapper { width: 100%; display: flex; justify-content: center; margin: 10px 0 80px 0; }
+  </style>
 </head>
 
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">HobbyMatch</div>
-            <ul class="nav-links">
-                <li><a href="index_new.html">Home</a></li>
-                <li><a href="community.html">Community</a></li>
-                <li><a href="network_page.html">Connect</a></li>
-                <li><a href="data_input.html" class="nav-cta">Take Quiz</a></li>
-            </ul>
-        </div>
-    </nav>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">Logo</div>
+      <div class="user-icon">👤</div>
+    </div>
+  </nav>
 
-    <main class="container">
-        <form id="quizForm" class="quiz-scroll-area">
-            
-            <div class="question-box">
-                <h2>Question description</h2>
-                <div class="options-container">
-                    <label class="option-label" for="q0">Answer (enter a number)</label>
-                    <input class="answer-input" id="q0" name="q0" type="text" inputmode="numeric" required placeholder="e.g. 1">
-                </div>
-            </div>
+  <main class="container">
+    <header class="quiz-header">
+      <h1 id="quizTitle">Loading quiz…</h1>
+      <p id="quizDescription"></p>
+      <div id="quizError" class="quiz-error"></div>
+    </header>
 
-            <div class="submit-wrapper">
-                <button type="submit" class="cta-button">SUBMIT</button>
-            </div>
-        </form>
-    </main>
+    <form id="quizForm" class="quiz-scroll-area">
+      <div id="quizQuestions"></div>
 
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h4>HobbyMatch</h4>
-                    <p>Connecting people with their perfect hobbies</p>
-                </div>
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="index_new.html">Home</a></li>
-                        <li><a href="community.html">Community</a></li>
-                        <li><a href="network_page.html">Connect</a></li>
-                        <li><a href="data_input.html">Take Quiz</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Contact</h4>
-                    <p>University of Bath<br>Bath, UK</p>
-                </div>
-            </div>
-        </div>
-    </footer>
+      <div class="submit-wrapper">
+        <button type="submit" class="cta-button">SUBMIT</button>
+      </div>
+    </form>
+  </main>
 
-    <script src="quiz-logic.js"></script>
-    <script src="sidebar.js"></script>
+  <script src="quiz-logic.js"></script>
 </body>
 </html>
