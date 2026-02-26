@@ -102,7 +102,7 @@ export function createHTTPServer(public_directory) {
                 await postHandler(req, res);
                 break;
             default:
-                await errorHandler(req, res, 405);
+                await errorHandler(res, 405);
                 break;
         }
     });

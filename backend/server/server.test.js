@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-import { getMimeType, createHTTPServer } from "./server";
+import { getMimeType, createHTTPServer, registerPOSTHandler } from "./server";
 import config from "../config";
 
 const public_directory = path.resolve("../public/");
@@ -10,6 +10,20 @@ async function getURL(url) {
     return fetch(`http://${config.URL}:${config.PORT}/${url}`).then(async res => {
         if (!res.ok) { return res.status; }
         return await (await res.blob()).text();
+    });
+}
+
+async function postURL(url, body = {}) {
+    return fetch(`http://${config.URL}:${config.PORT}/${url}`, { method: "POST", body: JSON.stringify(body) }).then(async res => {
+        if (!res.ok) { return res.status; }
+        return await res.json();
+    });
+}
+
+async function putURL(url, body = {}) {
+    return fetch(`http://${config.URL}:${config.PORT}/${url}`, { method: "PUT", body: JSON.stringify(body) }).then(async res => {
+        if (!res.ok) { return res.status; }
+        return await res.json();
     });
 }
 
@@ -42,7 +56,7 @@ describe("Server module", () => {
 
     beforeAll(() => {
         server = createHTTPServer(public_directory);
-        server.listen(config.PORT, config.URL, () => {});
+        server.listen(config.PORT, config.URL, () => { });
     });
 
     test("Get Request", async () => {
@@ -51,7 +65,34 @@ describe("Server module", () => {
         await expect(getURL("chat.html")).resolves.toBe(readFile("chat.html"));
         await expect(getURL("index.html?test=1")).resolves.toBe(readFile("index.html"));
         await expect(getURL("foo")).resolves.toBe(404);
+
+        await expect(getURL("../README.md")).resolves.toBe(404);
     });
+
+    test("Post Request", async () => {
+        registerPOSTHandler("/test", async (req, res) => {
+            let body = "";
+
+            req.on("data", (chunk) => {
+                body += chunk;
+            });
+
+            req.on("end", async () => {
+                res.writeHead(200).end(JSON.stringify(body));
+            });
+        });
+
+        await expect(postURL("")).resolves.toBe(404);
+        await expect(postURL("test")).resolves.toBe(`{}`);
+        await expect(postURL("test", { "test": 123 })).resolves.toBe(`{"test":123}`);
+
+        expect(() => { registerPOSTHandler("/test", (req, res) => { }); }).toThrow("Url already registered.");
+    });
+
+    test("Put Request", async () => {
+        await expect(putURL("")).resolves.toBe(405);
+    });
+
 
     afterAll(() => {
         server.close();
