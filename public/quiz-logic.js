@@ -14,7 +14,6 @@ function escapeHtml(str) {
 }
 
 async function fetchQuiz() {
-  // backend uses POST handlers
   const endpoints = ["/getQuiz", "/getquiz"];
   let lastErr = null;
 
@@ -38,8 +37,8 @@ function renderScaleQuestion({ idx, question, scale }) {
   const qId = `q${idx}`;
   const min = Number(scale?.min ?? 1);
   const max = Number(scale?.max ?? 5);
-  const minLabel = scale?.minLabel ?? "1";
-  const maxLabel = scale?.maxLabel ?? String(max);
+  const minLabel = scale?.minLabel ?? "Not at all";
+  const maxLabel = scale?.maxLabel ?? "Very much";
 
   let optionsHtml = "";
   for (let v = min; v <= max; v += 1) {
@@ -55,13 +54,50 @@ function renderScaleQuestion({ idx, question, scale }) {
   return `
     <div class="question-box">
       <h2>${escapeHtml(question.text ?? "")}</h2>
-      <div class="scale-labels">
-        <span>${escapeHtml(minLabel)}</span>
-        <span>${escapeHtml(maxLabel)}</span>
+      <div class="scale-row">
+        <span class="scale-label">${escapeHtml(minLabel)}</span>
+        <div class="options-container">${optionsHtml}</div>
+        <span class="scale-label">${escapeHtml(maxLabel)}</span>
       </div>
+    </div>
+  `;
+}
+
+function renderChoicesQuestion({ idx, question }) {
+  const qId = `q${idx}`;
+  const options = Array.isArray(question?.options) ? question.options : [];
+
+  if (!options.length) {
+    throw new Error("Question is missing options.");
+  }
+
+  const optionsHtml = options
+    .map((optionText, optionIdx) => {
+      const value = optionIdx + 1;
+      const inputId = `${qId}_${value}`;
+      return `
+        <label class="option-label" for="${inputId}">
+          <input type="radio" id="${inputId}" name="${qId}" value="${value}" required>
+          <span>${escapeHtml(optionText)}</span>
+        </label>
+      `;
+    })
+    .join("");
+
+  return `
+    <div class="question-box">
+      <h2>${escapeHtml(question.text ?? "")}</h2>
       <div class="options-container">${optionsHtml}</div>
     </div>
   `;
+}
+
+function renderQuestion({ idx, question, scale }) {
+  const isChoiceQuestion = Array.isArray(question?.options) && question.options.length > 0;
+  if (isChoiceQuestion) {
+    return renderChoicesQuestion({ idx, question });
+  }
+  return renderScaleQuestion({ idx, question, scale });
 }
 
 function renderQuiz(quiz) {
@@ -69,12 +105,14 @@ function renderQuiz(quiz) {
   quizDescriptionEl.textContent = quiz?.description || "";
 
   const questions = Array.isArray(quiz?.questions) ? quiz.questions : [];
-  if (!questions.length) throw new Error("Quiz has no questions");
+  if (!questions.length) {
+    throw new Error("Quiz has no questions");
+  }
 
-  const scale = quiz?.scale || { min: 1, max: 5 };
+  const scale = quiz?.scale || { min: 1, max: 5, minLabel: "Not at all", maxLabel: "Very much" };
 
   quizQuestionsEl.innerHTML = questions
-    .map((q, idx) => renderScaleQuestion({ idx, question: q, scale }))
+    .map((q, idx) => renderQuestion({ idx, question: q, scale }))
     .join("");
 }
 
@@ -89,24 +127,24 @@ function getAnswersFromForm(form) {
     }
     answers.push(parsed);
   }
+
   return answers;
 }
 
-async function getHobbyReccomendation(answers) {
-  const res = await fetch("/api/quiz", {
+async function getHobbyRecommendation(answers) {
+  const response = await fetch("/api/quiz", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ answers }),
   });
 
-  if (!res.ok) {
-    const msg = await res.text();
-    throw new Error(msg || `Quiz API failed (${res.status})`);
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || `Quiz API failed (${response.status})`);
   }
 
-  const payload = await res.json(); // backend returns {"hobby": "[[x, \"hobby_name\"], [y, \"hobby_name\"]]"}. First hobby is the most likely
-  alert(JSON.stringify(payload));
-  return payload.hobby[0][1]; 
+  const payload = await response.json();
+  return payload.hobby;
 }
 
 formEl.addEventListener("submit", async (e) => {
@@ -114,11 +152,10 @@ formEl.addEventListener("submit", async (e) => {
 
   try {
     const answers = getAnswersFromForm(formEl);
-    const hobby = await getHobbyReccomendation(answers);
+    const hobby = await getHobbyRecommendation(answers);
 
     localStorage.setItem("userHobby", hobby);
     document.cookie = `userHobby=${encodeURIComponent(hobby)}; path=/; max-age=86400`;
-
     window.location.href = `recommendation.html?hobby=${encodeURIComponent(hobby)}`;
   } catch (err) {
     console.error(err);
