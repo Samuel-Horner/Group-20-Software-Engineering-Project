@@ -1,8 +1,9 @@
 import fs from "fs";
 import path from "path";
 
-import { getMimeType, createHTTPServer, registerPOSTHandler } from "./server";
+import { getMimeType, createHTTPServer, registerPOSTHandler, getHandler } from "./server";
 import config from "../config";
+import { IncomingMessage, OutgoingMessage } from "http";
 
 const public_directory = path.resolve("../public/");
 
@@ -59,6 +60,7 @@ describe("Server module", () => {
         server.listen(config.PORT, config.URL, () => { });
     });
 
+    // Public Interface
     test("Get Request", async () => {
         await expect(getURL("")).resolves.toBe(readFile(config.DEFAULT_PAGE));
         await expect(getURL(config.DEFAULT_PAGE)).resolves.toBe(readFile(config.DEFAULT_PAGE));
@@ -66,7 +68,7 @@ describe("Server module", () => {
         await expect(getURL("index.html?test=1")).resolves.toBe(readFile("index.html"));
         await expect(getURL("foo")).resolves.toBe(404);
 
-        await expect(getURL("../README.md")).resolves.toBe(404);
+        await expect(getURL(encodeURI("../README.md"))).resolves.toBe(404);
     });
 
     test("Post Request", async () => {
@@ -93,6 +95,28 @@ describe("Server module", () => {
         await expect(putURL("")).resolves.toBe(405);
     });
 
+    test("Get Request Path Traversal", async () => {
+        global.URL.new = mockImplementation((a, b) => {
+            return {
+                pathname: a,
+                url: a + b,
+            }
+        });
+
+        let code = -1;
+
+        // Mock request / response objects
+        let req = {
+            url: "%2E%2E/README.md"
+        };
+        let res = {
+            end: () => {},
+            writeHead: (x) => {code = x;}
+        };
+
+        await expect(getHandler(public_directory, req, res)).resolves.toBeUndefined();
+        expect(code).toBe(404)
+    });
 
     afterAll(() => {
         server.close();
