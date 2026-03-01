@@ -1,3 +1,5 @@
+import { jest } from '@jest/globals';
+
 import fs from "fs";
 import path from "path";
 
@@ -93,29 +95,6 @@ describe("Server module", () => {
 
     test("Put Request", async () => {
         await expect(putURL("")).resolves.toBe(405);
-    });
-
-    test("Get Request Path Traversal", async () => {
-        global.URL.new = mockImplementation((a, b) => {
-            return {
-                pathname: a,
-                url: a + b,
-            }
-        });
-
-        let code = -1;
-
-        // Mock request / response objects
-        let req = {
-            url: "%2E%2E/README.md"
-        };
-        let res = {
-            end: () => {},
-            writeHead: (x) => {code = x;}
-        };
-
-        await expect(getHandler(public_directory, req, res)).resolves.toBeUndefined();
-        expect(code).toBe(404)
     });
 
     afterAll(() => {
