@@ -2,16 +2,54 @@ import path from "path";
 import fs from "fs";
 
 import { createHTTPServer, registerPOSTHandler } from "./server/server.js";
+import {spawn} from 'child_process'
 import config from "./config.js"
+
+import { init as dbInit} from "./dbManagement/index.js"
 
 const public_directory = path.resolve("./public/");
 const server = createHTTPServer(public_directory);
 
+// This function ONLY WORKS IF YOU RUN IT FROM ROOT
+// Example:   getHobbyReccomendation([1,4,1,2,4,2,3,3,1,2,4,5,5,4,2]);
+// Returns: The probabilities of the inputs most likely classes in [probability, class] pairs 
+//         -> Example: [ [0.5, "Football"], [0.2, "Games"], ... ] 
 async function getHobbyReccomendation(answers) {
-    throw new Error("Recommendation engine not implemented");
+    const args = ['backend/dbManagement/reccomendation/model_predictor.py', '--input', JSON.stringify(answers)];
+
+    const process = spawn('python', args);
+    process.stdout.setEncoding('utf-8');
+
+    // Wait until the python script has resolved until we can return the prediction
+    return new Promise( (resolve, reject) => {
+        process.stdout.on('data', (msg) => {
+            // console.log(`Recieved: ${msg}`);
+            let obj = JSON.parse(msg);
+
+            let classes = obj["classes"]; let predictions = obj["prediction"];
+            // console.log(classes, predictions);
+            let pairs = predictions.map( (p,idx) => [p, classes[idx]] ); // remember the original locations
+
+            // Return the most likely class as the prediction, descending order of probability 
+            const sorted = pairs.sort( (a,b) => {return b[0] - a[0] })
+            // let bestClass = classes[sorted[0][1]];
+            let bestClasses = sorted.slice(0,5)
+
+            console.log("sorted:", sorted);
+            console.log("best:", bestClasses);
+
+            resolve(bestClasses)
+        });
+
+        process.stderr.on('data', (err) => {
+            console.error(`${err}`);
+            reject(new Error(err));
+        });
+    });
 }
 
-registerPOSTHandler("/getQuiz", async (req, res) => {
+
+registerPOSTHandler("/getquiz", async (req, res) => {
     try {
         const quizPath = path.resolve("./backend/quiz.json");
         res.setHeader("Content-Type", "application/json");
@@ -40,6 +78,7 @@ registerPOSTHandler("/api/quiz", (req, res) => {
     req.on("end", async () => {
         try {
             const payload = body ? JSON.parse(body) : {};
+
             const rawAnswers = Array.isArray(payload.answers) ? payload.answers : [];
             const answers = rawAnswers.map((value) => Number.parseInt(String(value), 10));
 
@@ -66,6 +105,9 @@ registerPOSTHandler("/api/quiz", (req, res) => {
         res.writeHead(500).end();
     });
 });
+
+// Initialise database
+dbInit();
 
 server.listen(config.PORT, config.URL, () => {
     console.log(`Server listenning at ${config.URL}:${config.PORT}.`);

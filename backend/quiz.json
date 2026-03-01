@@ -1,13 +1,28 @@
 {
-  "quizId": "test-quiz-1",
-  "title": "Sample Quiz",
-  "description": "Test quiz data",
+  "quizId": "hobby-quiz-1",
+  "title": "Hobby Finder Quiz",
+  "description": "Rate each statement from 1 (not at all) to 5 (very much).",
+  "scale": {
+    "min": 1,
+    "max": 5,
+    "minLabel": "Not at all",
+    "maxLabel": "Very much"
+  },
   "questions": [
-    {
-      "id": 1,
-      "text": "What's your favourite hobby?",
-      "type": "multiple-choice",
-      "options": ["Reading", "Gaming", "Cooking", "Sports"]
-    }
+    { "id": 1, "text": "Do you enjoy meeting new people?", "type": "scale" },
+    { "id": 2, "text": "Do you enjoy working in a team?", "type": "scale" },
+    { "id": 3, "text": "Do you enjoy exercise?", "type": "scale" },
+    { "id": 4, "text": "Do you enjoy creating things?", "type": "scale" },
+    { "id": 5, "text": "Do you enjoy challenging yourself?", "type": "scale" },
+    { "id": 6, "text": "Do you enjoy spending your free time with other people?", "type": "scale" },
+    { "id": 7, "text": "Do you enjoy learning new things?", "type": "scale" },
+    { "id": 8, "text": "Do you enjoy seeing yourself improve?", "type": "scale" },
+    { "id": 9, "text": "Do you enjoy being in nature?", "type": "scale" },
+    { "id": 10, "text": "Do you enjoy performing?", "type": "scale" },
+    { "id": 11, "text": "Do you enjoy competition?", "type": "scale" },
+    { "id": 12, "text": "Do you enjoy collecting things?", "type": "scale" },
+    { "id": 13, "text": "Do you enjoy spending time alone?", "type": "scale" },
+    { "id": 14, "text": "Do you enjoy expressing your identity and interests?", "type": "scale" },
+    { "id": 15, "text": "Do you enjoy expressing your abilities and skills?", "type": "scale" }
   ]
 }
