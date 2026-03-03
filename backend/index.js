@@ -38,7 +38,8 @@ async function getHobbyReccomendation(answers) {
             console.log("sorted:", sorted);
             console.log("best:", bestClasses);
 
-            resolve(bestClasses)
+            let result = JSON.stringify(bestClasses);
+            resolve(result)
         });
 
         process.stderr.on('data', (err) => {
