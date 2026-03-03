@@ -1,10 +1,27 @@
+import { afterAll, beforeAll, describe, jest } from "@jest/globals"
+
 import fs from "fs";
 import path from "path";
 
-import { getMimeType, createHTTPServer, registerPOSTHandler } from "./server";
 import config from "../config";
 
-const public_directory = path.resolve("../public/");
+import { getMimeType, createHTTPServer, registerPOSTHandler, getHandler, releasePOSTHandler } from "./server";
+
+const public_directory = path.resolve("../public");
+
+class MockURL {
+    constructor(input, base) {
+        const baseURL = new URL(input, base);
+        this.origin = baseURL.origin;
+
+        if (input.startsWith("/")) {
+            this.pathname = input;
+        } else {
+            this.pathname = `/${input}`;
+        }
+    }
+}
+
 
 async function getURL(url) {
     return fetch(`http://${config.URL}:${config.PORT}/${url}`).then(async res => {
@@ -37,65 +54,91 @@ function readFile(file_path) {
     }
 }
 
-describe("Static server module", () => {
-    test("Get mime type", () => {
-        expect(getMimeType(".foo")).toBe("text/plain");
+describe("Server Tests", () => {
+    describe("Path Traversal Test", () => {
+        test("Path Traversal", async () => {
+            async function mockGetURL(url) {
+                let req = {
+                    url: url
+                };
 
-        expect(getMimeType(".html")).toBe("text/html");
-        expect(getMimeType(".css")).toBe("text/css");
-        expect(getMimeType(".js")).toBe("text/javascript");
-        expect(getMimeType(".json")).toBe("application/json");
-        expect(getMimeType(".jpg")).toBe("image/jpeg");
-        expect(getMimeType(".png")).toBe("image/png");
-        expect(getMimeType(".svg")).toBe("image/svg+xml");
-    });
-});
+                let res = {
+                    code: null,
+                    writeHead(code) { this.code = code; return this; },
+                    setHeader(key, val) { return this; },
+                    end() { }
+                }
 
-describe("Server module", () => {
-    let server = null;
+                await getHandler(public_directory, req, res, MockURL);
+                return res.code;
+            }
 
-    beforeAll(() => {
-        server = createHTTPServer(public_directory);
-        server.listen(config.PORT, config.URL, () => { });
-    });
-
-    test("Get Request", async () => {
-        await expect(getURL("")).resolves.toBe(readFile(config.DEFAULT_PAGE));
-        await expect(getURL(config.DEFAULT_PAGE)).resolves.toBe(readFile(config.DEFAULT_PAGE));
-        await expect(getURL("chat.html")).resolves.toBe(readFile("chat.html"));
-        await expect(getURL("index.html?test=1")).resolves.toBe(readFile("index.html"));
-        await expect(getURL("foo")).resolves.toBe(404);
-
-        await expect(getURL("../README.md")).resolves.toBe(404);
+            await expect(mockGetURL("../backend/index.js")).resolves.toBe(404);
+            await expect(mockGetURL("../README.md")).resolves.toBe(404);
+        });
     });
 
-    test("Post Request", async () => {
-        registerPOSTHandler("/test", async (req, res) => {
-            let body = "";
+    describe("Static server module", () => {
+        test("Get mime type", () => {
+            expect(getMimeType(".foo")).toBe("text/plain");
 
-            req.on("data", (chunk) => {
-                body += chunk;
-            });
+            expect(getMimeType(".html")).toBe("text/html");
+            expect(getMimeType(".css")).toBe("text/css");
+            expect(getMimeType(".js")).toBe("text/javascript");
+            expect(getMimeType(".json")).toBe("application/json");
+            expect(getMimeType(".jpg")).toBe("image/jpeg");
+            expect(getMimeType(".png")).toBe("image/png");
+            expect(getMimeType(".svg")).toBe("image/svg+xml");
+        });
+    });
 
-            req.on("end", async () => {
-                res.writeHead(200).end(JSON.stringify(body));
-            });
+    describe("Non-Verbose Server Module", () => {
+        let server;
+        beforeAll(async () => {
+            server = createHTTPServer(public_directory);
+            server.listen(config.PORT, config.URL, () => { });
         });
 
-        await expect(postURL("")).resolves.toBe(404);
-        await expect(postURL("test")).resolves.toBe(`{}`);
-        await expect(postURL("test", { "test": 123 })).resolves.toBe(`{"test":123}`);
+        // Public Interface
+        test("Get Request", async () => {
+            await expect(getURL("")).resolves.toBe(readFile(config.DEFAULT_PAGE));
+            await expect(getURL(config.DEFAULT_PAGE)).resolves.toBe(readFile(config.DEFAULT_PAGE));
+            await expect(getURL("chat.html")).resolves.toBe(readFile("chat.html"));
+            await expect(getURL("index.html?test=1")).resolves.toBe(readFile("index.html"));
+            await expect(getURL("foo")).resolves.toBe(404);
+        });
 
-        expect(() => { registerPOSTHandler("/test", (req, res) => { }); }).toThrow("Url already registered.");
-    });
+        test("Post Request", async () => {
+            expect(registerPOSTHandler("/test", async (req, res) => {
+                let body = "";
 
-    test("Put Request", async () => {
-        await expect(putURL("")).resolves.toBe(405);
-    });
+                req.on("data", (chunk) => {
+                    body += chunk;
+                });
 
+                req.on("end", async () => {
+                    res.writeHead(200).end(JSON.stringify(body));
+                });
+            })).toBeUndefined();
 
-    afterAll(() => {
-        server.close();
+            await expect(postURL("")).resolves.toBe(404);
+            await expect(postURL("test")).resolves.toBe(`{}`);
+            await expect(postURL("test", { "test": 123 })).resolves.toBe(`{"test":123}`);
+
+            expect(() => { registerPOSTHandler("/test", (req, res) => { }); }).toThrow("Url already registered.");
+
+            expect(releasePOSTHandler("/test")).toBeUndefined();
+            expect(() => { releasePOSTHandler("/test"); }).toThrow("Url not registered.");
+        });
+
+        test("Put Request", async () => {
+            await expect(putURL("")).resolves.toBe(405);
+        });
+
+        afterAll(() => {
+            server.close();
+        });
     });
 });
+
 

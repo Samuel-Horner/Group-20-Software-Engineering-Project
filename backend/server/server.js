@@ -29,10 +29,10 @@ export function getMimeType(ext) {
     }
 }
 
-async function getHandler(public_directory, req, res) {
+export async function getHandler(public_directory, req, res, _URL = URL) {
     console.log(`Recieved GET request for resource ${req.url}.`)
 
-    const url = new URL(req.url, qualified_url);
+    const url = new _URL(req.url, qualified_url);
 
     if (url.pathname == "/") {
         url.pathname = config.DEFAULT_PAGE;
@@ -40,12 +40,15 @@ async function getHandler(public_directory, req, res) {
 
     let file_path_str = path.resolve(path.join(public_directory, url.pathname));
 
+    // UPDATE: Path traversal seems very hard to achieve, since RFC3986 strips all URI dot segments. It is however still possible via a manuall crafted request, hence to test this we need to create a mock request.
+    // https://www.rfc-editor.org/rfc/rfc3986#page-33
+
     // Check for path traversal out of public directory.
     // This is probably not good enough to prevent path traversal.
     // TODO: Find a better mechanism for this.
     if (!file_path_str.startsWith(public_directory)) {
-        console.error(`Error, invalid file path: ${file_path}`);
-        errorHandler(res, 404);
+        console.error(`Error, invalid file path: ${file_path_str}`);
+        return errorHandler(res, 404);
     }
 
     let file_path = path.parse(file_path_str);
@@ -85,9 +88,17 @@ export function registerPOSTHandler(url, handler) {
     endpoints[url] = handler;
 }
 
+export function releasePOSTHandler(url) {
+    if (!(url in endpoints)) {
+        throw new Error("Url not registered.");
+    }
+    delete endpoints[url];
+}
+
 export async function errorHandler(res, code) {
     console.error(`HTTP Error ${code}`);
     res.writeHead(code).end();
+    return code;
 }
 
 export function createHTTPServer(public_directory) {

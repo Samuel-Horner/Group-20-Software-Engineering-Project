@@ -78,7 +78,6 @@ export async function load(path, manager) {
         
         for (const hobby of hobbies) {
             const id = await hobby_set.add(hobby, manager);
-            console.error(id);
             await manager.dbExecute(`
                 INSERT INTO TrainingSetTable (
                     HobbyID,
