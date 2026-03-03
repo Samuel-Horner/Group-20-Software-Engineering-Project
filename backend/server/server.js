@@ -29,10 +29,10 @@ export function getMimeType(ext) {
     }
 }
 
-export async function getHandler(public_directory, req, res, verbose = false) {
-    if (verbose) console.log(`Recieved GET request for resource ${req.url}.`)
+export async function getHandler(public_directory, req, res, _URL = URL) {
+    console.log(`Recieved GET request for resource ${req.url}.`)
 
-    const url = new URL(req.url, qualified_url);
+    const url = new _URL(req.url, qualified_url);
 
     if (url.pathname == "/") {
         url.pathname = config.DEFAULT_PAGE;
@@ -47,8 +47,8 @@ export async function getHandler(public_directory, req, res, verbose = false) {
     // This is probably not good enough to prevent path traversal.
     // TODO: Find a better mechanism for this.
     if (!file_path_str.startsWith(public_directory)) {
-        console.error(`Error, invalid file path: ${file_path}`);
-        errorHandler(res, 404);
+        console.error(`Error, invalid file path: ${file_path_str}`);
+        return errorHandler(res, 404);
     }
 
     let file_path = path.parse(file_path_str);
@@ -57,7 +57,7 @@ export async function getHandler(public_directory, req, res, verbose = false) {
     // Pipe file to client
     const read_stream = createReadStream(file_path_str);
     read_stream.on("open", () => {
-        if (verbose) console.log(`Piping file ${file_path_str}.`);
+        console.log(`Piping file ${file_path_str}.`);
         read_stream.pipe(res);
     });
     read_stream.on("end", () => {
@@ -71,8 +71,8 @@ export async function getHandler(public_directory, req, res, verbose = false) {
 
 let endpoints = {};
 
-async function postHandler(req, res, verbose = false) {
-    if (verbose) console.log(`Recieved POST request for resource ${req.url}.`);
+async function postHandler(req, res) {
+    console.log(`Recieved POST request for resource ${req.url}.`);
     if (req.url in endpoints) {
         endpoints[req.url](req, res);
     } else {
@@ -88,21 +88,29 @@ export function registerPOSTHandler(url, handler) {
     endpoints[url] = handler;
 }
 
+export function releasePOSTHandler(url) {
+    if (!(url in endpoints)) {
+        throw new Error("Url not registered.");
+    }
+    delete endpoints[url];
+}
+
 export async function errorHandler(res, code) {
     console.error(`HTTP Error ${code}`);
     res.writeHead(code).end();
+    return code;
 }
 
-export function createHTTPServer(public_directory, verbose = false) {
+export function createHTTPServer(public_directory) {
     return createServer(async (req, res) => {
         res.setHeader("Access-Control-Allow-Origin", "*")
 
         switch (req.method) {
             case "GET":
-                await getHandler(public_directory, req, res, verbose);
+                await getHandler(public_directory, req, res);
                 break;
             case "POST":
-                await postHandler(req, res, verbose);
+                await postHandler(req, res);
                 break;
             default:
                 await errorHandler(res, 405);
