@@ -7,7 +7,7 @@ import config from "./config.js"
 
 import { init as dbInit} from "./dbManagement/index.js"
 
-const server = createHTTPServer(config.PUBLIC);
+const server = createHTTPServer(config.PUBLIC, true);
 
 // This function ONLY WORKS IF YOU RUN IT FROM ROOT
 // Example:   getHobbyReccomendation([1,4,1,2,4,2,3,3,1,2,4,5,5,4,2]);

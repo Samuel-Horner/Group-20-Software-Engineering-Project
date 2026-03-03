@@ -29,8 +29,8 @@ export function getMimeType(ext) {
     }
 }
 
-export async function getHandler(public_directory, req, res) {
-    console.log(`Recieved GET request for resource ${req.url}.`)
+export async function getHandler(public_directory, req, res, verbose = false) {
+    if (verbose) console.log(`Recieved GET request for resource ${req.url}.`)
 
     const url = new URL(req.url, qualified_url);
 
@@ -46,7 +46,6 @@ export async function getHandler(public_directory, req, res) {
     // Check for path traversal out of public directory.
     // This is probably not good enough to prevent path traversal.
     // TODO: Find a better mechanism for this.
-    console.log(file_path_str, public_directory);
     if (!file_path_str.startsWith(public_directory)) {
         console.error(`Error, invalid file path: ${file_path}`);
         errorHandler(res, 404);
@@ -58,7 +57,7 @@ export async function getHandler(public_directory, req, res) {
     // Pipe file to client
     const read_stream = createReadStream(file_path_str);
     read_stream.on("open", () => {
-        console.log(`Piping file ${file_path_str}.`);
+        if (verbose) console.log(`Piping file ${file_path_str}.`);
         read_stream.pipe(res);
     });
     read_stream.on("end", () => {
@@ -72,8 +71,8 @@ export async function getHandler(public_directory, req, res) {
 
 let endpoints = {};
 
-async function postHandler(req, res) {
-    console.log(`Recieved POST request for resource ${req.url}.`);
+async function postHandler(req, res, verbose = false) {
+    if (verbose) console.log(`Recieved POST request for resource ${req.url}.`);
     if (req.url in endpoints) {
         endpoints[req.url](req, res);
     } else {
@@ -94,16 +93,16 @@ export async function errorHandler(res, code) {
     res.writeHead(code).end();
 }
 
-export function createHTTPServer(public_directory) {
+export function createHTTPServer(public_directory, verbose = false) {
     return createServer(async (req, res) => {
         res.setHeader("Access-Control-Allow-Origin", "*")
 
         switch (req.method) {
             case "GET":
-                await getHandler(public_directory, req, res);
+                await getHandler(public_directory, req, res, verbose);
                 break;
             case "POST":
-                await postHandler(req, res);
+                await postHandler(req, res, verbose);
                 break;
             default:
                 await errorHandler(res, 405);
