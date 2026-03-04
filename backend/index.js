@@ -10,20 +10,21 @@ import { init as dbInit} from "./dbManagement/index.js"
 const public_directory = path.resolve("./public/");
 const server = createHTTPServer(public_directory);
 
+
+// Initialize python process
+const args = ['backend/dbManagement/reccomendation/model_predictor.py'];
+const process = spawn('python', args);
+process.stdout.setEncoding('utf-8');
+
 // This function ONLY WORKS IF YOU RUN IT FROM ROOT
 // Example:   getHobbyReccomendation([1,4,1,2,4,2,3,3,1,2,4,5,5,4,2]);
 // Returns: The probabilities of the inputs most likely classes in [probability, class] pairs 
 //         -> Example: [ [0.5, "Football"], [0.2, "Games"], ... ] 
 async function getHobbyReccomendation(answers) {
-    const args = ['backend/dbManagement/reccomendation/model_predictor.py', '--input', JSON.stringify(answers)];
-
-    const process = spawn('python', args);
-    process.stdout.setEncoding('utf-8');
-
+    process.stdin.write( JSON.stringify(answers) + "\n" );
     // Wait until the python script has resolved until we can return the prediction
     return new Promise( (resolve, reject) => {
         process.stdout.on('data', (msg) => {
-            // console.log(`Recieved: ${msg}`);
             let obj = JSON.parse(msg);
 
             let classes = obj["classes"]; let predictions = obj["prediction"];
