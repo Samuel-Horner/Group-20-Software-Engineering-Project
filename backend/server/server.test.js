@@ -92,7 +92,7 @@ describe("Server Tests", () => {
         });
     });
 
-    describe("Non-Verbose Server Module", () => {
+    describe("Server Module", () => {
         let server;
         beforeAll(async () => {
             server = createHTTPServer(public_directory);

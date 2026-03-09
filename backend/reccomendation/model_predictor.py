@@ -27,12 +27,18 @@ with open("backend/reccomendation/model.json", "r") as f:
         x_raw = input() # Blocks on process.stdin until receives an input, with \n as a deliminator between requests in utf-8
 
         x = np.array( json.loads(x_raw))
+
         # Check if input is the correct size
         if data["n_features_in"] != len(x):
             err = "Input to hobby reccomendation has length {}, when length {} is needed".format(len(x), data["n_features_in"])
             sys.stderr.write(err)
-            sys.exit(1) # Exit with error code 1
+            # sys.exit(1) # Exit with error code 1
+            continue # Wait for new input
             
+        if not (min(x) > 0 and max(x) <= 5):
+            err = "Recieved answers out of range."
+            sys.stderr.write(err)
+            continue
             
         hidden_layers= data["hidden_layers"]
         model = MLPClassifier(max_iter=10_000, hidden_layer_sizes=hidden_layers, random_state=1, activation='logistic',solver='adam')
@@ -46,6 +52,5 @@ with open("backend/reccomendation/model.json", "r") as f:
         model.intercepts_ = [np.array(b) for b in data["network"]["biases"] ]
 
         prediction = softmax( model.predict_proba([x])[0], 5.0)
-
 
         print( json.dumps({"classes": data["classes"] , "prediction": list(prediction) }) ) # Return the prediction to the caller

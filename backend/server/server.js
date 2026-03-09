@@ -74,7 +74,10 @@ let endpoints = {};
 async function postHandler(req, res) {
     console.log(`Recieved POST request for resource ${req.url}.`);
     if (req.url in endpoints) {
-        endpoints[req.url](req, res);
+        await endpoints[req.url](req, res).catch(err => {
+            console.error(err);
+            errorHandler(res, 500);
+        });
     } else {
         console.error(`Error, no POST handler exists for resource ${req.url}.`);
         errorHandler(res, 404);
@@ -95,9 +98,9 @@ export function releasePOSTHandler(url) {
     delete endpoints[url];
 }
 
-export async function errorHandler(res, code) {
+export async function errorHandler(res, code, message = undefined) {
     console.error(`HTTP Error ${code}`);
-    res.writeHead(code).end();
+    res.writeHead(code).end(message);
     return code;
 }
 
