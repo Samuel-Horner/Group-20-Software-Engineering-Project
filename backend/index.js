@@ -11,7 +11,7 @@ const server = createHTTPServer(config.PUBLIC);
 
 
 // Initialize python process
-const args = ['backend/dbManagement/reccomendation/model_predictor.py'];
+const args = ['backend/reccomendation/model_predictor.py'];
 const process = spawn('python', args);
 process.stdout.setEncoding('utf-8');
 

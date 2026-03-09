@@ -20,7 +20,7 @@ def softmax(prob_distn: np.ndarray, temperature: float) -> np.ndarray:
     return result
 
 # 1) Load weights into the neural network
-with open("backend/dbManagement/reccomendation/model.json", "r") as f:
+with open("backend/reccomendation/model.json", "r") as f:
     data = json.load(f)
 
     while True:
