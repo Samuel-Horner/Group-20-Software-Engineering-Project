@@ -1,7 +1,7 @@
 // U can use the database thing to fetch the data instead 
 import {spawn} from 'child_process';
-import {loadTrainingSetFromCSV} from '../training_set.js'; //You need to do "npm install csvtojson" to use this
-let result = loadTrainingSetFromCSV("../../data/training_set.csv");
+import {loadTrainingSetFromCSV} from '../dbManagement/training_set.js'; //You need to do "npm install csvtojson" to use this
+let result = loadTrainingSetFromCSV("../data/training_set.csv");
 
 result.then( (e) => {
     //-------------- Send the data to python to handle ----------------------//
