@@ -1,10 +1,14 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { jest, describe, test, expect, beforeAll, afterAll } from "@jest/globals";
 
 import { DBManager } from "./DBManager.js";
 
-const TEST_DB_PATH = path.resolve("./data/networking.test.db");
+const TEST_DB_PATH = path.join(
+    os.tmpdir(),
+    `networking-${process.pid}-${Date.now()}.test.db`
+);
 
 const hobbyTableSchema = `
 CREATE TABLE IF NOT EXISTS HobbyTable (
@@ -44,14 +48,12 @@ describe("Networking DB", () => {
     });
 
     afterAll(async () => {
-        if (manager?.dbConnect) {
-            await new Promise((resolve, reject) => {
-                manager.dbConnect.close((err) => {
-                    if (err) { reject(err); }
-                    else { resolve(); }
-                });
-            });
-            manager.dbConnect = null;
+        if (manager) {
+            await manager.dbClose();
+        }
+
+        if (fs.existsSync(TEST_DB_PATH)) {
+            fs.rmSync(TEST_DB_PATH, { force: true });
         }
     });
 
