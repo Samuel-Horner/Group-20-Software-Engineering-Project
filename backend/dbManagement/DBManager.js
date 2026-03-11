@@ -1,50 +1,47 @@
 import sqlite3 from 'sqlite3';
 
 export class DBManager {
-    constructor (dbpathNew="./defaultDB.sqlite") {
-        this.dbpath = dbpathNew;
-        this.dbConnect = null;
+    constructor(path, verbose = false) {
+        this.path = path;
+        this.connection = null;
+        this.verbose = verbose;
     }
 
-    async establishConnection () {
-        let dbConnect = new sqlite3.Database(this.dbpath);
-        if (dbConnect) {
-            this.dbConnect = dbConnect;
-            this.dbConnect.on("trace", str => console.log(`DB: ${str}`)); 
-            return "establishConnection: Success";
-    }
-        else {return "establishConnection: Failed";}
-    }
+    async establishConnection() {
+        return new Promise((resolve, reject) => {
+            this.connection = new sqlite3.Database(this.path, (err) => {
+                if (err) reject(err);
 
-    async dbpathChange (dbpathNew) {
-        this.dbpath = dbpathNew;
-    }
-
-    async dbExecute (sqlCommand,params=[]) {
-        if (!this.dbConnect) {this.dbConnect = this.establishConnection();}
-        return new Promise ((resolve,_) => {
-            this.dbConnect.run(sqlCommand,params,(err) => {
-                if (!err) {resolve("dbExecute: Success");}
-                else {resolve("dbExecute: "+err.message);}
+                if (this.verbose) this.connection.on("trace", str => { console.log(str) });
+                resolve();
             });
         });
     }
 
-    async dbGet (sqlCommand,params=[]) {
-        if (!this.dbConnect) {this.dbConnect = this.establishConnection();}
-        return new Promise ((resolve,_) => {
-            let leadCommand = sqlCommand.trim().split(/\s+/)[0];
-            if (!(leadCommand == "SELECT")) {resolve("dbExecute: custom_ERROR: sqlCommand only accepts 'SELECT'");}
-            else {
-                this.dbConnect.all(sqlCommand,params,(err,result) => {
-                    if (!err) {resolve(result);}
-                    else {resolve("dbGet: "+err.message);}
-                })
-            }});
+    async dbExecute(cmd, params = []) {
+        if (!this.connection) throw new Error(`Attempted database operation before establishing connection!`);
+
+        return new Promise((resolve, reject) => {
+            this.connection.run(cmd, params, (err) => {
+                if (err) reject(err);
+                resolve();
+            });
+        });
     }
 
-    async dbClose () {
-        await this.dbConnect.close();
+    async dbGet(cmd, params = []) {
+        if (!this.connection) throw new Error(`Attempted database operation before establishing connection!`);
+
+        return new Promise((resolve, reject) => {
+            this.connection.all(cmd, params, (err, rows) => {
+                if (err) reject(err);
+                resolve(rows);
+            });
+        });
+    }
+
+    dbClose() {
+        if (this.connection) this.connection.close();
     }
 }
 

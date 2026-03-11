@@ -71,24 +71,9 @@ const network_seed_data = {
     }
 };
 
-async function executeOrThrow(sql, params = []) {
-    const result = await manager.dbExecute(sql, params);
-    if (result !== "dbExecute: Success") {
-        throw new Error(result);
-    }
-}
-
-async function selectOrThrow(sql, params = []) {
-    const result = await manager.dbGet(sql, params);
-    if (typeof result === "string") {
-        throw new Error(result);
-    }
-    return result;
-}
-
 async function ensureHobbyId(hobbyName) {
-    await executeOrThrow("INSERT OR IGNORE INTO HobbyTable (HobbyName) VALUES (?);", [hobbyName]);
-    const rows = await selectOrThrow(
+    await manager.dbExecute("INSERT OR IGNORE INTO HobbyTable (HobbyName) VALUES (?);", [hobbyName]);
+    const rows = await manager.dbGet(
         "SELECT HobbyID FROM HobbyTable WHERE LOWER(HobbyName) = LOWER(?) LIMIT 1;",
         [hobbyName]
     );
@@ -97,13 +82,13 @@ async function ensureHobbyId(hobbyName) {
 
 async function seedNetworkingData() {
     for (const account of network_seed_data.accounts) {
-        await executeOrThrow(
+        await manager.dbExecute(
             "INSERT OR IGNORE INTO NetworkAccount (Username, Description) VALUES (?, ?);",
             [account.username, account.description]
         );
     }
 
-    const accountRows = await selectOrThrow("SELECT AccountID, Username FROM NetworkAccount;");
+    const accountRows = await manager.dbGet("SELECT AccountID, Username FROM NetworkAccount;");
     const accountMap = new Map(accountRows.map((row) => [row.Username, row.AccountID]));
 
     for (const [username, hobbies] of Object.entries(network_seed_data.accountHobbies)) {
@@ -113,7 +98,7 @@ async function seedNetworkingData() {
         for (const hobbyName of hobbies) {
             const hobbyId = await ensureHobbyId(hobbyName);
             if (!hobbyId) { continue; }
-            await executeOrThrow(
+            await manager.dbExecute(
                 "INSERT OR IGNORE INTO NetworkAccountHobby (AccountID, HobbyID) VALUES (?, ?);",
                 [accountId, hobbyId]
             );
@@ -122,20 +107,19 @@ async function seedNetworkingData() {
 }
 
 export async function initNetworkingStorage() {
-    await manager.establishConnection();
-    await executeOrThrow("PRAGMA foreign_keys = ON;");
-    await executeOrThrow(network_account_schema);
-    await executeOrThrow(network_account_hobby_schema);
+    await manager.dbExecute("PRAGMA foreign_keys = ON;");
+    await manager.dbExecute(network_account_schema);
+    await manager.dbExecute(network_account_hobby_schema);
 
     for (const indexStatement of network_indexes) {
-        await executeOrThrow(indexStatement);
+        await manager.dbExecute(indexStatement);
     }
 
     await seedNetworkingData();
 }
 
 export async function getNetworkingHobbies() {
-    const rows = await selectOrThrow(`
+    const rows = await manager.dbGet(`
         SELECT DISTINCT h.HobbyName
         FROM NetworkAccountHobby nah
         JOIN HobbyTable h ON h.HobbyID = nah.HobbyID
@@ -184,7 +168,7 @@ export async function searchNetworkingAccounts({ search = "", hobbies = [] } = {
     }
 
     const whereClause = filters.length > 0 ? `WHERE ${filters.join(" AND ")}` : "";
-    const rows = await selectOrThrow(`
+    const rows = await manager.dbGet(`
         SELECT
             a.AccountID,
             a.Username,
