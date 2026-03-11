@@ -26,13 +26,13 @@ function readFile(file_path) {
 describe("Get Quiz Endpoint", () => {
     let server;
 
-    beforeAll(async () => {
+    beforeAll((done) => {
         const public_directory = path.resolve("../public");
 
         server = createHTTPServer(public_directory);
         registerPOSTHandler("/getquiz", async (req, res) => { return quizGetHandler(req, res, quizPath = path.resolve("./quiz.json"))});
 
-        server.listen(config.PORT, config.URL, () => { });
+        server.listen(config.PORT, config.URL, () => { done(); });
     });
 
     test("Real POST requests", async () => {
