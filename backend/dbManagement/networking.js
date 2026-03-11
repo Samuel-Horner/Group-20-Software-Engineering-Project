@@ -1,3 +1,4 @@
+import hobby_set from "./hobby_set.js";
 import { manager } from "./index.js";
 
 const network_account_schema = `
@@ -66,18 +67,24 @@ const network_seed_data = {
         david_kim: ["Guitar", "Cycling", "Photography"],
         nina_patel: ["Baking", "Gardening", "Cooking"],
         alex_nguyen: ["Electronics", "Gaming", "3D Printing"],
-        hannah_lee: ["Cooking", "Baking", "Gardening"],
+        hannah_lee: ["Cooking", "Baking", "Gardening"],    // await manager.dbExecute("INSERT OR IGNORE INTO HobbyTable (HobbyName) VALUES (?);", [hobbyName]);
+    // const rows = await manager.dbGet(
+    //     "SELECT HobbyID FROM HobbyTable WHERE LOWER(HobbyName) = LOWER(?) LIMIT 1;",
+    //     [hobbyName]
+    // );
         owen_brown: ["Cycling", "Photography", "Gaming"]
     }
 };
 
 async function ensureHobbyId(hobbyName) {
-    await manager.dbExecute("INSERT OR IGNORE INTO HobbyTable (HobbyName) VALUES (?);", [hobbyName]);
-    const rows = await manager.dbGet(
-        "SELECT HobbyID FROM HobbyTable WHERE LOWER(HobbyName) = LOWER(?) LIMIT 1;",
-        [hobbyName]
-    );
-    return rows.length > 0 ? rows[0].HobbyID : null;
+    // await manager.dbExecute("INSERT OR IGNORE INTO HobbyTable (HobbyName) VALUES (?);", [hobbyName]);
+    // const rows = await manager.dbGet(
+    //     "SELECT HobbyID FROM HobbyTable WHERE LOWER(HobbyName) = LOWER(?) LIMIT 1;",
+    //     [hobbyName]
+    // );
+    
+    // return rows.length > 0 ? rows[0].HobbyID : null;
+    return hobby_set.add(hobbyName, manager);
 }
 
 async function seedNetworkingData() {
