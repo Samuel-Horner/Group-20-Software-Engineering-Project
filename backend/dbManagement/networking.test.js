@@ -100,6 +100,15 @@ describe("Networking DB", () => {
         expect(usernames).toContain("owen_brown");
     });
 
+    test("searchNetworkingAccounts works with non-array hobbies", async () => {
+        const rows = await networkingModule.searchNetworkingAccounts({ hobbies: "gAmInG" });
+        const usernames = rows.map((row) => row.username);
+
+        expect(usernames).toContain("marcus_johnson");
+        expect(usernames).toContain("alex_nguyen");
+        expect(usernames).toContain("owen_brown");
+    });
+
     test("searchNetworkingAccounts combines search and hobby filters", async () => {
         const rows = await networkingModule.searchNetworkingAccounts({
             search: "alex",

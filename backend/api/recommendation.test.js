@@ -81,13 +81,13 @@ describe("Reccomendation API", () => {
     describe("Quiz API", () => {
         let server;
 
-        beforeAll(async () => {
+        beforeAll((done) => {
             const public_directory = path.resolve("../public");
 
             server = createHTTPServer(public_directory);
             registerPOSTHandler("/api/quiz", quizAPIHandler);
 
-            server.listen(config.PORT, config.URL, () => { });
+            server.listen(config.PORT, config.URL, () => { done(); });
         });
 
         test("Real Post Request", async () => {
