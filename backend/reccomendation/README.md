@@ -10,3 +10,7 @@ See requirements.txt for the required python libraries, refer to the README.md a
 
 # Model prediction
 The file 'model_predictor.py' will be a background process initialized by the server in backend/index.js, and will run in the background, returning a prediction at runtime when it is called by getHobbyReccomdendation() in index.js.
+
+# Testing
+In the reccomendation directory, run:
+$pytest
