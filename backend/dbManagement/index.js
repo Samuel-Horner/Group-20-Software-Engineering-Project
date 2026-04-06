@@ -2,6 +2,7 @@
 import { DBManager } from "./DBManager.js";
 import training_set from "./training_set.js";
 import hobby_set from "./hobby_set.js";
+import quiz_responses from "./quiz_responses.js";
 import config from "../config.js";
 
 export const manager = new DBManager(config.DATABASE_PATH);
@@ -13,4 +14,6 @@ export async function init() {
     await hobby_set.init(manager);
 
     await training_set.init("./backend/data/training_set.csv", manager);
+
+    await quiz_responses.init("./backend/quiz.json", manager);
 }
