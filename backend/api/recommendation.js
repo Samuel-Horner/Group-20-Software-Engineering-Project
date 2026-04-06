@@ -1,6 +1,7 @@
-import { spawn } from 'child_process'
-import { errorHandler } from "../server/server.js"
-import { Recoverable } from 'repl';
+import { spawn } from 'child_process';
+import { errorHandler } from "../server/server.js";
+import { manager } from "../dbManagement/index.js";
+import quiz_responses from "../dbManagement/quiz_responses.js";
 
 // Initialize python process
 let process;
@@ -64,6 +65,7 @@ export function quizAPIHandler(req, res, recommendation = getHobbyRecommendation
         });
 
         req.on("end", async () => {
+            console.log(body);
             const payload = body ? JSON.parse(body) : {};
 
             const rawAnswers = Array.isArray(payload.answers) ? payload.answers : [];
@@ -74,19 +76,16 @@ export function quizAPIHandler(req, res, recommendation = getHobbyRecommendation
                 return resolve(); 
             }
 
-            // const hobby = await recommendation(answers);
+            const hobby = await recommendation(answers);
 
-            // res.setHeader("Content-Type", "application/json");
-            // res.writeHead(200).end(JSON.stringify({ hobby }));
+            res.setHeader("Content-Type", "application/json");
+            res.writeHead(200).end(JSON.stringify({ hobby }));
 
-            await recommendation(answers).then(hobby => {
-                res.setHeader("Content-Type", "application/json");
-                res.writeHead(200).end(JSON.stringify({ hobby }));
+            // Store response
+            // TODO: Get User ID
+            await quiz_responses.add(payload.userID === undefined ? null : payload.userID, answers, hobby, manager);
 
-                resolve();
-            }).catch(err => {
-                reject(err);
-            });
+            return resolve();
         });
 
         req.on("error", async (err) => {

@@ -96,6 +96,7 @@ components:
       additionalProperties: false
       required:
         - answers
+        - userID
       properties:
         answers:
           type: array
@@ -103,6 +104,9 @@ components:
             type: integer
             format: int32
           minItems: 1
+        userID:
+          type: integer
+          format: int32
     Recommendation:
       type: object
       additionalProperties: false

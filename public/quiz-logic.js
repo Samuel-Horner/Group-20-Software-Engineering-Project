@@ -131,11 +131,15 @@ function getAnswersFromForm(form) {
   return answers;
 }
 
-async function getHobbyRecommendation(answers) {
+async function getHobbyRecommendation(answers, userID) {
+  alert(answers)
   const response = await fetch("/api/quiz", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ answers }),
+    body: JSON.stringify({
+      "answers": answers,
+      "userID": userID, 
+    }),
   });
 
   if (!response.ok) {
@@ -152,7 +156,9 @@ formEl.addEventListener("submit", async (e) => {
 
   try {
     const answers = getAnswersFromForm(formEl);
-    const hobby = await getHobbyRecommendation(answers);
+    // TODO - get user ID
+    const userID = 1;
+    const hobby = await getHobbyRecommendation(answers, userID);
 
     localStorage.setItem("userHobby", hobby);
     document.cookie = `userHobby=${encodeURIComponent(hobby)}; path=/; max-age=86400`;
