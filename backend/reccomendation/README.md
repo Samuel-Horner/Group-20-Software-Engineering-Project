@@ -13,4 +13,4 @@ The file 'model_predictor.py' will be a background process initialized by the se
 
 # Testing
 In the reccomendation directory, run:
-$pytest
+$python -m pytest

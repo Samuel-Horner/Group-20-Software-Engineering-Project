@@ -31,4 +31,8 @@ jobs:
         run: npm ci
       - name: Run tests
         run: npm test
+      - name: Run python tests
+        run: |
+          cd recommendation
+          python -m pytest
 
