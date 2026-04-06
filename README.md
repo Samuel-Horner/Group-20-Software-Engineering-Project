@@ -9,12 +9,12 @@ http://127.0.0.1:8080/
 
 Important note:
 
-The recommender engine requires a set of dependencies listed in backend/dbManagement/reccomendation/requirements.txt. I would advise doing the following before running the server:
+The recommender engine requires a set of dependencies listed in backend/dbManagement/recommendation/requirements.txt. I would advise doing the following before running the server:
 
 ```
 python -m venv .venv
 source .venv/bin/activate
-pip install -r backend/dbManagement/reccomendation/requirements.txt
+pip install -r backend/dbManagement/recommendation/requirements.txt
 
 node backend/index.js
 ```

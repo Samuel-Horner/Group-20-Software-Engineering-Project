@@ -5,20 +5,20 @@ import { Recoverable } from 'repl';
 // Initialize python process
 let process;
 
-export function initReccomendationProcess(options = {}) {
-    process = spawn('python', ['backend/reccomendation/model_predictor.py'], options);
+export function initRecommendationProcess(options = {}) {
+    process = spawn('python', ['backend/recommendation/model_predictor.py'], options);
     process.stdout.setEncoding('utf-8');
 }
 
-export function killReccomendationProcess() {
+export function killRecommendationProcess() {
     process.kill();
 }
 
 // This function ONLY WORKS IF YOU RUN IT FROM ROOT
-// Example:   getHobbyReccomendation([1,4,1,2,4,2,3,3,1,2,4,5,5,4,2]);
+// Example:   getHobbyRecommendation([1,4,1,2,4,2,3,3,1,2,4,5,5,4,2]);
 // Returns: The probabilities of the inputs most likely classes in [probability, class] pairs 
 //         -> Example: [ [0.5, "Football"], [0.2, "Games"], ... ] 
-export async function getHobbyReccomendation(answers) {
+export async function getHobbyRecommendation(answers) {
     process.stdin.write(JSON.stringify(answers) + "\n");
     // Wait until the python script has resolved until we can return the prediction
     return new Promise((resolve, reject) => {
@@ -55,7 +55,7 @@ export async function getHobbyReccomendation(answers) {
     });
 }
 
-export function quizAPIHandler(req, res, reccomendation = getHobbyReccomendation) {
+export function quizAPIHandler(req, res, recommendation = getHobbyRecommendation) {
     return new Promise((resolve, reject) => {
         let body = "";
 
@@ -74,12 +74,12 @@ export function quizAPIHandler(req, res, reccomendation = getHobbyReccomendation
                 return resolve(); 
             }
 
-            // const hobby = await reccomendation(answers);
+            // const hobby = await recommendation(answers);
 
             // res.setHeader("Content-Type", "application/json");
             // res.writeHead(200).end(JSON.stringify({ hobby }));
 
-            await reccomendation(answers).then(hobby => {
+            await recommendation(answers).then(hobby => {
                 res.setHeader("Content-Type", "application/json");
                 res.writeHead(200).end(JSON.stringify({ hobby }));
 

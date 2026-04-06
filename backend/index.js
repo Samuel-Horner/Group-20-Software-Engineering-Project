@@ -2,7 +2,7 @@ import { createHTTPServer, registerPOSTHandler } from "./server/server.js";
 import config from "./config.js"
 
 import { init as dbInit} from "./dbManagement/index.js"
-import { initReccomendationProcess, quizAPIHandler } from "./api/recommendation.js";
+import { initRecommendationProcess, quizAPIHandler } from "./api/recommendation.js";
 import { quizGetHandler } from "./api/quiz.js";
 
 const server = createHTTPServer(config.PUBLIC);
@@ -11,7 +11,7 @@ const server = createHTTPServer(config.PUBLIC);
 dbInit();
 
 // Initialise recommender
-initReccomendationProcess();
+initRecommendationProcess();
 
 registerPOSTHandler("/getquiz", quizGetHandler);
 registerPOSTHandler("/api/quiz", quizAPIHandler);

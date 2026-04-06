@@ -12,7 +12,7 @@ def softmax(prob_distn: np.ndarray, temperature: float) -> np.ndarray:
 
 def input_is_valid(data, x)-> bool:
     if data["n_features_in"] != len(x):
-        err = "Input to hobby reccomendation has length {}, when length {} is needed".format(len(x), data["n_features_in"])
+        err = "Input to hobby recommendation has length {}, when length {} is needed".format(len(x), data["n_features_in"])
         sys.stderr.write(err)
         return False 
     if not (min(x) > 0 and max(x) <= 5):
@@ -40,7 +40,7 @@ def make_prediction(data, x: np.ndarray):
 
 # 1) Load weights into the neural network
 if __name__ == "__main__":
-    with open("backend/reccomendation/model.json", "r") as f:
+    with open("backend/recommendation/model.json", "r") as f:
         data = json.load(f)
 
         while True:
