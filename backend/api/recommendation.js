@@ -1,6 +1,7 @@
 import { spawn } from 'child_process';
+import fs from "fs";
+
 import { errorHandler } from "../server/server.js";
-import { manager } from "../dbManagement/index.js";
 import quiz_responses from "../dbManagement/quiz_responses.js";
 
 // Initialize python process
@@ -56,7 +57,7 @@ export async function getHobbyRecommendation(answers) {
     });
 }
 
-export function quizAPIHandler(req, res, recommendation = getHobbyRecommendation) {
+export function quizAPIHandler(req, res, manager, recommendation = getHobbyRecommendation) {
     return new Promise((resolve, reject) => {
         let body = "";
 
@@ -65,27 +66,28 @@ export function quizAPIHandler(req, res, recommendation = getHobbyRecommendation
         });
 
         req.on("end", async () => {
-            console.log(body);
             const payload = body ? JSON.parse(body) : {};
 
             const rawAnswers = Array.isArray(payload.answers) ? payload.answers : [];
             const answers = rawAnswers.map((value) => Number.parseInt(String(value), 10));
 
-            if (!answers.length || answers.some((value) => Number.isNaN(value))) { 
+            if (!answers.length || answers.some((value) => Number.isNaN(value))) {
                 errorHandler(res, 400);
-                return resolve(); 
+                return resolve();
             }
 
-            const hobby = await recommendation(answers);
+            await recommendation(answers).then(async hobby => {
+                await quiz_responses.add(payload.userID === undefined ? null : payload.userID, answers, hobby, manager);
 
-            res.setHeader("Content-Type", "application/json");
-            res.writeHead(200).end(JSON.stringify({ hobby }));
+                res.setHeader("Content-Type", "application/json");
+                res.writeHead(200).end(JSON.stringify({ hobby }));
 
-            // Store response
-            // TODO: Get User ID
-            await quiz_responses.add(payload.userID === undefined ? null : payload.userID, answers, hobby, manager);
+                return resolve();
+            }).catch(err => {
+                console.error(err);
+                return reject(err);
+            });
 
-            return resolve();
         });
 
         req.on("error", async (err) => {

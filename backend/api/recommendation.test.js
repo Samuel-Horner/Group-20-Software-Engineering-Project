@@ -2,9 +2,12 @@ import { afterAll, beforeAll, describe, jest } from "@jest/globals"
 
 import { spawn } from 'child_process'
 import path from "path"
+import fs from "fs";
 
 import { initRecommendationProcess, quizAPIHandler, getHobbyRecommendation, killRecommendationProcess } from "./recommendation";
 import { createHTTPServer, registerPOSTHandler } from "../server/server";
+import { DBManager } from "../dbManagement/DBManager";
+import quiz_responses from "../dbManagement/quiz_responses";
 import config from "../config"
 
 async function postURL(url, body = {}) {
@@ -59,7 +62,7 @@ describe("Init Reccomendaton Process", () => {
 describe("Recommendation API", () => {
     // Needed to run tests
     beforeAll(() => {
-        initRecommendationProcess(options = { "cwd": "../" });
+        initRecommendationProcess({ "cwd": "../" });
     });
 
     // test("Hobby Recommendation", async () => {
@@ -80,14 +83,19 @@ describe("Recommendation API", () => {
 
     describe("Quiz API", () => {
         let server;
+        const manager = new DBManager("./data/recommendation_api.test.db");
 
         beforeAll((done) => {
             const public_directory = path.resolve("../public");
 
-            server = createHTTPServer(public_directory);
-            registerPOSTHandler("/api/quiz", quizAPIHandler);
+            manager.establishConnection().then(() => {
+                quiz_responses.init("quiz.json", manager).then(() => {
+                    server = createHTTPServer(public_directory);
+                    registerPOSTHandler("/api/quiz", (req, res) => quizAPIHandler(req, res, manager));
 
-            server.listen(config.PORT, config.URL, () => { done(); });
+                    server.listen(config.PORT, config.URL, () => { done(); });
+                });
+            });
         });
 
         test("Real Post Request", async () => {
@@ -97,7 +105,8 @@ describe("Recommendation API", () => {
             await expect(postURL("api/quiz", { answers: [1] })).resolves.toBe(500);
 
             const sample1 = [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4];
-            await expect(postURL("api/quiz", { answers: [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4] })).resolves.toEqual({ "hobby": await getRecommendation(sample1) });
+            await expect(postURL("api/quiz", { answers: [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4], userID: 1 })).resolves.toEqual({ "hobby": await getRecommendation(sample1) });
+            await expect(postURL("api/quiz", { answers: [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4], userID: undefined })).resolves.toEqual({ "hobby": await getRecommendation(sample1) });
         });
 
         test("Handler", async () => {
@@ -133,7 +142,7 @@ describe("Recommendation API", () => {
                 }
 
                 let internal_err = null;
-                quizAPIHandler(req, res, recommendation).catch(err => { internal_err = err });
+                quizAPIHandler(req, res, manager, recommendation).catch(err => { internal_err = err });
 
                 if (err == null) {
                     await req.end_fn();
@@ -155,18 +164,20 @@ describe("Recommendation API", () => {
             await expect(mockQuizAPIHandler("")).resolves.toBe(400);
 
             const sample1 = [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4];
-            await expect(mockQuizAPIHandler({"answers": sample1})).resolves.toEqual(JSON.stringify({ "hobby": await getRecommendation(sample1) }));
-            await expect(mockQuizAPIHandler(JSON.stringify({"answers": sample1}))).resolves.toEqual(JSON.stringify({ "hobby": await getRecommendation(sample1) }));
+            await expect(mockQuizAPIHandler({"answers": sample1, "userID": 1})).resolves.toEqual(JSON.stringify({ "hobby": await getRecommendation(sample1) }));
+            await expect(mockQuizAPIHandler(JSON.stringify({"answers": sample1, "userID": 1}))).resolves.toEqual(JSON.stringify({ "hobby": await getRecommendation(sample1) }));
 
             await expect(mockQuizAPIHandler({}, err = new Error("Test"))).rejects.toThrow("Test");
-            await expect(mockQuizAPIHandler({"answers": sample1}, null, async (answers) => {
+            await expect(mockQuizAPIHandler({"answers": sample1, "userID": 1}, null, async (answers) => {
                 throw new Error("Recommendation engine not implemented"); 
             })).rejects.toThrow("Recommendation engine not implemented");
 
         });
 
         afterAll(async () => {
+            manager.dbClose();
             server.close();
+            fs.rmSync("data/recommendation_api.test.db");
         });
     });
 
