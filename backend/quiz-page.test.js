@@ -122,6 +122,13 @@ describe("quiz page logic", () => {
   });
 
   test("submits answers and redirects when recommendation succeeds", async () => {
+    const recommendationPayload = [
+      [0.71, "video games"],
+      [0.12, "football"],
+    ];
+    const expectedSerialized = JSON.stringify(recommendationPayload);
+    const expectedEncoded = encodeURIComponent(expectedSerialized);
+
     const harness = createHarness({
       formValues: ["1", "2"],
       fetchImpl: async (url) => {
@@ -129,7 +136,7 @@ describe("quiz page logic", () => {
           return {
             ok: true,
             status: 200,
-            json: async () => ({ hobby: "Reading" }),
+            json: async () => ({ hobby: recommendationPayload }),
           };
         }
         throw new Error("Unexpected URL");
@@ -145,9 +152,9 @@ describe("quiz page logic", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ answers: [1, 2] }),
     });
-    expect(harness.localStorage.setItem).toHaveBeenCalledWith("userHobby", "Reading");
-    expect(harness.document.cookie).toContain("userHobby=Reading");
-    expect(harness.window.location.href).toBe("recommendation.html?hobby=Reading");
+    expect(harness.localStorage.setItem).toHaveBeenCalledWith("userHobby", expectedSerialized);
+    expect(harness.document.cookie).toContain(`userHobby=${expectedEncoded}`);
+    expect(harness.window.location.href).toBe(`recommendation.html?hobby=${expectedEncoded}`);
   });
 
   test("shows alert when quiz API returns an error", async () => {
@@ -168,6 +175,6 @@ describe("quiz page logic", () => {
     const event = { preventDefault: jest.fn() };
     await harness.runSubmit(event);
 
-    expect(harness.alert).toHaveBeenCalledWith("Recommendation engine not implemented");
+    expect(harness.alert).toHaveBeenCalledWith("Invalid input for recommendation page.");
   });
 });
