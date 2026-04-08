@@ -109,23 +109,15 @@ describe("Server Tests", () => {
         });
 
         test("Post Request", async () => {
-            expect(registerPOSTHandler("/test", async (req, res) => {
-                let body = "";
-
-                req.on("data", (chunk) => {
-                    body += chunk;
-                });
-
-                req.on("end", async () => {
-                    res.writeHead(200).end(JSON.stringify(body));
-                });
+            expect(registerPOSTHandler("/test", async (req, res, body) => {
+                res.writeHead(200).end(JSON.stringify(body));
             })).toBeUndefined();
 
             await expect(postURL("")).resolves.toBe(404);
-            await expect(postURL("test")).resolves.toBe(`{}`);
-            await expect(postURL("test", { "test": 123 })).resolves.toBe(`{"test":123}`);
+            await expect(postURL("test")).resolves.toEqual({});
+            await expect(postURL("test", { "test": 123 })).resolves.toEqual({"test":123});
 
-            expect(() => { registerPOSTHandler("/test", (req, res) => { }); }).toThrow("Url already registered.");
+            expect(() => { registerPOSTHandler("/test", (req, res, body) => { }); }).toThrow("Url already registered.");
 
             expect(releasePOSTHandler("/test")).toBeUndefined();
             expect(() => { releasePOSTHandler("/test"); }).toThrow("Url not registered.");

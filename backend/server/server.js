@@ -72,26 +72,31 @@ export async function getHandler(public_directory, req, res, _URL = URL) {
 let endpoints = {};
 
 async function postHandler(req, res) {
-    console.log(`Recieved POST request for resource ${req.url}.`);
-    if (req.url in endpoints) {
-        const body = await new Promise((resolve, reject) => {                       // Added
-            let raw = '';                                                           //
-            req.on('data', chunk => raw += chunk.toString());                       //
-            req.on('end', () => {                                                   //
-                try { resolve(JSON.parse(raw)); }                                   //
-                catch { resolve({}); }                                              //
-            });                                                                     //
-            req.on('error', reject);                                                //
-        });  
+    const pathname = new URL(req.url, qualified_url).pathname;
+    console.log(`Recieved POST request for resource ${pathname}.`);
 
-        await endpoints[req.url](req, res, body).catch(err => {
+    if (pathname in endpoints) {
+        const body = await new Promise((resolve, reject) => {
+            let raw = "";
+            req.on('data', chunk => raw += chunk.toString());
+            req.on('end', () => {
+                try { return resolve(JSON.parse(raw)); }
+                catch { return resolve({}); }
+            });
+            req.on('error', () => {
+                return reject(null);
+            });
+        });
+
+        if (body == null) { return errorHandler(res, 400); }
+
+        await endpoints[pathname](req, res, body).catch(err => {
             console.error(err);
-            errorHandler(res, 500);
+            return errorHandler(res, 500);
         });
     } else {
-        //console.error(`Error, no POST handler exists for resource ${req.url}.`);
-        console.error(`Error, no POST handler exists for resource ${pathname}.`);   // Added
-        errorHandler(res, 404);
+        console.error(`Error, no POST handler exists for resource ${pathname}.`);
+        return errorHandler(res, 404);
     }
 }
 
@@ -127,13 +132,13 @@ export function createHTTPServer(public_directory) {
                 await postHandler(req, res);
                 break;
 
-            case "OPTIONS":                                                             // Added
-                res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");    //
-                res.setHeader("Access-Control-Allow-Headers", "Content-Type");          //
-                res.writeHead(204);                                                     //
-                res.end();                                                              //
-                break;                                                                  //
-                    
+            case "OPTIONS":
+                res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+                res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+                res.writeHead(204);
+                res.end();
+                break;
+
             default:
                 await errorHandler(res, 405);
                 break;
