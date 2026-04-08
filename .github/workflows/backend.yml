@@ -18,8 +18,21 @@ jobs:
         with:
           node-version: 'latest'
           check-latest: true
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: 'pip'
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r recommendation/requirements.txt
       - name: Install dependencies
         run: npm ci
       - name: Run tests
         run: npm test
+      - name: Run python tests
+        run: |
+          cd recommendation
+          python -m pytest
 

@@ -58,18 +58,100 @@
             transform: translateY(-2px);
             box-shadow: var(--shadow-lg);
         }
+
+        .scrolly-card {
+            max-width: 720px;
+            margin: 0 auto;
+            background: var(--background);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            padding: 36px 32px;
+            text-align: center;
+            /* animation: scroller 4s ease-in; */
+        }
+
+        @keyframes scroller {
+            from {opacity: 0;max-width: 500px;}
+            to {opacity: 1; max-width: 720px;}
+        }
+
+        .scrolly-card.in-view {
+            animation: scroller 5s ease-out;
+        }
+        
     </style>
 </head>
 <body>
-    <div class="rec-card">
+    <div class="rec-card" style="margin-bottom: 10rem;">
         <h1 class="rec-title">Your Recommended Hobby</h1>
         <p>Based on your quiz answers, we think you'll enjoy:</p>
         <div id="hobbyName" class="rec-hobby">Loading...</div>
+        <p id="description"></p>
+    </div>
+
+    <!-- Information on the hobby -->
+    <div class="scrolly-card animate">
+        <h1 id="scrolly-title" class="rec-title">Results</h1>
+        <!-- <p id="scrolly-description"></p>  -->
+        <p id="scrolly-description">Your top 5 reccomended hobbies were ...</p> 
+
+        <div id="scrolly-list"></div>
+        
         <div class="rec-actions">
             <a class="cta-button" href="data_input.html">Retake Quiz</a>
-            <a class="secondary-btn" href="index.html">Back to Home</a>
-        </div>
+            <a class="secondary-btn" href="index_new.html">Back to Home</a>
+        </div> 
     </div>
+    
+    <script>
+        // Constants
+        const N_RECOMMENDATIONS = 5;
+        const DESCRIPTIONS = {
+            "reading": "Reading is the activity of comprehending written language contained within resources such as books, magazines and newspapers.\nThe act of reading is a great way to learn about interesting and fun stories as a pastime by reading fiction-books, or to learn about new skills, technologies, sciences, and more from educational non-fiction books.\nBook clubs are a great way to meet other people who enjoy this hobby. Reading can also be a comparatively inexpensive hobby depending on the books you read, as libraries are a crucial resource for using books without the high price of certain books getting in the way.",
+            "video games": "Gaming refers to the activity of playing video games or board games.\nConventions, and competitive tournaments can be used to meet fellow ‘gamers’ in person, while online-video games can let people play video games from around the world through an internet connection.\nBut while gaming can be a fun activity, it can also be expensive due to the high costs of gaming hardware and the video games themselves.",
+            "board games": "Gaming refers to the activity of playing video games or board games.\nConventions, and competitive tournaments can be used to meet fellow ‘gamers’ in person, while online-video games can let people play video games from around the world through an internet connection.\nBut while gaming can be a fun activity, it can also be expensive due to the high costs of gaming hardware and the video games themselves.",
+            "running": "Running is a hobby involving jogging/running between destinations. Marathons, racing, or just jogging in natural areas can be a healthy and enjoyable activity for people",
+            "playing guitar": "Playing instruments is a fun, useful and impressive skill. Although it can depend on the cost, as you may require music lessons and/or an expensive instrument such as a piano.",
+
+            "tennis": "Sports is a wide range of games involving physical exertion, which makes it a healthy hobby to pick up.\nExamples of sports are football, tennis, rugby, basketball, cricket.",
+            "cooking": "Cooking is the activity of creating food. Recipe books are a good way to get started, as they provide step-by-step examples of how to make meals.\nYeah, that’s about it.",
+            "sports":  "Sports is a wide range of games involving physical exertion, which makes it a healthy hobby to pick up.\nExamples of sports are football, tennis, rugby, basketball, cricket.",
+            "football": "Sports is a wide range of games involving physical exertion, which makes it a healthy hobby to pick up.\nExamples of sports are football, tennis, rugby, basketball, cricket.",
+            "photography": "Photography is a hobby involving taking pictures/video footage with a camera. For example, nature photographers will take pictures of wildlife.\nIt is a fun and charming hobby, and nowadays it is easy to get into as modern phones have quite decent cameras.\nBut more expensive cameras will always be useful for more advanced hobbiests, as they provide higher definition images and zoom",
+            "singing": "Signing involves saying words in a melodic way, particularly to a 'song'.",
+            "piano":  "Playing instruments is a fun, useful and impressive skill. Although it can depend on the cost, as you may require music lessons and/or an expensive instrument such as a piano.",
+            "cricket": "Sports is a wide range of games involving physical exertion, which makes it a healthy hobby to pick up.\nExamples of sports are football, tennis, rugby, basketball, cricket.",
+            "swimming": "Swimming involves moving about in liquids, usually water, like a fish. It is also a healthy, active activity",
+            "martial arts": "Martial arts, such as karati, judo and kickboxing are a range of combat practices used for self-defence and fighting.\nGood if you want to punch and/or hit things.",
+            "paddle" : "Padel is a racquet sport that can be described as a mixture of squash and tennis.",
+            "basketball": "Sports is a wide range of games involving physical exertion, which makes it a healthy hobby to pick up.\nExamples of sports are football, tennis, rugby, basketball, cricket.",
+            "any outdoor activity": "Outdoor activities such as scuba diving, hiking and camping, are healthy ways to excersize and enjoy nature/ explore the world.",
+            "scuba diving": "Scuba diving involves swimming underwater, but you have a 'scuba suit' allowing you to breathe underwater.",
+            "esports":  "Gaming refers to the activity of playing video games or board games.\nConventions, and competitive tournaments can be used to meet fellow ‘gamers’ in person, while online-video games can let people play video games from around the world through an internet connection.\nBut while gaming can be a fun activity, it can also be expensive due to the high costs of gaming hardware and the video games themselves.",
+            "sightseeing": "Outdoor activities such as scuba diving, hiking and camping, are healthy ways to excersize and enjoy nature/ explore the world.",
+            "hiking": "Outdoor activities such as scuba diving, hiking and camping, are healthy ways to excersize and enjoy nature/ explore the world.",
+            "camping": "Outdoor activities such as scuba diving, hiking and camping, are healthy ways to excersize and enjoy nature/ explore the world.",
+            "exercising": "Exercising involves physical activities such as running, pull ups, weight lifting, etc. It is common to exercize at gyms, which are places containing training equipment like treadmills.",
+            "stocks": "Stocks involve investing money into the stock market and predicting trends. It can be a very risky way to earn money due to the unpredictable nature of the stock market.",
+            "painting": "Artistic hobbies such as painting, handcrafting and crochet involve creating things.\nPainting involves putting colours on paper, handcrafting involves making objects manually, crochet involves creating textiles by threading loops of yarn/ other materials.",
+            "skiing": "Outdoor activities such as scuba diving, hiking and camping, are healthy ways to excersize and enjoy nature/ explore the world.",
+            "working out": "Working out involves physical activities such as running, pull ups, weight lifting, etc. It is common to exercize at gyms, which are places containing training equipment like treadmills.",
+            "rock climbing": "Outdoor activities such as scuba diving, hiking and camping, are healthy ways to excersize and enjoy nature/ explore the world.",
+            "pilates": "Pilates is a strength and flexibility workout involving exersizes that focus on balance and posture.\nIt is healthy and can be relaxing.",
+            "horse riding": "Horse riding involves driving a horse around like a car.",
+            "crochet":  "Artistic hobbies such as painting, handcrafting and crochet involve creating things.\nPainting involves putting colours on paper, handcrafting involves making objects manually, crochet involves creating textiles by threading loops of yarn/ other materials.",
+            "handcrafting":  "Artistic hobbies such as painting, handcrafting and crochet involve creating things.\nPainting involves putting colours on paper, handcrafting involves making objects manually, crochet involves creating textiles by threading loops of yarn/ other materials.",
+            "walks": "Running is a hobby involving jogging/running between destinations. Marathons, racing, or just jogging in natural areas can be a healthy and enjoyable activity for people.\nWalking is like running, but you move slower.",
+            "skate": "Skateboarding involves moving around via a wooden plank with wheels on it, and performing wicked and/or radical tricks.",
+            "rave": "Raves are social events where people dance to modern electronic music.",
+            "playing violin": "Playing instruments is a fun, useful and impressive skill. Although it can depend on the cost, as you may require music lessons and/or an expensive instrument such as a piano.",
+            "watching movies": "Watching movies is a fun way to spend an hour or two, by sitting down and watching images flash by in succession such that it appears like it is moving.\nThat's why it is called a movie.",
+            "volleyball": "Sports is a wide range of games involving physical exertion, which makes it a healthy hobby to pick up.\nExamples of sports are football, tennis, rugby, basketball, cricket.",
+            "weightlifting": "Exercising involves physical activities such as running, pull ups, weight lifting, etc. It is common to exercize at gyms, which are places containing training equipment like treadmills.",
+            "learning spanish": "Learning languages lets you communicate with people who only speak that language. This is also very useful for taking holidays in different locations."
+        }
+    </script>
+
 
     <script>
         function getCookie(name) {
@@ -111,12 +193,51 @@
         if (!storedHobby) {
             storedHobby = getCookie("userHobby");
         }
+        const hobbyNames = storedHobby || "No recommendation found. Please retake the quiz.";
+        console.log("hobby names:", hobbyNames);
 
-        const hobbyName = storedHobby || "No recommendation found. Please retake the quiz.";
 
         const hobbyEl = document.getElementById("hobbyName");
+        let _hobbyNames = JSON.parse(hobbyNames);
         if (hobbyEl) {
-            hobbyEl.textContent = hobbyName;
+            let bestHobby = _hobbyNames[0][1];
+
+            hobbyEl.textContent = bestHobby;
+        // The description for the chosen hobby
+        document.getElementById("description").innerHTML = DESCRIPTIONS[_hobbyNames[0][1]] || "A description for this hobby has not been provided. Your guess is as good as mine.";
+        }
+
+        //-----------------------------------------------------------
+
+        // THE RESULTS PANEL
+        let descr = `Your top ${N_RECOMMENDATIONS} reccomended hobbies were:`
+        document.getElementById("scrolly-description").innerHTML = "";
+
+        // Adds 'in-view' attribute to the class to see if it is in view.
+        document.addEventListener("DOMContentLoaded", () => {
+            let intObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                    }
+                })
+            });
+            // Add observer to each element with the .animate class 
+            let animElems = document.querySelectorAll(".animate");
+            animElems.forEach( (elem) => intObserver.observe(elem));
+        });
+
+        // Update the description and appearence of the webpage based on the reccomended hobby
+        for (let i=0; i<N_RECOMMENDATIONS; i++) {
+            const p = Math.round(_hobbyNames[i][0]*10_000)/100;
+            let e1 = document.createElement("h1");
+            e1.className = "rec-hobby";
+            e1.innerHTML = _hobbyNames[i][1];
+            let e2 = document.createElement("p");
+            e2.innerHTML = `With a confidence of ${p}%`;
+
+            document.getElementById("scrolly-list").appendChild(e1);
+            document.getElementById("scrolly-list").appendChild(e2);
         }
     </script>
     <script src="sidebar.js"></script>
