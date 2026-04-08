@@ -92,11 +92,11 @@ describe("Server Tests", () => {
         });
     });
 
-    describe("Non-Verbose Server Module", () => {
+    describe("Server Module", () => {
         let server;
-        beforeAll(async () => {
+        beforeAll((done) => {
             server = createHTTPServer(public_directory);
-            server.listen(config.PORT, config.URL, () => { });
+            server.listen(config.PORT, config.URL, () => { done(); });
         });
 
         // Public Interface

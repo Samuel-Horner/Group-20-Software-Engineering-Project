@@ -73,10 +73,7 @@ let endpoints = {};
 
 async function postHandler(req, res) {
     console.log(`Recieved POST request for resource ${req.url}.`);
-    const pathname = new URL(req.url, qualified_url).pathname;                      // Added
-    //if (req.url in endpoints) {
-    if (pathname in endpoints) {                                                    // Added
-        //endpoints[req.url](req, res);
+    if (req.url in endpoints) {
         const body = await new Promise((resolve, reject) => {                       // Added
             let raw = '';                                                           //
             req.on('data', chunk => raw += chunk.toString());                       //
@@ -85,8 +82,12 @@ async function postHandler(req, res) {
                 catch { resolve({}); }                                              //
             });                                                                     //
             req.on('error', reject);                                                //
-        });                                                                         //
-        endpoints[pathname](req, res, body);                                        //
+        });  
+
+        await endpoints[req.url](req, res, body).catch(err => {
+            console.error(err);
+            errorHandler(res, 500);
+        });
     } else {
         //console.error(`Error, no POST handler exists for resource ${req.url}.`);
         console.error(`Error, no POST handler exists for resource ${pathname}.`);   // Added
@@ -108,9 +109,9 @@ export function releasePOSTHandler(url) {
     delete endpoints[url];
 }
 
-export async function errorHandler(res, code) {
+export async function errorHandler(res, code, message = undefined) {
     console.error(`HTTP Error ${code}`);
-    res.writeHead(code).end();
+    res.writeHead(code).end(message);
     return code;
 }
 

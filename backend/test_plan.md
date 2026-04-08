@@ -55,7 +55,7 @@ Test plans (Non-complete since not all requirements have been designed):
 | --- | --- |
 | R0  | Start server, connect via browser. Create account, attempt to use all types of invalid password / username, use valid username / password. Perform some state bearing action, i.e. submitting quiz. Reload the page to verify if state persists. Sign out and attempt to re-sign in using all types of invalid username / password, then use valid username / password. Delete account, fail security check, retry and pass security check. |
 | R1 | Attempt to sign in to an account, use invalid password. Attempt to perform actions that the current session is not validated to perform, i.e. sending delete account requests for other accounts. |
-| R2 | Submit quiz, recieve reccomendations. User evaluation needed for recomendation validity. |
+| R2 | Submit quiz, recieve recommendations. User evaluation needed for recomendation validity. |
 | R4 | Submit incomplete quiz, complete quiz, submit quiz. |
 | R5 | |
 | R6 | |

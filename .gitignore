@@ -1,2 +1,4 @@
 node_modules
 backend/coverage
+__pycache__
+.pytest_cache
