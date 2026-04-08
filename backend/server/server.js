@@ -73,10 +73,23 @@ let endpoints = {};
 
 async function postHandler(req, res) {
     console.log(`Recieved POST request for resource ${req.url}.`);
-    if (req.url in endpoints) {
-        endpoints[req.url](req, res);
+    const pathname = new URL(req.url, qualified_url).pathname;                      // Added
+    //if (req.url in endpoints) {
+    if (pathname in endpoints) {                                                    // Added
+        //endpoints[req.url](req, res);
+        const body = await new Promise((resolve, reject) => {                       // Added
+            let raw = '';                                                           //
+            req.on('data', chunk => raw += chunk.toString());                       //
+            req.on('end', () => {                                                   //
+                try { resolve(JSON.parse(raw)); }                                   //
+                catch { resolve({}); }                                              //
+            });                                                                     //
+            req.on('error', reject);                                                //
+        });                                                                         //
+        endpoints[pathname](req, res, body);                                        //
     } else {
-        console.error(`Error, no POST handler exists for resource ${req.url}.`);
+        //console.error(`Error, no POST handler exists for resource ${req.url}.`);
+        console.error(`Error, no POST handler exists for resource ${pathname}.`);   // Added
         errorHandler(res, 404);
     }
 }
@@ -112,6 +125,14 @@ export function createHTTPServer(public_directory) {
             case "POST":
                 await postHandler(req, res);
                 break;
+
+            case "OPTIONS":                                                             // Added
+                res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");    //
+                res.setHeader("Access-Control-Allow-Headers", "Content-Type");          //
+                res.writeHead(204);                                                     //
+                res.end();                                                              //
+                break;                                                                  //
+                    
             default:
                 await errorHandler(res, 405);
                 break;

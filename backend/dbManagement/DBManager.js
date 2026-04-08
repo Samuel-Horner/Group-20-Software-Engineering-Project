@@ -40,7 +40,7 @@ export class DBManager {
         });
     }
 
-    dbClose() {
+    async dbClose() {
         if (this.connection) this.connection.close();
     }
 }

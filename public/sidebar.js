@@ -60,9 +60,8 @@
     accountTitle.textContent = 'Account';
     accountSection.appendChild(accountTitle);
 
-    // TODO: update href to login page once ready
     var loginBtn = document.createElement('a');
-    loginBtn.href = '#';
+    loginBtn.href = 'accountprofile.html';
     loginBtn.className = 'settings-login-btn';
     loginBtn.textContent = 'Log In';
 
