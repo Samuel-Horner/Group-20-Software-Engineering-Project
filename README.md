@@ -19,6 +19,12 @@ pip install -r backend/dbManagement/recommendation/requirements.txt
 node backend/index.js
 ```
 
+You may also need to install the node.js dependences beforehand.
+```
+cd backend
+npm install
+```
+
 Run backend tests via
 ```
 cd backend

@@ -3,6 +3,9 @@ const quizTitleEl = document.getElementById("quizTitle");
 const quizDescriptionEl = document.getElementById("quizDescription");
 const quizQuestionsEl = document.getElementById("quizQuestions");
 const quizErrorEl = document.getElementById("quizError");
+const hobbyList = document.getElementById("hobbyList");
+const hobbyMaskInput = document.getElementById("hobbyMaskInput");
+
 
 function escapeHtml(str) {
   return String(str)
@@ -131,11 +134,11 @@ function getAnswersFromForm(form) {
   return answers;
 }
 
-async function getHobbyRecommendation(answers) {
+async function getHobbyRecommendation(answers, maskedHobbies) {
   const response = await fetch("/api/quiz", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ answers }),
+    body: JSON.stringify({ answers, maskedHobbies }),
   });
 
   if (!response.ok) {
@@ -152,7 +155,8 @@ formEl.addEventListener("submit", async (e) => {
 
   try {
     const answers = getAnswersFromForm(formEl);
-    const hobby = await getHobbyRecommendation(answers);
+    const maskedHobbies = [hobbyMaskInput.value]; // you should be able to mask multiple hobbies, not just one
+    const hobby = await getHobbyRecommendation(answers, maskedHobbies);
 
     localStorage.setItem("userHobby", hobby);
     document.cookie = `userHobby=${encodeURIComponent(hobby)}; path=/; max-age=86400`;
@@ -167,9 +171,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     const quiz = await fetchQuiz();
     renderQuiz(quiz);
+    await renderHobbyList(hobbyList);
   } catch (err) {
     console.error("Quiz load error:", err);
     quizErrorEl.textContent = err?.message || "Failed to load quiz";
     quizErrorEl.style.display = "block";
   }
 });
+
+async function fetchHobbies() {
+    try {
+      const res = await fetch("/gethobbies", {method: "POST"});
+      return await res.json();
+    }catch (err) {
+      console.error("Hobby load error:", err)
+    }
+}
+
+async function renderHobbyList(hobbyList) {
+  // Get hobbys
+  let hobbies = await fetchHobbies();
+
+  // Create the datalist.
+  for (const h of hobbies) {
+    hobbyList.innerHTML += `<option>${h}</option>`;
+  }
+}

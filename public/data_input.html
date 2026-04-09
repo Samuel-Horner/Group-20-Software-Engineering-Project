@@ -150,13 +150,21 @@
       <div class="logo">Logo</div>
     </div>
   </nav>
-
+  
   <main class="container quiz-page">
     <header class="quiz-header">
       <h1 id="quizTitle">Loading quiz...</h1>
       <p id="quizDescription"></p>
       <div id="quizError" class="quiz-error"></div>
     </header>
+
+  <!-- Dropdown box for label masking-->
+
+    <div class="question-box" style="text-align: center; background: var(--accent-color)">
+      <label for="hobbyMaskInput" class="scale-label" style="color: var(--text-dark)">List your current hobbies</label>
+      <input type="text" id="hobbyMaskInput" name="hobbyMaskInput" list="hobbyList"/>
+      <datalist id="hobbyList"></datalist>
+    </div>
 
     <form id="quizForm" class="quiz-scroll-area">
       <div id="quizQuestions"></div>

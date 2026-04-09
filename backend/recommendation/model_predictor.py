@@ -22,7 +22,7 @@ def input_is_valid(data, x)-> bool:
     return True
             
 
-def make_prediction(data, x: np.ndarray):        
+def make_prediction(data, x: np.ndarray, mask):        
     model = MLPClassifier(max_iter=10_000, hidden_layer_sizes= data["hidden_layers"], random_state=1, activation='logistic',solver='adam')
     
     # Just used to handle assigning dimensions to the neural network, not for actual training
@@ -33,8 +33,20 @@ def make_prediction(data, x: np.ndarray):
     model.coefs_ = [np.array(w) for w in data["network"]["weights"] ] # convert back to numpy arrays
     model.intercepts_ = [np.array(b) for b in data["network"]["biases"] ]
 
-    prediction = softmax( model.predict_proba([x])[0], 5.0)
 
+    ## Do the masking ##
+    # This approach will be to set the masked predictions to the lowest predicted score, so it's still a probability distribution.
+    y_hat = model.predict_proba([x])[0]
+    y_min= np.min(y_hat)
+
+    y_masked = np.zeros(shape=y_hat.shape)
+    for i in range(len(data["classes"])):
+        if data["classes"][i] in mask: # Could be more efficient, but its just micro-optimisation at that point.
+            y_masked[i] = y_min
+        else:
+            y_masked[i] = y_hat[i]
+
+    prediction = softmax(y_masked, 5.0)
     return prediction
 
 
@@ -45,13 +57,14 @@ if __name__ == "__main__":
 
         while True:
             x_raw = input() # Blocks on process.stdin until receives an input, with \n as a deliminator between requests in utf-8
-            
-            x = np.array( json.loads(x_raw))
+
+            mask = json.loads(x_raw)["mask"]
+            x = np.array( json.loads(x_raw)["answers"])
 
             # Check if input is the correct size
             if not input_is_valid(data, x):
                 continue
 
-            prediction = make_prediction(data, x)
+            prediction = make_prediction(data, x, mask)
 
-            print( json.dumps({"classes": data["classes"] , "prediction": list(prediction) }) ) # Return the prediction to the caller
+            print( json.dumps({"classes": data["classes"] , "prediction": list(prediction), "mask": mask}) ) # Return the prediction to the caller
