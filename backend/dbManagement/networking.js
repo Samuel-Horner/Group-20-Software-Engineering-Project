@@ -1,4 +1,4 @@
-import { manager } from "./index.js";
+import hobby_set from "./hobby_set.js";
 
 const network_account_schema = `
 CREATE TABLE IF NOT EXISTS NetworkAccount (
@@ -71,16 +71,9 @@ const network_seed_data = {
     }
 };
 
-async function ensureHobbyId(hobbyName) {
-    await manager.dbExecute("INSERT OR IGNORE INTO HobbyTable (HobbyName) VALUES (?);", [hobbyName]);
-    const rows = await manager.dbGet(
-        "SELECT HobbyID FROM HobbyTable WHERE LOWER(HobbyName) = LOWER(?) LIMIT 1;",
-        [hobbyName]
-    );
-    return rows.length > 0 ? rows[0].HobbyID : null;
-}
-
-async function seedNetworkingData() {
+// Seeds the networking tables with demo account data. 
+// Requires HobbyTable and NetworkAccount/NetworkAccountHobby tables being initialised.
+export async function seed(manager) {
     for (const account of network_seed_data.accounts) {
         await manager.dbExecute(
             "INSERT OR IGNORE INTO NetworkAccount (Username, Description) VALUES (?, ?);",
@@ -96,8 +89,7 @@ async function seedNetworkingData() {
         if (!accountId) { continue; }
 
         for (const hobbyName of hobbies) {
-            const hobbyId = await ensureHobbyId(hobbyName);
-            if (!hobbyId) { continue; }
+            const hobbyId = await hobby_set.add(hobbyName, manager);
             await manager.dbExecute(
                 "INSERT OR IGNORE INTO NetworkAccountHobby (AccountID, HobbyID) VALUES (?, ?);",
                 [accountId, hobbyId]
@@ -106,19 +98,8 @@ async function seedNetworkingData() {
     }
 }
 
-export async function initNetworkingStorage() {
-    await manager.dbExecute("PRAGMA foreign_keys = ON;");
-    await manager.dbExecute(network_account_schema);
-    await manager.dbExecute(network_account_hobby_schema);
 
-    for (const indexStatement of network_indexes) {
-        await manager.dbExecute(indexStatement);
-    }
-
-    await seedNetworkingData();
-}
-
-export async function getNetworkingHobbies() {
+export async function getHobbies(manager) {
     const rows = await manager.dbGet(`
         SELECT DISTINCT h.HobbyName
         FROM NetworkAccountHobby nah
@@ -128,7 +109,10 @@ export async function getNetworkingHobbies() {
     return rows.map((row) => row.HobbyName);
 }
 
-export async function searchNetworkingAccounts({ search = "", hobbies = [] } = {}) {
+
+//Searches networking accounts.
+
+export async function searchAccounts({ search = "", hobbies = [] } = {}, manager) {
     const params = [];
     const filters = [];
 
@@ -194,3 +178,23 @@ export async function searchNetworkingAccounts({ search = "", hobbies = [] } = {
             : []
     }));
 }
+
+
+//Initialises the networking database tables and indexes.
+ 
+export async function init(manager) {
+    await manager.dbExecute("PRAGMA foreign_keys = ON;");
+    await manager.dbExecute(network_account_schema);
+    await manager.dbExecute(network_account_hobby_schema);
+
+    for (const indexStatement of network_indexes) {
+        await manager.dbExecute(indexStatement);
+    }
+}
+
+export default {
+    init,
+    seed,
+    getHobbies,
+    searchAccounts
+};
