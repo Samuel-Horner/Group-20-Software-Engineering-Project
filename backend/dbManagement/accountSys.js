@@ -1,4 +1,6 @@
 import { manager } from "./index.js";
+manager.DATABASE_PATH = "../backend/data/dev.db";
+manager.path = "../backend/data/dev.db";
 
 const accountSchema = `
 CREATE TABLE IF NOT EXISTS UserAccounts (
@@ -40,7 +42,7 @@ const seedAccountSchema = [
         },
         {
             Fullname: "Null Null Null Null",
-            Username: "console.log(null)",
+            Username: "console_log_null",
             Password: "nullthing001",
             Description: "",
             Location: "Somewhere in the ...",
@@ -51,150 +53,176 @@ const seedAccountSchema = [
         },
 ];
 
-async function seedAccountsData() {
-    await manager.establishConnection();
-    await executeOrThrow(`DROP TABLE UserAccounts;`);
-    await executeOrThrow(accountSchema);
-    for (const account of seedAccountSchema) {
-        await executeOrThrow(
-            `INSERT OR IGNORE INTO UserAccounts (Fullname,Username,Password,Description,Location,HobbyTags,HobbyExperience,QuizResults,SessionKey)
-            VALUES (?,?,?,?,?,?,?,?,?);`,
-            [account.Fullname,account.Username,account.Password,account.Description,account.Location,JSON.stringify(account.HobbyTags),JSON.stringify(account.HobbyExperience),JSON.stringify(account.QuizResults),account.SessionKey]
-        );
-    }
-    await manager.dbClose();
+// For the purposes of resetting and returning the UserAccoount table. Leave uncommented during testing, so the actual table isnt affected, by the testing lines
+export async function seedAccountsData() {
+    return new Promise(async (resolve,_) => {
+        await manager.establishConnection();
+        await executeOrThrow(`DROP TABLE UserAccounts;`);
+        await executeOrThrow(accountSchema);
+        for (const account of seedAccountSchema) {
+            await executeOrThrow(
+                `INSERT OR IGNORE INTO UserAccounts (Fullname,Username,Password,Description,Location,HobbyTags,HobbyExperience,QuizResults,SessionKey)
+                VALUES (?,?,?,?,?,?,?,?,?);`,
+                [account.Fullname,account.Username,account.Password,account.Description,account.Location,JSON.stringify(account.HobbyTags),JSON.stringify(account.HobbyExperience),JSON.stringify(account.QuizResults),account.SessionKey]
+            );
+        }
+        await manager.dbClose();
+        resolve();
+    });
+}
+
+export async function retAll () {
+    return new Promise(async (resolve,_) => {
+        await manager.establishConnection();
+        let retall = await selectOrThrow(`SELECT * FROM UserAccounts`);
+        await manager.dbClose();
+        console.log(retall);
+        resolve(retall);
+    });
 }
 
 // Keep this line always commented, unless you planned to reset the UserAccounts table
 // It will allow for the SessionKey feature to still work even after server restarts
 // (I spent so long trying to figure out why it happened, and getting confused, and now im only half-upset after learning the reason)
-//seedAccountsData(); // node ./backend/dbManagement/accountSys.js
+//console.log(manager); seedAccountsData(); // node ./dbManagement/accountSys.js
 
-async function executeOrThrow(sql, params = []) {
-    const result = await manager.dbExecute(sql, params);
-    if (result) {
-        throw new Error(result);
-    }
+
+
+
+
+export async function executeOrThrow(sql, params = []) {
+    return new Promise(async (resolve,_) => {
+        await manager.dbExecute(sql, params);
+        resolve();
+    });
 }
 
-async function selectOrThrow(sql, params = []) {
-    const result = await manager.dbGet(sql, params);
-    if (!result) {
-        throw new Error(result);
-    }
-    return result;
+export async function selectOrThrow(sql, params = []) {
+    return new Promise(async (resolve,reject) => {
+        var result = await manager.dbGet(sql, params);
+        resolve(result);
+    });
 }
 
-export async function UserLogin (body) {
-    try {
-        var user = body.user;
-        var pass = body.pass;
-
-        if (user && pass) {
-            user = user.replace(/=/g,"");
-            pass = pass.replace(/=/g,"");
-            await manager.establishConnection();
-            let userID = await selectOrThrow(`SELECT UserID FROM UserAccounts WHERE Username = ? AND Password = ?`,[user,pass]);
-            await manager.dbClose();
-            if (userID) {return CreateSession(user);}
-        } else {return null;}
-    }
-    catch (err) {return null;}
+export async function userLogin (body) {
+    return new Promise(async (resolve,reject) => {
+        try {
+            if ((typeof(body.user) == "string") && (typeof(body.pass) == "string")) {
+                var user = (body.user).replace(/=/g,"");
+                var pass = (body.pass).replace(/=/g,"");
+                await manager.establishConnection();
+                let userID = await selectOrThrow(`SELECT UserID FROM UserAccounts WHERE Username = ? AND Password = ?`,[user,pass]);
+                await manager.dbClose();
+                if (userID.length == 1) {resolve(await createSession(user));}
+                else {resolve();}
+            } else {throw new Error();}
+        }
+        catch (err) {reject();}
+    });
 }
 
-export async function RetrieveAccInfo (body) {
-    try {
-        await manager.establishConnection();
-        let content = (await selectOrThrow(`SELECT * FROM UserAccounts WHERE Username = ? AND SessionKey = ?`,[body.user,body.key]))[0];
-        let keyy = (await selectOrThrow(`SELECT SessionKey FROM UserAccounts WHERE Username = ?`,[body.user]));
-        await manager.dbClose();
-        content.QuizResults = JSON.parse(content.QuizResults);
-        content.HobbyTags = JSON.parse(content.HobbyTags);
-        content.HobbyExperience = JSON.parse(content.HobbyExperience);
-        return content;
-    }
-    catch (err) {return [];}
+export async function retrieveAccInfo (body) {
+    return new Promise(async (resolve,reject) => {
+        try {
+            if ((typeof(body.user) == "string") && (typeof(body.key) == "number")) {
+                await manager.establishConnection();
+                let content = (await selectOrThrow(`SELECT * FROM UserAccounts WHERE Username = ? AND SessionKey = ?`,[body.user,body.key]));
+                await manager.dbClose();
+                if (!(content.length > 0)) {resolve({});}
+                else {
+                    content = content[0];
+                    content.QuizResults = JSON.parse(content.QuizResults);
+                    content.HobbyTags = JSON.parse(content.HobbyTags);
+                    content.HobbyExperience = JSON.parse(content.HobbyExperience);
+                    resolve(content);
+                }
+            } else {throw new Error();}
+        } catch (err) {reject();}
+    });
 }
 
-export async function CreateSession (username) {
-    try {
-        let session_key = Math.floor(Math.random()*100000000000);
-        let content = {user: username,key: session_key};
+export async function createSession (username) {
+    return new Promise(async (resolve,reject) => {
+        try {
+            if (typeof(username) == "string") {
+                let session_key = Math.floor(Math.random()*100000000000);
+                let content = {user: username,key: session_key};
 
-        await manager.establishConnection();
-        await executeOrThrow(`UPDATE UserAccounts SET SessionKey = ? WHERE Username = ?`,[session_key,username]);
-        await manager.dbClose();
+                await manager.establishConnection();
+                await executeOrThrow(`UPDATE UserAccounts SET SessionKey = ? WHERE Username = ?`,[session_key,username]);
+                await manager.dbClose();
 
-        return content
-    } catch (err) {return null}
+                resolve(content);
+            } else {throw new Error();}
+        } catch (err) {reject();}
+    });
 }
 
-export async function UserLogout (body) {
-    DeleteSession(body.user);
-    return null;
+export async function userLogout (body) {
+    return new Promise(async (resolve,reject) => {
+        try {
+            if ((typeof(body.user) == "string") && (typeof(body.key) == "number")) {
+                await manager.establishConnection();
+                await executeOrThrow(`UPDATE UserAccounts SET SessionKey = NULL WHERE Username = ? AND SessionKey = ?`,[body.user,body.key]);
+                await manager.dbClose();
+                resolve();
+            } else {throw new Error();}
+        } catch (err) {reject();}
+    });
 }
 
-export async function DeleteSession (body) {
-    try {
-        await manager.establishConnection();
-        await executeOrThrow(`UPDATE UserAccounts SET SessionKey = NULL WHERE Username = ?`,[username]);
-        await manager.dbClose();
-    } catch (err) {
-        console.error(err);
-    }
+export async function changeAccInfo (body) {
+    return new Promise(async (resolve,reject) => {
+        try {
+            var changes = body.changes;
+            var sessionKey = body.sessionKey;
+            changes = [changes.user, changes.pass, changes.full, changes.desc, changes.loca, changes.tags, changes.diff];
+
+            if (changes.filter((value) => (value)).length > 0) {
+                var sets = ["Username = ?","Password = ?","Fullname = ?","Description = ?","Location = ?","HobbyTags = ?","HobbyExperience = ?"].filter((_,index) => (changes[index]));
+                changes = changes.filter((value,_) => (value));
+                const cmd = `UPDATE UserAccounts SET `+sets.join(",")+` WHERE Username = ? AND SessionKey = ?`;
+                const params = changes.concat([sessionKey.user,sessionKey.key]);
+                await manager.establishConnection();
+                await executeOrThrow(cmd,params);
+                await manager.dbClose();
+                resolve();
+            } else {throw new Error();}
+        } catch (err) {reject();}
+    });
 }
 
-export async function ChangeAccInfo (body) {
-    try {
-        var changes = body.changes;
-        var sessionKey = body.sessionKey;
-        await manager.establishConnection();
-        await executeOrThrow(`UPDATE UserAccounts SET
-            Username = ?,
-            Password = ?,
-            Fullname = ?,
-            Description = ?,
-            Location = ?,
-            HobbyTags = ?,
-            HobbyExperience = ?
-            WHERE Username = ? AND SessionKey = ?
-            `,[changes.user, changes.pass, changes.full, changes.desc, changes.loca, changes.tags, changes.diff, sessionKey.user, sessionKey.key]);
-        await manager.dbClose();
-    } catch (err) {console.log(`error`)}
+export async function createAccount (body) {
+    return new Promise(async (resolve,reject) => {
+        try {
+            var changes = body.changes;
+            var newbody = {user: changes.user, pass: changes.pass};
+            changes = [changes.user, changes.pass, changes.full, changes.desc, changes.loca, changes.tags, changes.diff];
+            if (typeof(newbody.user) == "string" && typeof(newbody.pass) == "string" && newbody.user && newbody.pass) {
+                var sets = ["Username","Password","Fullname","Description","Location","HobbyTags","HobbyExperience"].filter((_,index) => (changes[index]));
+                const cmd = `INSERT OR IGNORE INTO UserAccounts (`+sets.join(",")+`) VALUES (`+Array(sets.length).fill("?").join(",")+`);`;
+                const params = changes.filter((value,_) => (value));
+                await manager.establishConnection();
+                await executeOrThrow(cmd,params);
+                await manager.dbClose();
+                resolve(await userLogin(newbody));
+            } else {throw new Error();}
+        }
+        catch (err) {reject();}
+    });
 }
 
-export async function CreateAccount (body) {
-    try {
-        var changes = JSON.parse(JSON.stringify(body.changes));
-        await manager.establishConnection();
-        await executeOrThrow(
-            `INSERT OR IGNORE INTO UserAccounts (Username,Password,Fullname,Description,Location,HobbyTags,HobbyExperience)
-            VALUES (?,?,?,?,?,?,?);`,
-            [changes.user, changes.pass, changes.full, changes.desc, changes.loca, changes.tags, changes.diff]
-        );
-        var newbody = {user: changes.user, pass: changes.pass}
-        return await UserLogin(newbody);
-    }
-    catch (err) {console.log(`error`)}
+export async function deleteAccount (body) {
+    return new Promise(async (resolve,reject) => {
+        try {
+            var sessionKey = body.sessionKey;
+            if (typeof(sessionKey.user) == "string" && typeof(sessionKey.key) == "number" && sessionKey.user && (sessionKey.key > 0)) {
+                await manager.establishConnection();
+                await executeOrThrow(`DELETE FROM UserAccounts WHERE Username = ? OR SessionKey = ?`,[sessionKey.user,sessionKey.key]);
+                await manager.dbClose();
+                resolve();
+            } else {throw new Error();}
+        }
+        catch (err) {reject();}
+    });
 }
-
-export async function DeleteAccount (body) {
-    try {
-        var user = body.user;
-        var key = body.key;
-
-        await manager.establishConnection();
-        await executeOrThrow(`DELETE FROM UserAccounts WHERE Username = ? OR UserID = ?`,[user,key]);
-        await manager.dbClose();
-    }
-    catch (err) {console.log(`error`)}
-}
-
-export async function RetAll () {
-    await manager.establishConnection();
-    let retall = await selectOrThrow(`SELECT * FROM UserAccounts`);
-    await manager.dbClose();
-    console.log(retall);
-    return retall;
-}
-

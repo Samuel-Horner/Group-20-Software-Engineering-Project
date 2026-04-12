@@ -1,6 +1,6 @@
 var TEST_INFO = {
     Fullname: "Null Null Null Null",
-    Username: "console.log(null)",
+    Username: "console_log_null",
     Password: "nullthing001",
     Description: "",
     Location: "Somewhere in the ...",
@@ -10,8 +10,8 @@ var TEST_INFO = {
     SessionKey: null,
 };  // For the purpose of understanding the initial state of this user account record
 
-// Pass this manually into the LoginFunc() function on line 115
-var TEST_USER_LOGIN = "console.log(null)";
+// Pass this manually into the loginFunc() function on line 115
+var TEST_USER_LOGIN = "console_log_null";
 var TEST_PASS_LOGIN = "nullthing001";
 
 
@@ -26,7 +26,7 @@ function clearAllListeners(element) {
     return clone;
 }
 
-async function LoginFunc (TEST_USER_LOGIN=null,TEST_PASS_LOGIN=null) {
+async function loginFunc (TEST_USER_LOGIN=null,TEST_PASS_LOGIN=null) {
     var user = document.getElementById("user_login").value;
     var pass = document.getElementById("pass_login").value;
 
@@ -40,7 +40,19 @@ async function LoginFunc (TEST_USER_LOGIN=null,TEST_PASS_LOGIN=null) {
     renderAccountPageFormat(0);
 }
 
-async function AccEditRenderer (mode,accInfo={}) {
+async function accLogout () {
+    var sessionKey = JSON.parse(localStorage.getItem('user-key'));
+    localStorage.removeItem('user-key');
+    var response = await fetch('/acc_login',{
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({action: 'logout', body: sessionKey}),
+    });
+    document.getElementById("account_editor").innerHTML = ``;
+    renderAccountPageFormat(0);
+}
+
+async function accEditRenderer (mode,accInfo={}) {
     var innerHTML = `
         <div class="content_section" style="gap: 42px">
             <h3>Username</h3>
@@ -117,11 +129,11 @@ async function renderAccountPageFormat (accountMode) {
 
         var login_trigger = document.getElementById("login_trigger");
         login_trigger = clearAllListeners(login_trigger);
-        login_trigger.addEventListener("click",function (event) {LoginFunc()});
+        login_trigger.addEventListener("click",function (event) {loginFunc()});
 
         var create_account = document.getElementById("create_account");
         create_account = clearAllListeners(create_account);
-        create_account.addEventListener("click",function (event) {AccEditRenderer("create")});
+        create_account.addEventListener("click",function (event) {accEditRenderer("create")});
     }
     else {
         var response = await fetch('/acc_login',{
@@ -168,16 +180,21 @@ async function renderAccountPageFormat (accountMode) {
                 innerHTML = `
                     <div class="editor_button">
                         <button id="editor_trigger">Edit Details</button>
+                        <button id="logout_trigger">Logout</button>
                     </div>
                 `;
-                document.getElementById("account-editor").innerHTML = innerHTML;
+                document.getElementById("account_editor").innerHTML = innerHTML;
 
                 var editor_trigger = document.getElementById("editor_trigger");
                 editor_trigger = clearAllListeners(editor_trigger);
                 editor_trigger.addEventListener("click",function (event) {renderAccountPageFormat(1)});
+
+                var logout_trigger = document.getElementById("logout_trigger");
+                logout_trigger = clearAllListeners(logout_trigger);
+                logout_trigger.addEventListener("click",function (event) {accLogout()});
             }
             else {
-                AccEditRenderer("change",accInfo);
+                accEditRenderer("change",accInfo);
             }
         }
         else {
@@ -198,7 +215,7 @@ function accEditor (mode,tag_changes=null,base_info=null) {
                 <button id="delete_trigger">Delete Account</button>
             </div>
         `;
-        document.getElementById("account-editor").innerHTML = innerHTML;
+        document.getElementById("account_editor").innerHTML = innerHTML;
 
         var return_trigger = document.getElementById("return_trigger");
         return_trigger = clearAllListeners(return_trigger);
@@ -220,7 +237,7 @@ function accEditor (mode,tag_changes=null,base_info=null) {
                 <button id="create_trigger">Create Account</button>
             </div>
         `;
-        document.getElementById("account-editor").innerHTML = innerHTML;
+        document.getElementById("account_editor").innerHTML = innerHTML;
 
         var create_trigger = document.getElementById("create_trigger");
         create_trigger = clearAllListeners(create_trigger);
@@ -236,7 +253,7 @@ function accEditor (mode,tag_changes=null,base_info=null) {
                 <h3>! Deletion Set !</h3>
             </div>
         `;
-        document.getElementById("account-editor").innerHTML = innerHTML;
+        document.getElementById("account_editor").innerHTML = innerHTML;
 
         var return_trigger = document.getElementById("return_trigger");
         return_trigger = clearAllListeners(return_trigger);
@@ -299,9 +316,10 @@ async function makeChanges (action,tag_changes=null,base_info=null) {
     if (action == "change" || action == "create") {
         var userInput = document.getElementById("username_input").value;
         var passInput = document.getElementById("password_input").value;
-
+        
         if (action == "create" && (userInput == "" || passInput == "")) {
             accEditor("create",tag_changes,base_info);    // Should have a message that says smth like 'username or password cannot be empty'
+            return;
         }
 
         var fullInput = document.getElementById("fullname_input").value;
@@ -340,7 +358,7 @@ async function makeChanges (action,tag_changes=null,base_info=null) {
         localStorage.setItem('user-key',JSON.stringify(sessionKey));
     }
 
-    document.getElementById("account-editor").innerHTML = ``;
+    document.getElementById("account_editor").innerHTML = ``;
     renderAccountPageFormat(0);
 }
 
