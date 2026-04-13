@@ -1,69 +1,66 @@
-import { afterAll, beforeAll, describe, jest } from "@jest/globals"
-import path from "path"
-
-import { userLogin,userLogout,retrieveAccInfo,changeAccInfo,createAccount,deleteAccount,createSession,seedAccountsData,retAll } from "../dbManagement/accountSys.js";
-import { createHTTPServer, registerPOSTHandler } from "../server/server";
-import config from "../config"
-
-async function postURL(url, body = {}) {
-    return fetch(`http://${config.URL}:${config.PORT}/${url}`, { method: "POST", body: JSON.stringify(body) }).then(async res => {
-        if (!res.ok) { return res.status; }
-        return await res.json();
-    });
-}
+import { afterAll, beforeAll, describe, afterEach, beforeEach, jest } from "@jest/globals";
+import { init,userLogin,userLogout,retrieveAccInfo,changeAccInfo,createAccount,deleteAccount,createSession,seedAccountsData,retAll } from "../dbManagement/accountSys.js";
+import { DBManager } from "./DBManager.js";
+import fs from "fs";
 
 describe ("Account System Functions", () => {
-    test("userLogin", async () => {
-        await expect(userLogin({user: "", pass: ""})).resolves.toBe();
-        await expect(userLogin({user: "testUser", pass: "testPass"})).resolves.toBe();
-        await expect(userLogin({user: "sarah_chen", pass: "photos4Days"})).resolves.toBeInstanceOf(Object);
-        await expect(userLogin(["testUser", "testPass"])).rejects.toBe();
-    });
-    test("userLogout", async () => {
-        var sessionKey = await userLogin({user: "sarah_chen", pass: "photos4Days"});
-        await expect(userLogout(sessionKey)).resolves.toBe();
-        await expect(userLogout(["sarah_chen",123456789])).rejects.toBe();
-    });
-
-    test("retrieveAccInfo", async () => {
-        var sessionKey = await userLogin({user: "sarah_chen", pass: "photos4Days"});
-        await expect(retrieveAccInfo(sessionKey)).resolves.not.toBe({});
-        await expect(retrieveAccInfo({user:"sarah_chen",key:123456789})).resolves.toStrictEqual({});
-        await expect(retrieveAccInfo(["sarah_chen",123456789])).rejects.toBe();
-    });
-    test("changeAccInfo", async () => {
-        var sessionKey = await userLogin({user: "sarah_chen", pass: "photos4Days"});
-        await expect(changeAccInfo({sessionKey: sessionKey, changes: {}})).rejects.toBe();
-        await expect(changeAccInfo({sessionKey: sessionKey, changes: {desc: "new",}})).resolves.toBe();
-        expect((await retrieveAccInfo(sessionKey)).Description).toBe("new");
-        await expect(changeAccInfo({sessionKey: sessionKey, changes: {desc: "",}})).rejects.toBe();
-    });
-
-    test("createAccount", async () => {
-        var sessionKey = await createAccount({changes: {user:"test",pass:"test",desc:"test"}});
-        expect(sessionKey).toBeInstanceOf(Object);
-        expect(JSON.stringify(await retrieveAccInfo(sessionKey))).not.toBe("{}");
-        await expect(createAccount({})).rejects.toBe();
-        await expect(createAccount({changes: {}})).rejects.toBe();
-    });
-    test("deleteAccount", async () => {
-        var sessionKey = await userLogin({user: "test", pass: "test"});
-        await expect(deleteAccount({})).rejects.toBe();
-        await expect(deleteAccount(sessionKey)).resolves.toBe();
-        expect(JSON.stringify(await retrieveAccInfo(sessionKey))).toBe("{}");
-    });
-
-    test("createSession", async () => {
-        await expect(createSession("sarah_chen")).resolves.toBeInstanceOf(Object);
-        await expect(createSession(123456789)).rejects.toBe();
+    const testManager = new DBManager("./data/test.db", false);
+    beforeAll(async () => {
+        await init(testManager);
     });
 
     // Comment to view actual changes to the UserAccount table after tests
     afterAll(async () => {
-        var before = JSON.stringify(await retAll());
-        await expect(seedAccountsData()).resolves.toBe();
-        var after = await retAll();
+        var before = JSON.stringify(await retAll(testManager));
+        await expect(seedAccountsData(testManager)).resolves.toBe();
+        var after = await retAll(testManager);
         expect(after.length).toBe(3);
         expect(JSON.stringify(after)).not.toBe(before);
+        fs.rmSync("./data/test.db");
+    });
+
+    test("userLogin", async () => {
+        await expect(userLogin(testManager,{login: {user: "", pass: ""}})).resolves.toBe();
+        await expect(userLogin(testManager,{login: {user: "testUser", pass: "testPass"}})).resolves.toBe();
+        await expect(userLogin(testManager,{login: {user: "sarah_chen", pass: "photos4Days"}})).resolves.toBeInstanceOf(Object);
+        await expect(userLogin(testManager,{login: ["testUser", "testPass"]})).rejects.toBe();
+    });
+    test("userLogout", async () => {
+        var sessionKey = await userLogin(testManager,{login: {user: "sarah_chen", pass: "photos4Days"}});
+        await expect(userLogout(testManager,{sessionKey: sessionKey})).resolves.toBe();
+        await expect(userLogout(testManager,{sessionKey: ["sarah_chen",123456789]})).rejects.toBe();
+    });
+
+    test("retrieveAccInfo", async () => {
+        var sessionKey = await userLogin(testManager,{login: {user: "sarah_chen", pass: "photos4Days"}});
+        await expect(retrieveAccInfo(testManager,{sessionKey: sessionKey})).resolves.not.toBe({});
+        await expect(retrieveAccInfo(testManager,{sessionKey: {user:"sarah_chen",key:123456789}})).resolves.toStrictEqual({});
+        await expect(retrieveAccInfo(testManager,{sessionKey: ["sarah_chen",123456789]})).rejects.toBe();
+    });
+    test("changeAccInfo", async () => {
+        var sessionKey = await userLogin(testManager,{login: {user: "sarah_chen", pass: "photos4Days"}});
+        await expect(changeAccInfo(testManager,{sessionKey: sessionKey, changes: {}})).rejects.toBe();
+        await expect(changeAccInfo(testManager,{sessionKey: sessionKey, changes: {desc: "new",}})).resolves.toBe();
+        expect((await retrieveAccInfo(testManager,{sessionKey: sessionKey})).Description).toBe("new");
+        await expect(changeAccInfo(testManager,{sessionKey: sessionKey, changes: {desc: "",}})).rejects.toBe();
+    });
+
+    test("createAccount", async () => {
+        var sessionKey = await createAccount(testManager,{changes: {user:"test",pass:"test",desc:"test"}});
+        expect(sessionKey).toBeInstanceOf(Object);
+        expect(JSON.stringify(await retrieveAccInfo(testManager,{sessionKey: sessionKey}))).not.toBe("{}");
+        await expect(createAccount(testManager,{})).rejects.toBe();
+        await expect(createAccount(testManager,{changes: {}})).rejects.toBe();
+    });
+    test("deleteAccount", async () => {
+        var sessionKey = await userLogin(testManager,{login: {user: "test", pass: "test"}});
+        await expect(deleteAccount(testManager,{sessionKey: {}})).rejects.toBe();
+        await expect(deleteAccount(testManager,{sessionKey: sessionKey})).resolves.toBe();
+        expect(JSON.stringify(await retrieveAccInfo(testManager,{sessionKey: sessionKey}))).toBe("{}");
+    });
+
+    test("createSession", async () => {
+        await expect(createSession(testManager,"sarah_chen")).resolves.toBeInstanceOf(Object);
+        await expect(createSession(testManager,123456789)).rejects.toBe();
     });
 });
