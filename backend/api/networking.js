@@ -1,5 +1,4 @@
 import networking from "../dbManagement/networking.js";
-import { manager } from "../dbManagement/index.js";
 
 export function parseHobbyFilters(searchParams) {
     const repeatedValues = searchParams.getAll("hobbies");
@@ -14,7 +13,7 @@ export function parseHobbyFilters(searchParams) {
     )];
 }
 
-export async function networkAccountsHandler(_, res, url, mgr = manager) {
+export async function networkAccountsHandler(_, res, url, mgr) {
     try {
         const search = (url.searchParams.get("search") || "").trim();
         const hobbies = parseHobbyFilters(url.searchParams);
@@ -32,7 +31,7 @@ export async function networkAccountsHandler(_, res, url, mgr = manager) {
     }
 }
 
-export async function networkHobbiesHandler(_, res, url, mgr = manager) {
+export async function networkHobbiesHandler(_, res, url, mgr) {
     try {
         const hobbies = await networking.getHobbies(mgr);
         res.setHeader("Content-Type", "application/json");

@@ -86,7 +86,6 @@ export async function seed(manager) {
 
     for (const [username, hobbies] of Object.entries(network_seed_data.accountHobbies)) {
         const accountId = accountMap.get(username);
-        if (!accountId) { continue; }
 
         for (const hobbyName of hobbies) {
             const hobbyId = await hobby_set.add(hobbyName, manager);
