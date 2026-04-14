@@ -8,11 +8,8 @@ import { quizGetHandler } from "./api/quiz.js";
 
 const server = createHTTPServer(config.PUBLIC);
 
-function parseHobbyFilters(searchParams) {
-    const repeatedValues = searchParams.getAll("hobbies");
-    const splitValues = repeatedValues.flatMap((value) =>
-        String(value).split(",")
-    );
+// Initialise database
+dbInit();
 
 // Initialise recommender
 initRecommendationProcess();
@@ -21,7 +18,6 @@ registerGETHandler("/api/network/accounts", networkAccountsHandler);
 registerGETHandler("/api/network/hobbies", networkHobbiesHandler);
 
 registerPOSTHandler("/getquiz", quizGetHandler);
-registerPOSTHandler("/getQuiz", quizGetHandler);
 registerPOSTHandler("/api/quiz", quizAPIHandler);
 
 server.listen(config.PORT, config.URL, () => {

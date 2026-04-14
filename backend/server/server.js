@@ -83,7 +83,7 @@ async function postHandler(req, res) {
     console.log(`Recieved POST request for resource ${req.url}.`);
     const url = new URL(req.url, qualified_url);
     if (url.pathname in postEndpoints) {
-        await postEndpoints[url.pathname](req, res, url).catch(async (err) => {
+        await postEndpoints[url.pathname](req, res).catch(async (err) => {
             console.error(err);
             await errorHandler(res, 500);
         });
