@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, jest } from "@jest/globals"
 import { spawn } from 'child_process'
 import path from "path"
 
-import { initReccomendationProcess, quizAPIHandler, getHobbyReccomendation, killReccomendationProcess } from "./recommendation";
+import { initRecommendationProcess, quizAPIHandler, getHobbyRecommendation, killRecommendationProcess } from "./recommendation";
 import { createHTTPServer, registerPOSTHandler } from "../server/server";
 import config from "../config"
 
@@ -15,8 +15,8 @@ async function postURL(url, body = {}) {
 }
 
 // Directly call the recommendation engine (using a new instance)
-async function getReccomendation(answers) {
-    const args = ['backend/reccomendation/model_predictor.py'];
+async function getRecommendation(answers) {
+    const args = ['backend/recommendation/model_predictor.py'];
     const process = spawn('python', args, { cwd: "../" });
     process.stdout.setEncoding('utf-8');
     process.stdin.write(JSON.stringify(answers) + "\n");
@@ -51,31 +51,31 @@ async function getReccomendation(answers) {
 describe("Init Reccomendaton Process", () => {
     test("Init / Kill", () => {
         // Try without any arguments
-        expect(initReccomendationProcess()).toBeUndefiend;
-        expect(killReccomendationProcess()).toBeUndefiend;
+        expect(initRecommendationProcess()).toBeUndefiend;
+        expect(killRecommendationProcess()).toBeUndefiend;
     });
 })
 
-describe("Reccomendation API", () => {
+describe("Recommendation API", () => {
     // Needed to run tests
     beforeAll(() => {
-        initReccomendationProcess(options = { "cwd": "../" });
+        initRecommendationProcess(options = { "cwd": "../" });
     });
 
-    // test("Hobby Reccomendation", async () => {
-    //     await expect(getHobbyReccomendation([])).rejects.toThrow("Input to hobby reccomendation has length 0, when length 15 is needed");
-    //     await expect(getHobbyReccomendation(["test"])).rejects.toThrow("Input to hobby reccomendation has length 1, when length 15 is needed");
-    //     await expect(getHobbyReccomendation([1])).rejects.toThrow("Input to hobby reccomendation has length 1, when length 15 is needed");
+    // test("Hobby Recommendation", async () => {
+    //     await expect(getHobbyRecommendation([])).rejects.toThrow("Input to hobby recommendation has length 0, when length 15 is needed");
+    //     await expect(getHobbyRecommendation(["test"])).rejects.toThrow("Input to hobby recommendation has length 1, when length 15 is needed");
+    //     await expect(getHobbyRecommendation([1])).rejects.toThrow("Input to hobby recommendation has length 1, when length 15 is needed");
 
-    //     await expect(getHobbyReccomendation([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])).rejects.toThrow("Input to hobby reccomendation has length 14, when length 15 is needed");
-    //     await expect(getHobbyReccomendation([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])).rejects.toThrow("Recieved answers out of range.");
-    //     await expect(getHobbyReccomendation([0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14])).rejects.toThrow("Recieved answers out of range.");
+    //     await expect(getHobbyRecommendation([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])).rejects.toThrow("Input to hobby recommendation has length 14, when length 15 is needed");
+    //     await expect(getHobbyRecommendation([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])).rejects.toThrow("Recieved answers out of range.");
+    //     await expect(getHobbyRecommendation([0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14])).rejects.toThrow("Recieved answers out of range.");
 
     //     const sample1 = [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4];
-    //     await expect(getHobbyReccomendation(sample1)).resolves.toEqual(await getReccomendation(sample1));
+    //     await expect(getHobbyRecommendation(sample1)).resolves.toEqual(await getRecommendation(sample1));
 
     //     const sample2 = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-    //     await expect(getHobbyReccomendation(sample2)).resolves.toEqual(await getReccomendation(sample2));
+    //     await expect(getHobbyRecommendation(sample2)).resolves.toEqual(await getRecommendation(sample2));
     // });
 
     describe("Quiz API", () => {
@@ -97,11 +97,11 @@ describe("Reccomendation API", () => {
             await expect(postURL("api/quiz", { answers: [1] })).resolves.toBe(500);
 
             const sample1 = [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4];
-            await expect(postURL("api/quiz", { answers: [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4] })).resolves.toEqual({ "hobby": await getReccomendation(sample1) });
+            await expect(postURL("api/quiz", { answers: [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4] })).resolves.toEqual({ "hobby": await getRecommendation(sample1) });
         });
 
         test("Handler", async () => {
-            async function mockQuizAPIHandler(body, err = null, reccomendation = getHobbyReccomendation) {
+            async function mockQuizAPIHandler(body, err = null, recommendation = getHobbyRecommendation) {
                 const url = "/api/quiz";
 
                 let req = {
@@ -133,7 +133,7 @@ describe("Reccomendation API", () => {
                 }
 
                 let internal_err = null;
-                quizAPIHandler(req, res, reccomendation).catch(err => { internal_err = err });
+                quizAPIHandler(req, res, recommendation).catch(err => { internal_err = err });
 
                 if (err == null) {
                     await req.end_fn();
@@ -151,12 +151,12 @@ describe("Reccomendation API", () => {
             await expect(mockQuizAPIHandler({})).resolves.toBe(400);
             await expect(mockQuizAPIHandler({"answers": []})).resolves.toBe(400);
             await expect(mockQuizAPIHandler({"answers": ["test"]})).resolves.toBe(400);
-            await expect(mockQuizAPIHandler({"answers": [1]})).rejects.toThrow("Input to hobby reccomendation has length 1, when length 15 is needed");
+            await expect(mockQuizAPIHandler({"answers": [1]})).rejects.toThrow("Input to hobby recommendation has length 1, when length 15 is needed");
             await expect(mockQuizAPIHandler("")).resolves.toBe(400);
 
             const sample1 = [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4];
-            await expect(mockQuizAPIHandler({"answers": sample1})).resolves.toEqual(JSON.stringify({ "hobby": await getReccomendation(sample1) }));
-            await expect(mockQuizAPIHandler(JSON.stringify({"answers": sample1}))).resolves.toEqual(JSON.stringify({ "hobby": await getReccomendation(sample1) }));
+            await expect(mockQuizAPIHandler({"answers": sample1})).resolves.toEqual(JSON.stringify({ "hobby": await getRecommendation(sample1) }));
+            await expect(mockQuizAPIHandler(JSON.stringify({"answers": sample1}))).resolves.toEqual(JSON.stringify({ "hobby": await getRecommendation(sample1) }));
 
             await expect(mockQuizAPIHandler({}, err = new Error("Test"))).rejects.toThrow("Test");
             await expect(mockQuizAPIHandler({"answers": sample1}, null, async (answers) => {
@@ -171,6 +171,6 @@ describe("Reccomendation API", () => {
     });
 
     afterAll(() => {
-        killReccomendationProcess();
+        killRecommendationProcess();
     });
 });
