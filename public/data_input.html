@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Quiz</title>
+  <title>HobbyMatch | Take Quiz</title>
   <link id="theme-stylesheet" href="light.css" rel="stylesheet">
   <link href="styles.css" rel="stylesheet">
 
@@ -123,6 +123,161 @@
       font-size: 1.3rem;
     }
 
+    .hobby-excluder {
+      width: 100%;
+      max-width: 900px;
+      margin: 24px auto 0 auto;
+    }
+
+    .hobby-excluder-box {
+      background: var(--background);
+      border: 2px solid var(--primary-color);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 28px 40px;
+    }
+
+    .hobby-excluder-header {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .hobby-excluder-header h3 {
+      font-size: 1.15rem;
+      color: var(--text-dark);
+      margin: 0;
+    }
+
+    .optional-text {
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    .hobby-excluder-box > p {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      margin-bottom: 16px;
+    }
+
+    .hobby-chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+      min-height: 4px;
+    }
+
+    .hobby-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-color);
+      color: #fff;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      animation: chipIn 0.15s ease;
+    }
+
+    @keyframes chipIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .hobby-chip-remove {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+      opacity: 0.75;
+      transition: opacity 0.15s;
+    }
+
+    .hobby-chip-remove:hover { opacity: 1; }
+
+    .hobby-dropdown-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .hobby-dropdown-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--background);
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      padding: 9px 18px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--text-dark);
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: border-color 0.15s;
+    }
+
+    .hobby-dropdown-button:hover,
+    .hobby-dropdown-button.active {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .hobby-dropdown-arrow {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      transition: transform 0.15s;
+    }
+
+    .hobby-dropdown-button.active .hobby-dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    .hobby-dropdown-list {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      background: var(--background-alt);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+      list-style: none;
+      padding: 6px 0;
+      margin: 0;
+      min-width: 240px;
+      max-height: 250px;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .hobby-dropdown-list.hidden { display: none; }
+
+    .hobby-option {
+      padding: 9px 18px;
+      font-size: 0.95rem;
+      color: var(--text-dark);
+      cursor: pointer;
+      transition: background 0.1s, color 0.1s;
+    }
+
+    .hobby-option:hover {
+      background: var(--background);
+      color: var(--primary-color);
+    }
+
+    .hobby-option-empty {
+      padding: 9px 18px;
+      font-size: 0.9rem;
+      color: var(--text-light);
+      font-style: italic;
+    }
+
     @media (max-width: 768px) {
       .question-box {
         padding: 36px 22px;
@@ -140,6 +295,10 @@
       .scale-label {
         min-width: 0;
       }
+
+      .hobby-excluder-box {
+        padding: 20px 18px;
+      }
     }
   </style>
 </head>
@@ -147,10 +306,16 @@
 <body>
   <nav class="navbar">
     <div class="nav-container">
-      <div class="logo">Logo</div>
+      <div class="logo">HobbyMatch</div>
+      <ul class="nav-links">
+        <li><a href="index_new.html">Home</a></li>
+        <li><a href="community.html">Community</a></li>
+        <li><a href="network_page.html">Connect</a></li>
+        <li><a href="data_input.html" class="nav-cta">Take Quiz</a></li>
+      </ul>
     </div>
   </nav>
-  
+
   <main class="container quiz-page">
     <header class="quiz-header">
       <h1 id="quizTitle">Loading quiz...</h1>
@@ -158,12 +323,23 @@
       <div id="quizError" class="quiz-error"></div>
     </header>
 
-  <!-- Dropdown box for label masking-->
-
-    <div class="question-box" style="text-align: center; background: var(--accent-color)">
-      <label for="hobbyMaskInput" class="scale-label" style="color: var(--text-dark)">List your current hobbies</label>
-      <input type="text" id="hobbyMaskInput" name="hobbyMaskInput" list="hobbyList"/>
-      <datalist id="hobbyList"></datalist>
+    <!-- Hobby excluder -->
+    <div class="hobby-excluder">
+      <div class="hobby-excluder-box">
+        <div class="hobby-excluder-header">
+          <h3>Hobbies you already enjoy</h3>
+          <span class="optional-text">Optional</span>
+        </div>
+        <p>Select any hobbies you already have. We won't recommend those.</p>
+        <div class="hobby-chips-row" id="hobbyChips"></div>
+        <div class="hobby-dropdown-wrapper">
+          <button type="button" class="hobby-dropdown-button" id="hobbyDropdownButton">
+            Add a hobby
+            <span class="hobby-dropdown-arrow">▾</span>
+          </button>
+          <ul class="hobby-dropdown-list hidden" id="hobbyDropdownList"></ul>
+        </div>
+      </div>
     </div>
 
     <form id="quizForm" class="quiz-scroll-area">
@@ -174,6 +350,30 @@
       </div>
     </form>
   </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>HobbyMatch</h4>
+          <p>Connecting people with their perfect hobbies</p>
+        </div>
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="index_new.html">Home</a></li>
+            <li><a href="community.html">Community</a></li>
+            <li><a href="network_page.html">Connect</a></li>
+            <li><a href="data_input.html">Take Quiz</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Contact</h4>
+          <p>University of Bath<br>Bath, UK</p>
+        </div>
+      </div>
+    </div>
+  </footer>
 
   <script src="quiz-logic.js"></script>
   <script src="sidebar.js"></script>

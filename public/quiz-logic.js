@@ -3,8 +3,10 @@ const quizTitleEl = document.getElementById("quizTitle");
 const quizDescriptionEl = document.getElementById("quizDescription");
 const quizQuestionsEl = document.getElementById("quizQuestions");
 const quizErrorEl = document.getElementById("quizError");
-const hobbyList = document.getElementById("hobbyList");
-const hobbyMaskInput = document.getElementById("hobbyMaskInput");
+
+// Hobby chip selector state
+let selectedHobbies = [];
+let availableHobbies = [];
 
 
 function escapeHtml(str) {
@@ -155,7 +157,7 @@ formEl.addEventListener("submit", async (e) => {
 
   try {
     const answers = getAnswersFromForm(formEl);
-    const maskedHobbies = [hobbyMaskInput.value]; // you should be able to mask multiple hobbies, not just one
+    const maskedHobbies = [...selectedHobbies];
     const hobby = await getHobbyRecommendation(answers, maskedHobbies);
 
     localStorage.setItem("userHobby", hobby);
@@ -171,7 +173,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     const quiz = await fetchQuiz();
     renderQuiz(quiz);
-    await renderHobbyList(hobbyList);
+    await setupHobbySelector();
   } catch (err) {
     console.error("Quiz load error:", err);
     quizErrorEl.textContent = err?.message || "Failed to load quiz";
@@ -180,20 +182,85 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function fetchHobbies() {
-    try {
-      const res = await fetch("/gethobbies", {method: "POST"});
-      return await res.json();
-    }catch (err) {
-      console.error("Hobby load error:", err)
-    }
+  try {
+    const res = await fetch("/gethobbies", { method: "POST" });
+    return await res.json();
+  } catch (err) {
+    console.error("Hobby load error:", err);
+    return [];
+  }
 }
 
-async function renderHobbyList(hobbyList) {
-  // Get hobbys
-  let hobbies = await fetchHobbies();
+function capitalizeHobby(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
-  // Create the datalist.
-  for (const h of hobbies) {
-    hobbyList.innerHTML += `<option>${h}</option>`;
+function renderChips() {
+  const chipsContainer = document.getElementById("hobbyChips");
+  chipsContainer.innerHTML = selectedHobbies.map(h => `
+    <span class="hobby-chip">
+      ${escapeHtml(capitalizeHobby(h))}
+      <button type="button" class="hobby-chip-remove" data-hobby="${escapeHtml(h)}">×</button>
+    </span>
+  `).join("");
+}
+
+function renderDropdownOptions() {
+  const dropdownList = document.getElementById("hobbyDropdownList");
+  const remaining = availableHobbies.filter(h => !selectedHobbies.includes(h));
+  if (!remaining.length) {
+    dropdownList.innerHTML = `<li class="hobby-option-empty">No more hobbies to add</li>`;
+  } else {
+    dropdownList.innerHTML = remaining.map(h =>
+      `<li class="hobby-option" data-hobby="${escapeHtml(h)}">${escapeHtml(capitalizeHobby(h))}</li>`
+    ).join("");
   }
+}
+
+function initHobbySelector() {
+  const button = document.getElementById("hobbyDropdownButton");
+  const dropdownList = document.getElementById("hobbyDropdownList");
+  const chipsContainer = document.getElementById("hobbyChips");
+
+  button.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isHidden = dropdownList.classList.contains("hidden");
+    if (isHidden) {
+      renderDropdownOptions();
+      dropdownList.classList.remove("hidden");
+      button.classList.add("active");
+    } else {
+      dropdownList.classList.add("hidden");
+      button.classList.remove("active");
+    }
+  });
+
+  dropdownList.addEventListener("click", (e) => {
+    const option = e.target.closest(".hobby-option");
+    if (!option || !option.dataset.hobby) return;
+    selectedHobbies.push(option.dataset.hobby);
+    renderChips();
+    renderDropdownOptions();
+    dropdownList.classList.add("hidden");
+    button.classList.remove("active");
+  });
+
+  chipsContainer.addEventListener("click", (e) => {
+    const removeButton = e.target.closest(".hobby-chip-remove");
+    if (!removeButton || !removeButton.dataset.hobby) return;
+    selectedHobbies = selectedHobbies.filter(h => h !== removeButton.dataset.hobby);
+    renderChips();
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!button.contains(e.target) && !dropdownList.contains(e.target)) {
+      dropdownList.classList.add("hidden");
+      button.classList.remove("active");
+    }
+  });
+}
+
+async function setupHobbySelector() {
+  availableHobbies = await fetchHobbies();
+  initHobbySelector();
 }
