@@ -6,6 +6,8 @@ import path, { sep } from "path";
 import config from "../config.js";
 
 const qualified_url = `http://${config.URL}:${config.PORT}`;
+const getEndpoints = {};
+const postEndpoints = {};
 
 export function getCookies(req) {
     if (!req.headers) return null;
@@ -61,6 +63,13 @@ export async function getHandler(public_directory, req, res, _URL = URL) {
     console.log(`Recieved GET request for resource ${req.url}.`)
 
     const url = new _URL(req.url, qualified_url);
+    if (url.pathname in getEndpoints) {
+        await getEndpoints[url.pathname](req, res, url).catch(async (err) => {
+            console.error(err);
+            await errorHandler(res, 500);
+        });
+        return;
+    }
 
     if (url.pathname == "/") {
         url.pathname = config.DEFAULT_PAGE;
@@ -76,7 +85,8 @@ export async function getHandler(public_directory, req, res, _URL = URL) {
     // TODO: Find a better mechanism for this.
     if (!file_path_str.startsWith(public_directory)) {
         console.error(`Error, invalid file path: ${file_path_str}`);
-        return errorHandler(res, 404);
+        await errorHandler(res, 404);
+        return;
     }
 
     let file_path = path.parse(file_path_str);
@@ -97,13 +107,11 @@ export async function getHandler(public_directory, req, res, _URL = URL) {
     });
 }
 
-let endpoints = {};
-
 async function postHandler(req, res) {
     const pathname = new URL(req.url, qualified_url).pathname;
     console.log(`Recieved POST request for resource ${pathname}.`);
 
-    if (pathname in endpoints) {
+    if (pathname in postEndpoints) {
         const body = await new Promise((resolve, reject) => {
             let raw = "";
             req.on('data', chunk => raw += chunk.toString());
@@ -118,7 +126,7 @@ async function postHandler(req, res) {
 
         if (body == null) { return errorHandler(res, 400); }
 
-        await endpoints[pathname](req, res, body).catch(err => {
+        await postEndpoints[pathname](req, res, body).catch(err => {
             console.error(err);
             return errorHandler(res, 500, err.message);
         });
@@ -128,18 +136,25 @@ async function postHandler(req, res) {
     }
 }
 
-export function registerPOSTHandler(url, handler) {
-    if (url in endpoints) {
+export function registerGETHandler(url, handler) {
+    if (url in getEndpoints || url in postEndpoints) {
         throw new Error("Url already registered.");
     }
-    endpoints[url] = handler;
+    getEndpoints[url] = handler;
+}
+
+export function registerPOSTHandler(url, handler) {
+    if (url in postEndpoints || url in getEndpoints) {
+        throw new Error("Url already registered.");
+    }
+    postEndpoints[url] = handler;
 }
 
 export function releasePOSTHandler(url) {
-    if (!(url in endpoints)) {
+    if (!(url in postEndpoints)) {
         throw new Error("Url not registered.");
     }
-    delete endpoints[url];
+    delete postEndpoints[url];
 }
 
 export async function errorHandler(res, code, message = undefined) {

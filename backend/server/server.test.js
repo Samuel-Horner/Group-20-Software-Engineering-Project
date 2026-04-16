@@ -5,7 +5,7 @@ import path from "path";
 
 import config from "../config";
 
-import { getMimeType, createHTTPServer, registerPOSTHandler, getHandler, releasePOSTHandler } from "./server";
+import { getMimeType, createHTTPServer, registerPOSTHandler, getHandler, releasePOSTHandler, registerGETHandler } from "./server";
 
 const public_directory = path.resolve("../public");
 
@@ -111,6 +111,23 @@ describe("Server Tests", () => {
             await expect(getURL("chat.html")).resolves.toBe(readFile("chat.html"));
             await expect(getURL("index.html?test=1")).resolves.toBe(readFile("index.html"));
             await expect(getURL("foo")).resolves.toBe(404);
+        });
+
+        test("Get Request (Custom Handler)", async () => {
+            expect(registerGETHandler("/gettest", async (req, res) => {
+                res.writeHead(200).end("Hello World!");
+            })).toBeUndefined();
+
+            await expect(getURL("invalidurl")).resolves.toBe(404);
+            await expect(getURL("gettest")).resolves.toBe("Hello World!");
+
+            expect(() => { registerGETHandler("/gettest", (req, res) => { }); }).toThrow("Url already registered.");
+
+            expect(registerGETHandler("/geterror", async (req, res) => {
+                throw new Error("test")
+            })).toBeUndefined();
+
+            await expect(getURL("geterror")).resolves.toBe(500);
         });
 
         test("Post Request", async () => {
