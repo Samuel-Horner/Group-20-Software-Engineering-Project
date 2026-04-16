@@ -1,11 +1,39 @@
 import { createServer } from "http";
 import { createReadStream } from "fs";
 import { URL } from "url";
-import path from "path";
+import path, { sep } from "path";
 
 import config from "../config.js";
 
 const qualified_url = `http://${config.URL}:${config.PORT}`;
+
+export function getCookies(req) {
+    if (!req.headers) return null;
+    if (!req.headers.cookie) return null;
+
+    let cookies = {};
+    req.headers.cookie.split(";").forEach(cookie => {
+        const seperator_index = cookie.indexOf("=");
+        const name = decodeURIComponent(cookie.slice(0, seperator_index));
+        const value = decodeURIComponent(cookie.slice(seperator_index + 1));
+
+        cookies[name] = value;
+    });
+    return cookies;
+}
+
+export function setCookie(res, cookies) {
+    res.setHeader("Set-Cookie", cookies.map(
+        cookie => `${encodeURIComponent(cookie.name)}=${encodeURIComponent(cookie.value)}`
+            + (cookie.expires != null ? `; Expires=${cookie.expires.toUTCString()}` : '')
+            + (cookie.maxAge != null ? `; Max-Age=${cookie.maxAge}` : '')
+            + (cookie.domain != null ? `; Domain=${cookie.domain}` : '')
+            + (cookie.path != null ? `; Path=${cookie.path}` : '')
+            + (cookie.secure ? '; Secure' : '')
+            + (cookie.httpOnly ? '; HttpOnly' : '')
+            + (cookie.sameSite != null ? `; SameSite=${cookie.sameSite}` : ''))
+    );
+}
 
 export function getMimeType(ext) {
     switch (ext) {
@@ -84,7 +112,7 @@ async function postHandler(req, res) {
                 catch { return resolve({}); }
             });
             req.on('error', () => {
-                return reject(null);
+                return resolve(null);
             });
         });
 
@@ -92,7 +120,7 @@ async function postHandler(req, res) {
 
         await endpoints[pathname](req, res, body).catch(err => {
             console.error(err);
-            return errorHandler(res, 500);
+            return errorHandler(res, 500, err.message);
         });
     } else {
         console.error(`Error, no POST handler exists for resource ${pathname}.`);

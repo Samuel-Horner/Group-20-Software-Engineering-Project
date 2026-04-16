@@ -71,6 +71,13 @@
     document.body.appendChild(overlay);
     document.body.appendChild(sidebar);
 
+    fetch("/api/account/validate", {
+        method: "POST",
+        credentials: "include",
+    }).then(res => {
+        if (res.ok) loginBtn.textContent = "Manage";
+    });
+
     checkbox.addEventListener('change', function () {
         var isDark = checkbox.checked;
         themeLink.href = isDark ? 'dark.css' : 'light.css';

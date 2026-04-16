@@ -30,7 +30,7 @@ describe("Get Quiz Endpoint", () => {
         const public_directory = path.resolve("../public");
 
         server = createHTTPServer(public_directory);
-        registerPOSTHandler("/getquiz", async (req, res) => { return quizGetHandler(req, res, quizPath = path.resolve("./quiz.json"))});
+        registerPOSTHandler("/getquiz", async (req, res, body) => { return quizGetHandler(req, res, body, quizPath = path.resolve("./quiz.json"))});
 
         server.listen(config.PORT, config.URL, () => { done(); });
     });
@@ -73,9 +73,9 @@ describe("Get Quiz Endpoint", () => {
             let res = new Res();
 
             if (quizPath != "default") {
-                await quizGetHandler(req, res, quizPath);
+                await quizGetHandler(req, res, null, quizPath);
             } else {
-                await quizGetHandler(req, res);
+                await quizGetHandler(req, res, null);
             }
 
             res.writeHead(200).end();
@@ -89,7 +89,7 @@ describe("Get Quiz Endpoint", () => {
         await expect(mockGetQuizHandler("default")).rejects.toThrow(`ENOENT: no such file or directory, open '${path.resolve("./backend/quiz.json")}'`);
     });
 
-    afterAll(async () => {
-        server.close();
+    afterAll((done) => {
+        server.close(() => { done(); });
     });
 })

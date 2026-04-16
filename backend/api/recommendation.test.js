@@ -137,8 +137,8 @@ describe("Recommendation API", () => {
 
         });
 
-        afterAll(async () => {
-            server.close();
+        afterAll((done) => {
+            server.close(() => { done(); });
         });
     });
 

@@ -22,7 +22,6 @@ class MockURL {
     }
 }
 
-
 async function getURL(url) {
     return fetch(`http://${config.URL}:${config.PORT}/${url}`).then(async res => {
         if (!res.ok) { return res.status; }
@@ -117,6 +116,8 @@ describe("Server Tests", () => {
             await expect(postURL("test")).resolves.toEqual({});
             await expect(postURL("test", { "test": 123 })).resolves.toEqual({"test":123});
 
+            expect((await fetch(`http://${config.URL}:${config.PORT}/test`, { method: "POST", body: "invalid { json"})).status).toBe(200);
+
             expect(() => { registerPOSTHandler("/test", (req, res, body) => { }); }).toThrow("Url already registered.");
 
             expect(releasePOSTHandler("/test")).toBeUndefined();
@@ -127,8 +128,8 @@ describe("Server Tests", () => {
             await expect(putURL("")).resolves.toBe(405);
         });
 
-        afterAll(() => {
-            server.close();
+        afterAll((done) => {
+            server.close(() => { done(); });
         });
     });
 });
