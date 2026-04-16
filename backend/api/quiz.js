@@ -3,7 +3,7 @@ import fs from "fs";
 
 import { errorHandler } from "../server/server.js"
 
-export function quizGetHandler(req, res, quizPath = path.resolve("./backend/quiz.json")) {
+export function quizGetHandler(req, res, _, quizPath = path.resolve("./backend/quiz.json")) {
     return new Promise((resolve, reject) => {
         res.setHeader("Content-Type", "application/json");
 

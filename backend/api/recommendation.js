@@ -20,7 +20,7 @@ export function killRecommendationProcess() {
 async function waitForPythonReady() {
     while (!pythonReady) {
         // Wait for 10 ms
-        await new Promise((resolve)=> setTimeout(() => resolve(), 10)) 
+        await new Promise((resolve) => setTimeout(() => resolve(), 10))
     }
 }
 
@@ -34,7 +34,7 @@ export async function getHobbyRecommendation(answers, maskedHobbies) {
     // If other processes currently running, block until other processes are finished
     await waitForPythonReady();
     pythonReady = false;
-    process.stdin.write(JSON.stringify({"answers": answers, "mask": maskedHobbies}) + "\n");
+    process.stdin.write(JSON.stringify({ "answers": answers, "mask": maskedHobbies }) + "\n");
 
     console.log("answers=", answers)
 
@@ -76,47 +76,25 @@ export async function getHobbyRecommendation(answers, maskedHobbies) {
     });
 }
 
-export function quizAPIHandler(req, res, recommendation = getHobbyRecommendation) {
-    return new Promise((resolve, reject) => {
-        let body = "";
+export function quizAPIHandler(req, res, body, recommendation = getHobbyRecommendation) {
+    return new Promise(async (resolve, reject) => {
+        const payload = body ? body : {};
+        const maskedHobbies = payload["maskedHobbies"];
 
-        req.on("data", (chunk) => {
-            body += chunk;
-        });
+        const rawAnswers = Array.isArray(payload.answers) ? payload.answers : [];
+        const answers = rawAnswers.map((value) => Number.parseInt(String(value), 10));
 
-        req.on("end", async () => {
-            const payload = body ? JSON.parse(body) : {};
+        if (!answers.length || answers.some((value) => Number.isNaN(value))) {
+            errorHandler(res, 400);
+            return resolve();
+        }
 
-            // console.log("payload=", payload);
-            const maskedHobbies = payload["maskedHobbies"];
-            // console.log("maskedHobbies = ", maskedHobbies);
-
-            const rawAnswers = Array.isArray(payload.answers) ? payload.answers : [];
-            const answers = rawAnswers.map((value) => Number.parseInt(String(value), 10));
-
-            if (!answers.length || answers.some((value) => Number.isNaN(value))) { 
-                errorHandler(res, 400);
-                return resolve(); 
-            }
-
-            // const hobby = await recommendation(answers);
-
-            // res.setHeader("Content-Type", "application/json");
-            // res.writeHead(200).end(JSON.stringify({ hobby }));
-
-            await recommendation(answers, maskedHobbies).then(hobby => {
-                res.setHeader("Content-Type", "application/json");
-                res.writeHead(200).end(JSON.stringify({ hobby }));
-
-                resolve();
-            }).catch(err => {
-                reject(err);
-            });
-        });
-
-        req.on("error", async (err) => {
-            console.error(`Error reading request body: ${err.message}`);
-            reject(err);
+        await recommendation(answers).then(hobby => {
+            res.setHeader("Content-Type", "application/json");
+            res.writeHead(200).end(JSON.stringify({ hobby }));
+            return resolve();
+        }).catch(err => {
+            return reject(err);
         });
     });
 }

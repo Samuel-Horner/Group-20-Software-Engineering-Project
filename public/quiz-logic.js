@@ -136,6 +136,13 @@ function getAnswersFromForm(form) {
   return answers;
 }
 
+function serializeRecommendation(recommendation) {
+  if (typeof recommendation === "string") {
+    return recommendation;
+  }
+  return JSON.stringify(recommendation);
+}
+
 async function getHobbyRecommendation(answers, maskedHobbies) {
   const response = await fetch("/api/quiz", {
     method: "POST",
@@ -159,13 +166,15 @@ formEl.addEventListener("submit", async (e) => {
     const answers = getAnswersFromForm(formEl);
     const maskedHobbies = [...selectedHobbies];
     const hobby = await getHobbyRecommendation(answers, maskedHobbies);
+    const serializedHobby = serializeRecommendation(hobby);
+    const encodedHobby = encodeURIComponent(serializedHobby);
 
-    localStorage.setItem("userHobby", hobby);
-    document.cookie = `userHobby=${encodeURIComponent(hobby)}; path=/; max-age=86400`;
-    window.location.href = `recommendation.html?hobby=${encodeURIComponent(hobby)}`;
+    localStorage.setItem("userHobby", serializedHobby);
+    document.cookie = `userHobby=${encodedHobby}; path=/; max-age=86400`;
+    window.location.href = `recommendation.html?hobby=${encodedHobby}`;
   } catch (err) {
     console.error(err);
-    alert(err?.message || "Something went wrong.");
+    alert("Invalid input for recommendation page.");
   }
 });
 

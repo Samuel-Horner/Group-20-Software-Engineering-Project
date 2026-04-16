@@ -31,6 +31,8 @@ jobs:
         run: npm ci
       - name: Run tests
         run: npm test
+      - name: Run individual tests
+        run: npm test quiz-page.test.js
       - name: Run python tests
         run: |
           cd recommendation

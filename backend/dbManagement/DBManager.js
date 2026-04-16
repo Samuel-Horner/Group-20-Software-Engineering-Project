@@ -41,7 +41,20 @@ export class DBManager {
     }
 
     dbClose() {
-        if (this.connection) this.connection.close();
+        return new Promise((resolve, reject) => {
+            if (this.connection) {
+                this.connection.close((err) => {
+                    if (err) { 
+                        reject(err);
+                    }
+                    else {
+                        this.connection = null;
+                        resolve();
+                    }
+                });
+            }
+            else { resolve(); }
+        })
     }
 }
 
