@@ -92,7 +92,7 @@ def test_softmax():
 def test_prediction(test_export):
     data = test_export
     correct = np.array([1,4,1,2,4,2,3,3,1,2,4,5,5,4,2])
-    result = make_prediction(data, correct)
+    result = make_prediction(data, correct, {})
     assert len(result) == data["n_outputs"]
 
 
