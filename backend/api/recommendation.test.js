@@ -1,14 +1,15 @@
 import { afterAll, beforeAll, describe, jest } from "@jest/globals"
 
-import { spawn } from 'child_process'
-import path from "path"
+import { spawn } from 'child_process';
+import path from "path";
 import fs from "fs";
 
 import { initRecommendationProcess, quizAPIHandler, getHobbyRecommendation, killRecommendationProcess } from "./recommendation";
 import { createHTTPServer, registerPOSTHandler } from "../server/server";
 import { DBManager } from "../dbManagement/DBManager";
 import quiz_responses from "../dbManagement/quiz_responses";
-import config from "../config"
+import config from "../config";
+import account_system from "../dbManagement/account_system";
 
 describe("Init Reccomendaton Process", () => {
     test("Init / Kill", () => {
@@ -16,7 +17,7 @@ describe("Init Reccomendaton Process", () => {
         expect(initRecommendationProcess()).toBeUndefiend;
         expect(killRecommendationProcess()).toBeUndefiend;
     });
-})
+});
 
 describe("Recommendation API", () => {
     // Needed to run tests
@@ -42,7 +43,7 @@ describe("Recommendation API", () => {
 
     describe("Quiz API", () => {
         let server;
-        const manager = new DBManager("./data/recommendation_api.test.db");
+        const manager = new DBManager("./data/recommendation_api.test.db", false);
         let port;
 
         async function postURL(url, body = {}) {
@@ -55,14 +56,19 @@ describe("Recommendation API", () => {
         beforeAll((done) => {
             const public_directory = path.resolve("../public");
 
-            manager.establishConnection().then(() => {
-                quiz_responses.init("quiz.json", manager).then(() => {
-                    server = createHTTPServer(public_directory);
-                    registerPOSTHandler("/api/quiz", (req, res) => quizAPIHandler(req, res, manager));
+            manager.establishConnection().then(async () => {
+                await manager.dbExecute(`PRAGMA foreign_keys = ON;`);
 
-            server.listen(0, config.URL, () => {
-                port = server.address().port;
-                done();
+                await account_system.init(manager);
+                await quiz_responses.init("quiz.json", manager);
+            }).then(() => {
+                server = createHTTPServer(public_directory);
+                registerPOSTHandler("/api/quiz", (req, res, body) => quizAPIHandler(req, res, body, manager));
+
+                server.listen(0, config.URL, () => {
+                    port = server.address().port;
+                    done();
+                });
             });
         });
 
@@ -72,11 +78,16 @@ describe("Recommendation API", () => {
             await expect(postURL("api/quiz", { answers: ["test"] })).resolves.toBe(400);
             await expect(postURL("api/quiz", { answers: [1] })).resolves.toBe(400);
             await expect(postURL("api/quiz", { answers: [1], maskedHobbies: null })).resolves.toBe(400);
-            await expect(postURL("api/quiz", { answers: [1], maskedHobbies: {} })).resolves.toBe(500);
+            await expect(postURL("api/quiz", { answers: [1], maskedHobbies: [] })).resolves.toBe(500);
 
             const sample1 = [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4];
-            await expect(postURL("api/quiz", { answers: [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4], maskedHobbies: {} })).resolves.not.toBe(400);
-            await expect(postURL("api/quiz", { answers: [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4], maskedHobbies: {} })).resolves.not.toBe(400);
+            const answer1 = await postURL("api/quiz", { answers: sample1, maskedHobbies: [] });
+            expect(answer1).not.toBe(400);
+            expect(answer1).not.toBe(500);
+
+            const answer2 = await postURL("api/quiz", { answers: sample1, maskedHobbies: ["running"] });
+            expect(answer2).not.toBe(400);
+            expect(answer2).not.toBe(500);
         });
 
         test("Handler", async () => {
@@ -96,7 +107,10 @@ describe("Recommendation API", () => {
                     end(body) { this.body = body; return this; }
                 }
 
-                await quizAPIHandler(req, res, body, recommendation);
+                await quizAPIHandler(req, res, body, manager, recommendation).catch(err => {
+                    // reject(err);
+                    throw err;
+                });
 
                 return res.body != null ? res.body : res.code;
             }

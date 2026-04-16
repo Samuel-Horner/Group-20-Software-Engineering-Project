@@ -20,7 +20,7 @@ describe("Networking DB", () => {
             fs.unlinkSync(TEST_DB_PATH);
         }
 
-        manager = new DBManager(TEST_DB_PATH);
+        manager = new DBManager(TEST_DB_PATH, false);
         await manager.establishConnection();
         await manager.dbExecute("PRAGMA foreign_keys = ON;");
         await hobby_set.init(manager);
@@ -88,7 +88,7 @@ describe("Networking DB", () => {
         });
 
         test("returns empty array when no accounts have hobbies", async () => {
-            const emptyManager = new DBManager(path.join(os.tmpdir(), `net-empty-${Date.now()}.db`));
+            const emptyManager = new DBManager(path.join(os.tmpdir(), `net-empty-${Date.now()}.db`), false);
             await emptyManager.establishConnection();
             await emptyManager.dbExecute("PRAGMA foreign_keys = ON;");
             await hobby_set.init(emptyManager);

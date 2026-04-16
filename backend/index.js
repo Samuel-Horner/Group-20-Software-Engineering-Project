@@ -14,13 +14,13 @@ const server = createHTTPServer(config.PUBLIC);
 dbInit();
 
 // Initialise recommender
-initRecommendationProcess("./backend/quiz.json");
+initRecommendationProcess();
 
 registerGETHandler("/api/network/accounts", (req, res, url) => networkAccountsHandler(req, res, url, manager));
 registerGETHandler("/api/network/hobbies", (req, res, url) => networkHobbiesHandler(req, res, url, manager));
 
 registerPOSTHandler("/getquiz", quizGetHandler);
-registerPOSTHandler("/api/quiz", (req, res) => quizAPIHandler(req, res, manager));
+registerPOSTHandler("/api/quiz", (req, res, body) => quizAPIHandler(req, res, body, manager));
 
 let model = fs.readFileSync("./backend/recommendation/model.json", "utf8"); 
 let jsonData = JSON.parse(model)

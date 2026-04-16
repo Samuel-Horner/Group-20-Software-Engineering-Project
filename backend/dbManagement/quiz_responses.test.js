@@ -3,13 +3,17 @@ import fs from "fs";
 
 import { DBManager } from "./DBManager.js";
 import { init, add, table_name } from "./quiz_responses.js";
+import account_system from "./account_system.js";
 
 describe("Quiz Response Database", () => {
-    const manager = new DBManager("./data/quiz_response.test.db");
+    const manager = new DBManager("./data/quiz_response.test.db", false);
 
     beforeAll(async () => {
         await manager.establishConnection();
         await manager.dbExecute(`PRAGMA foreign_keys = ON;`);
+
+        await account_system.init(manager);
+        await account_system.createAccount("test", "test", manager);
     });
 
     test("Init", async () => {
@@ -20,19 +24,18 @@ describe("Quiz Response Database", () => {
     test("Add", async () => {
         await init("quiz.json", manager);
 
-        await expect(add(undefined, [], undefined, manager)).rejects.toThrow("Answers and result are NOT NULL.");
+        await expect(add(undefined, [], undefined, manager)).rejects.toThrow("Expected 15 answers, got 0.");
         await expect(add(undefined, [], [], manager)).rejects.toThrow("Expected 15 answers, got 0.");
 
         const sample1 = [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4];
         await expect(add(undefined, sample1, [], manager)).resolves.toBeUndefined();
         await expect(add(1, sample1, [], manager)).resolves.toBeUndefined();
 
-        console.log(await manager.dbGet(`SELECT * FROM ${table_name}`));
         await expect(manager.dbGet(`SELECT * FROM ${table_name}`)).resolves.toEqual([
             {
                 ResponseID: 1,
                 UserID: null,
-                ResultJSON: '[]',
+                HobbyJSON: '[]',
                 Question1: 5,
                 Question2: 3,
                 Question3: 5,
@@ -52,7 +55,7 @@ describe("Quiz Response Database", () => {
             {
                 ResponseID: 2,
                 UserID: 1,
-                ResultJSON: '[]',
+                HobbyJSON: '[]',
                 Question1: 5,
                 Question2: 3,
                 Question3: 5,

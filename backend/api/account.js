@@ -6,9 +6,9 @@ function setSessionCookie(res, session) {
     setCookie(res, [{
         "name": "session",
         "value": JSON.stringify(session),
-        "sameSite": "Strict",
-        "path": "/api/account",
+        "sameSite": "Lax",
         "httpOnly": true,
+        "path": "/",
         "expires": new Date(Date.now() + 24 * 60 * 60 * 1000),
     }]);
 }

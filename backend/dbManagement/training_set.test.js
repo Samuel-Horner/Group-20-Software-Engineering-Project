@@ -16,7 +16,7 @@ describe("Training Set Database", () => {
     });
     
     describe("DB Operations", () => {
-        const manager = new DBManager("./data/training_set.test.db");
+        const manager = new DBManager("./data/training_set.test.db", false);
 
         beforeAll(async () => {
             await manager.establishConnection();
