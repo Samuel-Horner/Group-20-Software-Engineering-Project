@@ -11,7 +11,7 @@ describe("Account System Database", () => {
     });
 
     describe("DB Operations", () => {
-        const manager = new DBManager("./data/account_system.test.db");
+        const manager = new DBManager("./data/account_system.test.db", false);
 
         beforeAll(async () => {
             await manager.establishConnection();

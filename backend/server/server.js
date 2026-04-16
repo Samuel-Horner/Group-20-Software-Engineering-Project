@@ -16,8 +16,8 @@ export function getCookies(req) {
     let cookies = {};
     req.headers.cookie.split(";").forEach(cookie => {
         const seperator_index = cookie.indexOf("=");
-        const name = decodeURIComponent(cookie.slice(0, seperator_index));
-        const value = decodeURIComponent(cookie.slice(seperator_index + 1));
+        const name = decodeURIComponent(cookie.slice(0, seperator_index).trim());
+        const value = decodeURIComponent(cookie.slice(seperator_index + 1).trim());
 
         cookies[name] = value;
     });
@@ -60,7 +60,7 @@ export function getMimeType(ext) {
 }
 
 export async function getHandler(public_directory, req, res, _URL = URL) {
-    console.log(`Recieved GET request for resource ${req.url}.`)
+    console.log(`Recieved GET request for resource ${req.url}.`);
 
     const url = new _URL(req.url, qualified_url);
     if (url.pathname in getEndpoints) {
@@ -124,7 +124,10 @@ async function postHandler(req, res) {
             });
         });
 
-        if (body == null) { return errorHandler(res, 400); }
+        if (body == null) { 
+            console.error("Empty body");
+            return errorHandler(res, 400); 
+        }
 
         await postEndpoints[pathname](req, res, body).catch(err => {
             console.error(err);

@@ -1,6 +1,9 @@
-import { spawn } from 'child_process'
-import { errorHandler } from "../server/server.js"
-import { Recoverable } from 'repl';
+import { spawn } from 'child_process';
+import fs from "fs";
+
+import { errorHandler, getCookies } from "../server/server.js";
+import quiz_responses from "../dbManagement/quiz_responses.js";
+import account_system from '../dbManagement/account_system.js';
 
 // Initialize python process
 let process;
@@ -36,8 +39,6 @@ export async function getHobbyRecommendation(answers, maskedHobbies) {
     pythonReady = false;
     process.stdin.write(JSON.stringify({ "answers": answers, "mask": maskedHobbies }) + "\n");
 
-    console.log("answers=", answers)
-
     // Wait until the python script has resolved until we can return the prediction
     return new Promise((resolve, reject) => {
         // We need to do this weird wrapping to ensure handlers are only called once
@@ -54,9 +55,7 @@ export async function getHobbyRecommendation(answers, maskedHobbies) {
             // let bestClass = classes[sorted[0][1]];
             let bestClasses = sorted.slice(0, 5)
 
-            console.log("sorted:", sorted);
-            console.log("best:", bestClasses);
-            console.log("mask:", mask);
+            console.log(bestClasses);
 
             pythonReady = true;
             let result = JSON.stringify(bestClasses);
@@ -76,12 +75,12 @@ export async function getHobbyRecommendation(answers, maskedHobbies) {
     });
 }
 
-export function quizAPIHandler(req, res, body, recommendation = getHobbyRecommendation) {
+export function quizAPIHandler(req, res, body, manager, recommendation = getHobbyRecommendation) {
     return new Promise(async (resolve, reject) => {
         const payload = body ? body : {};
         const maskedHobbies = payload["maskedHobbies"];
 
-        if (!maskedHobbies)  {
+        if (!maskedHobbies) {
             errorHandler(res, 400);
             return resolve();
         }
@@ -94,7 +93,22 @@ export function quizAPIHandler(req, res, body, recommendation = getHobbyRecommen
             return resolve();
         }
 
-        await recommendation(answers, maskedHobbies).then(hobby => {
+        let user_id = null;
+        const cookies = getCookies(req);
+        try {
+            const session = JSON.parse(cookies.session);
+            if (await account_system.validateSession(session, manager)) {
+                user_id = session.account_id;
+            }
+        } catch (err) {
+            if (cookies != null) {
+                console.error(err);
+            }
+        }
+
+        await recommendation(answers, maskedHobbies).then(async hobby => {
+            await quiz_responses.add(user_id, answers, maskedHobbies, manager);
+
             res.setHeader("Content-Type", "application/json");
             res.writeHead(200).end(JSON.stringify({ hobby }));
             return resolve();

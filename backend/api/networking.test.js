@@ -77,7 +77,7 @@ describe("Network API Handlers", () => {
             fs.unlinkSync(TEST_DB_PATH);
         }
 
-        manager = new DBManager(TEST_DB_PATH);
+        manager = new DBManager(TEST_DB_PATH, false);
         await manager.establishConnection();
         await manager.dbExecute("PRAGMA foreign_keys = ON;");
         await hobby_set.init(manager);

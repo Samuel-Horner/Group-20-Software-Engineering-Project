@@ -51,7 +51,7 @@ async function mockHandler(handler, body, cookies, manager) {
 describe("Account API", () => {
     let server;
     let port;
-    const manager = new DBManager("./data/account_api.test.db");
+    const manager = new DBManager("./data/account_api.test.db", false);
 
     async function postURL(url, body = {}, session = {}) {
         return fetch(`http://${config.URL}:${port}/${url}`,

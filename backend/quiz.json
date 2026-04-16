@@ -1,5 +1,5 @@
 {
-  "quizId": "hobby-quiz-1",
+  "quizId": "hobby_quiz_1",
   "title": "Hobby Finder Quiz",
   "description": "Rate each statement from 1 (not at all) to 5 (very much).",
   "scale": {

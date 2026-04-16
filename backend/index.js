@@ -20,7 +20,7 @@ registerGETHandler("/api/network/accounts", (req, res, url) => networkAccountsHa
 registerGETHandler("/api/network/hobbies", (req, res, url) => networkHobbiesHandler(req, res, url, manager));
 
 registerPOSTHandler("/getquiz", quizGetHandler);
-registerPOSTHandler("/api/quiz", quizAPIHandler);
+registerPOSTHandler("/api/quiz", (req, res, body) => quizAPIHandler(req, res, body, manager));
 
 let model = fs.readFileSync("./backend/recommendation/model.json", "utf8"); 
 let jsonData = JSON.parse(model)
