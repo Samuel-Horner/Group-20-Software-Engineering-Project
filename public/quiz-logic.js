@@ -4,6 +4,11 @@ const quizDescriptionEl = document.getElementById("quizDescription");
 const quizQuestionsEl = document.getElementById("quizQuestions");
 const quizErrorEl = document.getElementById("quizError");
 
+// Hobby chip selector state
+let selectedHobbies = [];
+let availableHobbies = [];
+
+
 function escapeHtml(str) {
   return String(str)
     .replaceAll("&", "&amp;")
@@ -131,15 +136,18 @@ function getAnswersFromForm(form) {
   return answers;
 }
 
-async function getHobbyRecommendation(answers, userID) {
-  alert(answers)
+function serializeRecommendation(recommendation) {
+  if (typeof recommendation === "string") {
+    return recommendation;
+  }
+  return JSON.stringify(recommendation);
+}
+
+async function getHobbyRecommendation(answers, maskedHobbies) {
   const response = await fetch("/api/quiz", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      "answers": answers,
-      "userID": userID, 
-    }),
+    body: JSON.stringify({ answers, maskedHobbies }),
   });
 
   if (!response.ok) {
@@ -156,16 +164,17 @@ formEl.addEventListener("submit", async (e) => {
 
   try {
     const answers = getAnswersFromForm(formEl);
-    // TODO - get user ID
-    const userID = 1;
-    const hobby = await getHobbyRecommendation(answers, userID);
+    const maskedHobbies = [...selectedHobbies];
+    const hobby = await getHobbyRecommendation(answers, maskedHobbies);
+    const serializedHobby = serializeRecommendation(hobby);
+    const encodedHobby = encodeURIComponent(serializedHobby);
 
-    localStorage.setItem("userHobby", hobby);
-    document.cookie = `userHobby=${encodeURIComponent(hobby)}; path=/; max-age=86400`;
-    window.location.href = `recommendation.html?hobby=${encodeURIComponent(hobby)}`;
+    localStorage.setItem("userHobby", serializedHobby);
+    document.cookie = `userHobby=${encodedHobby}; path=/; max-age=86400`;
+    window.location.href = `recommendation.html?hobby=${encodedHobby}`;
   } catch (err) {
     console.error(err);
-    alert(err?.message || "Something went wrong.");
+    alert("Invalid input for recommendation page.");
   }
 });
 
@@ -173,9 +182,94 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     const quiz = await fetchQuiz();
     renderQuiz(quiz);
+    await setupHobbySelector();
   } catch (err) {
     console.error("Quiz load error:", err);
     quizErrorEl.textContent = err?.message || "Failed to load quiz";
     quizErrorEl.style.display = "block";
   }
 });
+
+async function fetchHobbies() {
+  try {
+    const res = await fetch("/gethobbies", { method: "POST" });
+    return await res.json();
+  } catch (err) {
+    console.error("Hobby load error:", err);
+    return [];
+  }
+}
+
+function capitalizeHobby(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function renderChips() {
+  const chipsContainer = document.getElementById("hobbyChips");
+  chipsContainer.innerHTML = selectedHobbies.map(h => `
+    <span class="hobby-chip">
+      ${escapeHtml(capitalizeHobby(h))}
+      <button type="button" class="hobby-chip-remove" data-hobby="${escapeHtml(h)}">×</button>
+    </span>
+  `).join("");
+}
+
+function renderDropdownOptions() {
+  const dropdownList = document.getElementById("hobbyDropdownList");
+  const remaining = availableHobbies.filter(h => !selectedHobbies.includes(h));
+  if (!remaining.length) {
+    dropdownList.innerHTML = `<li class="hobby-option-empty">No more hobbies to add</li>`;
+  } else {
+    dropdownList.innerHTML = remaining.map(h =>
+      `<li class="hobby-option" data-hobby="${escapeHtml(h)}">${escapeHtml(capitalizeHobby(h))}</li>`
+    ).join("");
+  }
+}
+
+function initHobbySelector() {
+  const button = document.getElementById("hobbyDropdownButton");
+  const dropdownList = document.getElementById("hobbyDropdownList");
+  const chipsContainer = document.getElementById("hobbyChips");
+
+  button.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isHidden = dropdownList.classList.contains("hidden");
+    if (isHidden) {
+      renderDropdownOptions();
+      dropdownList.classList.remove("hidden");
+      button.classList.add("active");
+    } else {
+      dropdownList.classList.add("hidden");
+      button.classList.remove("active");
+    }
+  });
+
+  dropdownList.addEventListener("click", (e) => {
+    const option = e.target.closest(".hobby-option");
+    if (!option || !option.dataset.hobby) return;
+    selectedHobbies.push(option.dataset.hobby);
+    renderChips();
+    renderDropdownOptions();
+    dropdownList.classList.add("hidden");
+    button.classList.remove("active");
+  });
+
+  chipsContainer.addEventListener("click", (e) => {
+    const removeButton = e.target.closest(".hobby-chip-remove");
+    if (!removeButton || !removeButton.dataset.hobby) return;
+    selectedHobbies = selectedHobbies.filter(h => h !== removeButton.dataset.hobby);
+    renderChips();
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!button.contains(e.target) && !dropdownList.contains(e.target)) {
+      dropdownList.classList.add("hidden");
+      button.classList.remove("active");
+    }
+  });
+}
+
+async function setupHobbySelector() {
+  availableHobbies = await fetchHobbies();
+  initHobbySelector();
+}

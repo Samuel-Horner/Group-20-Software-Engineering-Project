@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account</title>
+    <link id="theme-stylesheet" href="light.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+
+    <style>
+        .center {
+            display: flex;
+            flex-grow: 1;
+
+            align-items: center;
+            justify-content: center;
+        }
+
+        .row {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .row>* {
+            padding: 1rem;
+        }
+
+        .form {
+            display: flex;
+            flex-direction: column;
+
+            width: 20rem
+        }
+
+        .form-item {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+
+            padding: 0.1em;
+        }
+
+        .form-title {
+            padding: 1em;
+        }
+
+        .form-bottom {
+            padding: 1em;
+        }
+
+        .form-item button {
+            padding: 0.2em;
+            margin-left: 0.2em;
+            margin-right: 0.2em;
+            flex-grow: 1;
+        }
+
+        .form-item input {
+            flex-grow: 1;
+        }
+
+        .form-item label {
+            flex-grow: 1;
+        }
+
+        .text-light {
+            color: var(--text-light);
+        }
+
+        .text-dark {
+            color: var(--text-dark);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">HobbyMatch</div>
+            <ul class="nav-links">
+                <li><a href="index_new.html">Home</a></li>
+                <li><a href="community.html">Community</a></li>
+                <li><a href="network_page.html">Connect</a></li>
+                <li><a href="data_input.html" class="nav-cta">Take Quiz</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container center" style="margin-top:100px">
+        <div>
+            <div id="signed-out-content" style="visibility: hidden; position: fixed;">
+                <div class="form">
+                    <div class="form-item form-title">
+                        <h1> Account </h1>
+                    </div>
+
+                    <div class="form-item">
+                        <label for="username">Username: </label>
+                        <input type="text" name="username" id="username-input">
+                    </div>
+
+                    <div class="form-item">
+                        <label for="password">Password: </label>
+                        <input type="password" name="password" id="password-input">
+                    </div>
+
+                    <div class="form-item form-bottom">
+                        <button id="sign-in-submit">Sign In</button>
+                        <button id="create-account-submit">Create Account</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="signed-in-content" style="visibility: hidden; position: fixed;">
+                <div class="form">
+                    <div class="form-item form-title">
+                        <div class="form">
+                            <h1 class="form-item">Account</h1>
+                            <p class="form-item text-light" id="username-display"></p>
+                        </div>
+                    </div>
+
+                    <div class="form-item">
+                        <label for="fullname">Full Name: </label>
+                        <input type="text" name="fullname" id="fullname-input">
+                    </div>
+                    <div class="form-item">
+                        <div class="form">
+                            <label for="description" class="form-item">Description: </label>
+                            <textarea class="form-item" name="description" id="description-input" rows=4 cols=80>
+                        </textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-item form-bottom">
+                        <button id="save-changes-submit">Save Changes</button>
+                    </div>
+
+                    <div class="form-item form-bottom">
+                        <button id="sign-out-all-submit">Sign Out (all devices)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+    <script src="account_page.js" type="module"></script>
+    <script src="sidebar.js"></script>
+
+</body>
+
+</html>

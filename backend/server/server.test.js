@@ -5,7 +5,7 @@ import path from "path";
 
 import config from "../config";
 
-import { getMimeType, createHTTPServer, registerPOSTHandler, getHandler, releasePOSTHandler } from "./server";
+import { getMimeType, createHTTPServer, registerPOSTHandler, getHandler, releasePOSTHandler, registerGETHandler } from "./server";
 
 const public_directory = path.resolve("../public");
 
@@ -22,27 +22,6 @@ class MockURL {
     }
 }
 
-
-async function getURL(url) {
-    return fetch(`http://${config.URL}:${config.PORT}/${url}`).then(async res => {
-        if (!res.ok) { return res.status; }
-        return await (await res.blob()).text();
-    });
-}
-
-async function postURL(url, body = {}) {
-    return fetch(`http://${config.URL}:${config.PORT}/${url}`, { method: "POST", body: JSON.stringify(body) }).then(async res => {
-        if (!res.ok) { return res.status; }
-        return await res.json();
-    });
-}
-
-async function putURL(url, body = {}) {
-    return fetch(`http://${config.URL}:${config.PORT}/${url}`, { method: "PUT", body: JSON.stringify(body) }).then(async res => {
-        if (!res.ok) { return res.status; }
-        return await res.json();
-    });
-}
 
 function readFile(file_path) {
     file_path = path.join(public_directory, file_path);
@@ -94,9 +73,35 @@ describe("Server Tests", () => {
 
     describe("Server Module", () => {
         let server;
+        let port;
+
+        async function getURL(url) {
+            return fetch(`http://${config.URL}:${port}/${url}`).then(async res => {
+                if (!res.ok) { return res.status; }
+                return await (await res.blob()).text();
+            });
+        }
+
+        async function postURL(url, body = {}) {
+            return fetch(`http://${config.URL}:${port}/${url}`, { method: "POST", body: JSON.stringify(body) }).then(async res => {
+                if (!res.ok) { return res.status; }
+                return await res.json();
+            });
+        }
+
+        async function putURL(url, body = {}) {
+            return fetch(`http://${config.URL}:${port}/${url}`, { method: "PUT", body: JSON.stringify(body) }).then(async res => {
+                if (!res.ok) { return res.status; }
+                return await res.json();
+            });
+        }
+
         beforeAll((done) => {
             server = createHTTPServer(public_directory);
-            server.listen(config.PORT, config.URL, () => { done(); });
+            server.listen(0, config.URL, () => {
+                port = server.address().port;
+                done();
+            });
         });
 
         // Public Interface
@@ -108,24 +113,35 @@ describe("Server Tests", () => {
             await expect(getURL("foo")).resolves.toBe(404);
         });
 
+        test("Get Request (Custom Handler)", async () => {
+            expect(registerGETHandler("/gettest", async (req, res) => {
+                res.writeHead(200).end("Hello World!");
+            })).toBeUndefined();
+
+            await expect(getURL("invalidurl")).resolves.toBe(404);
+            await expect(getURL("gettest")).resolves.toBe("Hello World!");
+
+            expect(() => { registerGETHandler("/gettest", (req, res) => { }); }).toThrow("Url already registered.");
+
+            expect(registerGETHandler("/geterror", async (req, res) => {
+                throw new Error("test")
+            })).toBeUndefined();
+
+            await expect(getURL("geterror")).resolves.toBe(500);
+        });
+
         test("Post Request", async () => {
-            expect(registerPOSTHandler("/test", async (req, res) => {
-                let body = "";
-
-                req.on("data", (chunk) => {
-                    body += chunk;
-                });
-
-                req.on("end", async () => {
-                    res.writeHead(200).end(JSON.stringify(body));
-                });
+            expect(registerPOSTHandler("/test", async (req, res, body) => {
+                res.writeHead(200).end(JSON.stringify(body));
             })).toBeUndefined();
 
             await expect(postURL("")).resolves.toBe(404);
-            await expect(postURL("test")).resolves.toBe(`{}`);
-            await expect(postURL("test", { "test": 123 })).resolves.toBe(`{"test":123}`);
+            await expect(postURL("test")).resolves.toEqual({});
+            await expect(postURL("test", { "test": 123 })).resolves.toEqual({ "test": 123 });
 
-            expect(() => { registerPOSTHandler("/test", (req, res) => { }); }).toThrow("Url already registered.");
+            expect((await fetch(`http://${config.URL}:${port}/test`, { method: "POST", body: "invalid { json" })).status).toBe(200);
+
+            expect(() => { registerPOSTHandler("/test", (req, res, body) => { }); }).toThrow("Url already registered.");
 
             expect(releasePOSTHandler("/test")).toBeUndefined();
             expect(() => { releasePOSTHandler("/test"); }).toThrow("Url not registered.");
@@ -135,8 +151,10 @@ describe("Server Tests", () => {
             await expect(putURL("")).resolves.toBe(405);
         });
 
-        afterAll(() => {
-            server.close();
+        afterAll(async () => {
+            await new Promise((resolve) => {
+                server.close(resolve);
+            });
         });
     });
 });
