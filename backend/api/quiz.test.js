@@ -8,12 +8,6 @@ import { createHTTPServer, registerPOSTHandler } from "../server/server";
 import config from "../config";
 import { PassThrough } from "stream";
 
-async function postURL(url, body = {}) {
-    return fetch(`http://${config.URL}:${config.PORT}/${url}`, { method: "POST", body: JSON.stringify(body) }).then(async res => {
-        if (!res.ok) { return res.status; }
-        return await res.json();
-    });
-}
 
 function readFile(file_path) {
     try {
@@ -25,14 +19,26 @@ function readFile(file_path) {
 
 describe("Get Quiz Endpoint", () => {
     let server;
+    let port;
+
+    async function postURL(url, body = {}) {
+        return fetch(`http://${config.URL}:${port}/${url}`, { method: "POST", body: JSON.stringify(body) }).then(async res => {
+            if (!res.ok) { return res.status; }
+            return await res.json();
+        });
+    }
+
 
     beforeAll((done) => {
         const public_directory = path.resolve("../public");
 
         server = createHTTPServer(public_directory);
-        registerPOSTHandler("/getquiz", async (req, res, body) => { return quizGetHandler(req, res, body, quizPath = path.resolve("./quiz.json"))});
+        registerPOSTHandler("/getquiz", async (req, res, body) => { return quizGetHandler(req, res, body, quizPath = path.resolve("./quiz.json")) });
 
-        server.listen(config.PORT, config.URL, () => { done(); });
+        server.listen(0, config.URL, () => {
+            port = server.address().port;
+            done();
+        });
     });
 
     test("Real POST requests", async () => {
@@ -55,18 +61,18 @@ describe("Get Quiz Endpoint", () => {
                     this.body = null;
                 }
 
-                writeHead(code) { 
-                    this.code = code; 
-                    return this; 
+                writeHead(code) {
+                    this.code = code;
+                    return this;
                 }
 
-                setHeader(key, val) { 
-                    return this; 
+                setHeader(key, val) {
+                    return this;
                 }
 
-                end(body) { 
-                    this.body = body; 
-                    return this; 
+                end(body) {
+                    this.body = body;
+                    return this;
                 }
             }
 
@@ -80,7 +86,7 @@ describe("Get Quiz Endpoint", () => {
 
             res.writeHead(200).end();
 
-            return res.body != null ? res.body : res.code; 
+            return res.body != null ? res.body : res.code;
         }
 
         await expect(mockGetQuizHandler("abc")).rejects.toThrow("ENOENT: no such file or directory, open 'abc'");
@@ -89,7 +95,9 @@ describe("Get Quiz Endpoint", () => {
         await expect(mockGetQuizHandler("default")).rejects.toThrow(`ENOENT: no such file or directory, open '${path.resolve("./backend/quiz.json")}'`);
     });
 
-    afterAll((done) => {
-        server.close(() => { done(); });
+    afterAll(async () => {
+        await new Promise((resolve) => {
+            server.close(resolve);
+        });
     });
 })

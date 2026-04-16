@@ -7,12 +7,7 @@ import { initRecommendationProcess, quizAPIHandler, getHobbyRecommendation, kill
 import { createHTTPServer, registerPOSTHandler } from "../server/server";
 import config from "../config"
 
-async function postURL(url, body = {}) {
-    return fetch(`http://${config.URL}:${config.PORT}/${url}`, { method: "POST", body: JSON.stringify(body) }).then(async res => {
-        if (!res.ok) { return res.status; }
-        return await res.json();
-    });
-}
+
 
 // Directly call the recommendation engine (using a new instance)
 async function getRecommendation(answers) {
@@ -80,6 +75,14 @@ describe("Recommendation API", () => {
 
     describe("Quiz API", () => {
         let server;
+        let port;
+
+        async function postURL(url, body = {}) {
+            return fetch(`http://${config.URL}:${port}/${url}`, { method: "POST", body: JSON.stringify(body) }).then(async res => {
+                if (!res.ok) { return res.status; }
+                return await res.json();
+            });
+        }
 
         beforeAll((done) => {
             const public_directory = path.resolve("../public");
@@ -87,7 +90,10 @@ describe("Recommendation API", () => {
             server = createHTTPServer(public_directory);
             registerPOSTHandler("/api/quiz", quizAPIHandler);
 
-            server.listen(config.PORT, config.URL, () => { done(); });
+            server.listen(0, config.URL, () => {
+                port = server.address().port;
+                done();
+            });
         });
 
         test("Real Post Request", async () => {
@@ -119,26 +125,28 @@ describe("Recommendation API", () => {
 
                 await quizAPIHandler(req, res, body, recommendation);
 
-                return res.body != null ? res.body : res.code; 
+                return res.body != null ? res.body : res.code;
             }
 
             await expect(mockQuizAPIHandler(null)).resolves.toBe(400);
             await expect(mockQuizAPIHandler({})).resolves.toBe(400);
-            await expect(mockQuizAPIHandler({"answers": []})).resolves.toBe(400);
-            await expect(mockQuizAPIHandler({"answers": ["test"]})).resolves.toBe(400);
-            await expect(mockQuizAPIHandler({"answers": [1]})).rejects.toThrow("Input to hobby recommendation has length 1, when length 15 is needed");
+            await expect(mockQuizAPIHandler({ "answers": [] })).resolves.toBe(400);
+            await expect(mockQuizAPIHandler({ "answers": ["test"] })).resolves.toBe(400);
+            await expect(mockQuizAPIHandler({ "answers": [1] })).rejects.toThrow("Input to hobby recommendation has length 1, when length 15 is needed");
 
             const sample1 = [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4];
-            await expect(mockQuizAPIHandler({"answers": sample1})).resolves.toEqual(JSON.stringify({ "hobby": await getRecommendation(sample1) }));
+            await expect(mockQuizAPIHandler({ "answers": sample1 })).resolves.toEqual(JSON.stringify({ "hobby": await getRecommendation(sample1) }));
 
-            await expect(mockQuizAPIHandler({"answers": sample1}, async (answers) => {
-                throw new Error("Recommendation engine not implemented"); 
+            await expect(mockQuizAPIHandler({ "answers": sample1 }, async (answers) => {
+                throw new Error("Recommendation engine not implemented");
             })).rejects.toThrow("Recommendation engine not implemented");
 
         });
 
-        afterAll((done) => {
-            server.close(() => { done(); });
+        afterAll(async () => {
+            await new Promise((resolve) => {
+                server.close(resolve);
+            });
         });
     });
 

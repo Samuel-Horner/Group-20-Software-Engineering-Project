@@ -22,26 +22,6 @@ class MockURL {
     }
 }
 
-async function getURL(url) {
-    return fetch(`http://${config.URL}:${config.PORT}/${url}`).then(async res => {
-        if (!res.ok) { return res.status; }
-        return await (await res.blob()).text();
-    });
-}
-
-async function postURL(url, body = {}) {
-    return fetch(`http://${config.URL}:${config.PORT}/${url}`, { method: "POST", body: JSON.stringify(body) }).then(async res => {
-        if (!res.ok) { return res.status; }
-        return await res.json();
-    });
-}
-
-async function putURL(url, body = {}) {
-    return fetch(`http://${config.URL}:${config.PORT}/${url}`, { method: "PUT", body: JSON.stringify(body) }).then(async res => {
-        if (!res.ok) { return res.status; }
-        return await res.json();
-    });
-}
 
 function readFile(file_path) {
     file_path = path.join(public_directory, file_path);
@@ -93,9 +73,35 @@ describe("Server Tests", () => {
 
     describe("Server Module", () => {
         let server;
+        let port;
+
+        async function getURL(url) {
+            return fetch(`http://${config.URL}:${port}/${url}`).then(async res => {
+                if (!res.ok) { return res.status; }
+                return await (await res.blob()).text();
+            });
+        }
+
+        async function postURL(url, body = {}) {
+            return fetch(`http://${config.URL}:${port}/${url}`, { method: "POST", body: JSON.stringify(body) }).then(async res => {
+                if (!res.ok) { return res.status; }
+                return await res.json();
+            });
+        }
+
+        async function putURL(url, body = {}) {
+            return fetch(`http://${config.URL}:${port}/${url}`, { method: "PUT", body: JSON.stringify(body) }).then(async res => {
+                if (!res.ok) { return res.status; }
+                return await res.json();
+            });
+        }
+
         beforeAll((done) => {
             server = createHTTPServer(public_directory);
-            server.listen(config.PORT, config.URL, () => { done(); });
+            server.listen(0, config.URL, () => {
+                port = server.address().port;
+                done();
+            });
         });
 
         // Public Interface
@@ -114,9 +120,9 @@ describe("Server Tests", () => {
 
             await expect(postURL("")).resolves.toBe(404);
             await expect(postURL("test")).resolves.toEqual({});
-            await expect(postURL("test", { "test": 123 })).resolves.toEqual({"test":123});
+            await expect(postURL("test", { "test": 123 })).resolves.toEqual({ "test": 123 });
 
-            expect((await fetch(`http://${config.URL}:${config.PORT}/test`, { method: "POST", body: "invalid { json"})).status).toBe(200);
+            expect((await fetch(`http://${config.URL}:${port}/test`, { method: "POST", body: "invalid { json" })).status).toBe(200);
 
             expect(() => { registerPOSTHandler("/test", (req, res, body) => { }); }).toThrow("Url already registered.");
 
@@ -128,8 +134,10 @@ describe("Server Tests", () => {
             await expect(putURL("")).resolves.toBe(405);
         });
 
-        afterAll((done) => {
-            server.close(() => { done(); });
+        afterAll(async () => {
+            await new Promise((resolve) => {
+                server.close(resolve);
+            });
         });
     });
 });

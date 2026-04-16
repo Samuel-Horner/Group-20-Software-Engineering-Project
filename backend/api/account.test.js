@@ -10,18 +10,7 @@ import config from "../config";
 
 import { loginHandler, createAccountHandler, logoutHandler, deleteAccountHandler, updateAccountHandler, getAccountInformationHandler, validateSessionHandler } from "./account.js";
 
-async function postURL(url, body = {}, session = {}) {
-    return fetch(`http://${config.URL}:${config.PORT}/${url}`,
-        {
-            method: "POST",
-            body: JSON.stringify(body),
-            credentials: "include",
-        }
-    ).then(async res => {
-        if (!res.ok) { return res.status; }
-        return await res.json();
-    });
-}
+
 
 async function mockHandler(handler, body, cookies, manager) {
     let req = {
@@ -58,31 +47,42 @@ async function mockHandler(handler, body, cookies, manager) {
     return res;
 }
 
-async function getSession(username, password) {
-    return fetch(`http://${config.URL}:${config.PORT}/api/account/login`, {
-        "method": "POST",
-        "body": JSON.stringify({ "username": username, "password": password }),
-        "credentials": "include"
-    }).then(res => {
-        const cookies = res.headers.getSetCookie().map(cookie => {
-            cookie = cookie.split(";", 1)[0];
-            const seperator_index = cookie.indexOf("=");
-            const name = decodeURIComponent(cookie.slice(0, seperator_index));
-            const value = decodeURIComponent(cookie.slice(seperator_index + 1));
-            return { "name": name, "value": value };
-        });
-
-        return JSON.parse(cookies.find(cookie => cookie.name == "session").value);
-    });
-}
 
 describe("Account API", () => {
-    afterAll(() => {
-        fs.rmSync("./data/account_api.test.db");
-    });
-
     let server;
+    let port;
     const manager = new DBManager("./data/account_api.test.db");
+
+    async function postURL(url, body = {}, session = {}) {
+        return fetch(`http://${config.URL}:${port}/${url}`,
+            {
+                method: "POST",
+                body: JSON.stringify(body),
+                credentials: "include",
+            }
+        ).then(async res => {
+            if (!res.ok) { return res.status; }
+            return await res.json();
+        });
+    }
+
+    async function getSession(username, password) {
+        return fetch(`http://${config.URL}:${port}/api/account/login`, {
+            "method": "POST",
+            "body": JSON.stringify({ "username": username, "password": password }),
+            "credentials": "include"
+        }).then(res => {
+            const cookies = res.headers.getSetCookie().map(cookie => {
+                cookie = cookie.split(";", 1)[0];
+                const seperator_index = cookie.indexOf("=");
+                const name = decodeURIComponent(cookie.slice(0, seperator_index));
+                const value = decodeURIComponent(cookie.slice(seperator_index + 1));
+                return { "name": name, "value": value };
+            });
+
+            return JSON.parse(cookies.find(cookie => cookie.name == "session").value);
+        });
+    }
 
     beforeAll(async () => {
         await manager.establishConnection();
@@ -99,17 +99,13 @@ describe("Account API", () => {
             registerPOSTHandler("/api/account/logout", (req, res, body) => logoutHandler(req, res, body, manager));
             registerPOSTHandler("/api/account/get", (req, res, body) => getAccountInformationHandler(req, res, body, manager));
 
-            server.listen(config.PORT, config.URL, () => { resolve(); });
+            server.listen(0, config.URL, () => {
+                port = server.address().port;
+                resolve();
+            });
         });
 
         await account_system.createAccount("test_username", "test_password", manager);
-    });
-
-    afterAll(async () => {
-        await manager.dbClose();
-        await new Promise((resolve) => {
-            server.close(() => { resolve(); });
-        });
     });
 
     test("Login Handler", async () => {
@@ -296,5 +292,15 @@ describe("Account API", () => {
 
         await expect(postURL("api/account/get", { "username": account.Username })).resolves.not.toBe(500);
         await expect(postURL("api/account/get", { "account_id": account.AccountID })).resolves.not.toBe(500);
+    });
+
+    afterAll(async () => {
+        await manager.dbClose();
+        await new Promise((resolve) => {
+            server.close(resolve);
+        });
+
+        fs.rmSync("./data/account_api.test.db");
+        console.log("Finished cleanup");
     });
 });
