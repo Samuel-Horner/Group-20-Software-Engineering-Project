@@ -3,22 +3,30 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Your Hobby Recommendation</title>
+    <title>HobbyMatch | Your Recommendation</title>
     <link id="theme-stylesheet" href="light.css" rel="stylesheet">
     <link href="styles.css" rel="stylesheet">
     <style>
         body {
             background: var(--background-alt);
-            padding: 80px 20px;
+        }
+
+        .rec-page {
+            padding-top: 114px;
+            padding-bottom: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 32px;
         }
 
         .rec-card {
+            width: 100%;
             max-width: 720px;
-            margin: 0 auto;
             background: var(--background);
             border-radius: 20px;
             box-shadow: var(--shadow-lg);
-            padding: 36px 32px;
+            padding: 48px 40px;
             text-align: center;
         }
 
@@ -39,6 +47,7 @@
             justify-content: center;
             gap: 16px;
             flex-wrap: wrap;
+            margin-top: 32px;
         }
 
         .secondary-btn {
@@ -60,14 +69,13 @@
         }
 
         .scrolly-card {
+            width: 100%;
             max-width: 720px;
-            margin: 0 auto;
             background: var(--background);
             border-radius: 20px;
             box-shadow: var(--shadow-lg);
-            padding: 36px 32px;
+            padding: 48px 40px;
             text-align: center;
-            /* animation: scroller 4s ease-in; */
         }
 
         @keyframes scroller {
@@ -82,7 +90,20 @@
     </style>
 </head>
 <body>
-    <div class="rec-card" style="margin-bottom: 10rem;">
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">HobbyMatch</div>
+      <ul class="nav-links">
+        <li><a href="index_new.html">Home</a></li>
+        <li><a href="community.html">Community</a></li>
+        <li><a href="network_page.html">Connect</a></li>
+        <li><a href="data_input.html" class="nav-cta">Take Quiz</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container rec-page">
+    <div class="rec-card">
         <h1 class="rec-title">Your Recommended Hobby</h1>
         <p>Based on your quiz answers, we think you'll enjoy:</p>
         <div id="hobbyName" class="rec-hobby">Loading...</div>
@@ -241,5 +262,30 @@
         }
     </script>
     <script src="sidebar.js"></script>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>HobbyMatch</h4>
+          <p>Connecting people with their perfect hobbies</p>
+        </div>
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="index_new.html">Home</a></li>
+            <li><a href="community.html">Community</a></li>
+            <li><a href="network_page.html">Connect</a></li>
+            <li><a href="data_input.html">Take Quiz</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Contact</h4>
+          <p>University of Bath<br>Bath, UK</p>
+        </div>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>
