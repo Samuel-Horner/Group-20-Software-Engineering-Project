@@ -7,7 +7,7 @@
     "type": "module",
     "main": "index.js",
     "scripts": {
-        "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage --detectOpenHandles",
+        "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage --detectOpenHandles --runInBand",
         "start": "node index.js"
     },
     "devDependencies": {
