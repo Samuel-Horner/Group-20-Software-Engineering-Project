@@ -60,9 +60,8 @@
     accountTitle.textContent = 'Account';
     accountSection.appendChild(accountTitle);
 
-    // TODO: update href to login page once ready
     var loginBtn = document.createElement('a');
-    loginBtn.href = '#';
+    loginBtn.href = 'accountprofile.html';
     loginBtn.className = 'settings-login-btn';
     loginBtn.textContent = 'Log In';
 
@@ -71,6 +70,13 @@
 
     document.body.appendChild(overlay);
     document.body.appendChild(sidebar);
+
+    fetch("/api/account/validate", {
+        method: "POST",
+        credentials: "include",
+    }).then(res => {
+        if (res.ok) loginBtn.textContent = "Manage";
+    });
 
     checkbox.addEventListener('change', function () {
         var isDark = checkbox.checked;

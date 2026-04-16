@@ -55,43 +55,30 @@ export async function getHobbyRecommendation(answers) {
     });
 }
 
-export function quizAPIHandler(req, res, recommendation = getHobbyRecommendation) {
-    return new Promise((resolve, reject) => {
-        let body = "";
+export function quizAPIHandler(req, res, body, recommendation = getHobbyRecommendation) {
+    return new Promise(async (resolve, reject) => {
+        const payload = body ? body : {};
 
-        req.on("data", (chunk) => {
-            body += chunk;
-        });
+        const rawAnswers = Array.isArray(payload.answers) ? payload.answers : [];
+        const answers = rawAnswers.map((value) => Number.parseInt(String(value), 10));
 
-        req.on("end", async () => {
-            const payload = body ? JSON.parse(body) : {};
+        if (!answers.length || answers.some((value) => Number.isNaN(value))) { 
+            errorHandler(res, 400);
+            return resolve(); 
+        }
 
-            const rawAnswers = Array.isArray(payload.answers) ? payload.answers : [];
-            const answers = rawAnswers.map((value) => Number.parseInt(String(value), 10));
+        // const hobby = await recommendation(answers);
 
-            if (!answers.length || answers.some((value) => Number.isNaN(value))) { 
-                errorHandler(res, 400);
-                return resolve(); 
-            }
+        // res.setHeader("Content-Type", "application/json");
+        // res.writeHead(200).end(JSON.stringify({ hobby }));
 
-            // const hobby = await recommendation(answers);
+        await recommendation(answers).then(hobby => {
+            res.setHeader("Content-Type", "application/json");
+            res.writeHead(200).end(JSON.stringify({ hobby }));
 
-            // res.setHeader("Content-Type", "application/json");
-            // res.writeHead(200).end(JSON.stringify({ hobby }));
-
-            await recommendation(answers).then(hobby => {
-                res.setHeader("Content-Type", "application/json");
-                res.writeHead(200).end(JSON.stringify({ hobby }));
-
-                resolve();
-            }).catch(err => {
-                reject(err);
-            });
-        });
-
-        req.on("error", async (err) => {
-            console.error(`Error reading request body: ${err.message}`);
-            reject(err);
+            return resolve();
+        }).catch(err => {
+            return reject(err);
         });
     });
 }
