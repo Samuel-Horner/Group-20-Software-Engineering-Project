@@ -22,14 +22,14 @@ registerGETHandler("/api/network/hobbies", (req, res, url) => networkHobbiesHand
 registerPOSTHandler("/getquiz", quizGetHandler);
 registerPOSTHandler("/api/quiz", quizAPIHandler);
 
-let model = fs.readFileSync("./backend/recommendation/model.json", "utf8");    let jsonData = JSON.parse(model)
-let hobbies = jsonData["classes"]
-model= null; jsonData = null;
+let model = fs.readFileSync("./backend/recommendation/model.json", "utf8"); 
+let jsonData = JSON.parse(model)
+let hobbies = jsonData["classes"];
 
-export function hobbyGetHandler(req, res, h=hobbies) {
-    return new Promise( (resolve, reject) => {
+export function hobbyGetHandler(req, res, body, h = hobbies) {
+    return new Promise((resolve, reject) => {
         res.setHeader("Content-Type", "application/json");
-        res.end(JSON.stringify(h)) 
+        res.end(JSON.stringify(h))
         resolve();
     })
 }

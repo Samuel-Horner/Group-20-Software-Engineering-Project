@@ -150,7 +150,7 @@ describe("quiz page logic", () => {
         expect(harness.fetch).toHaveBeenCalledWith("/api/quiz", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ answers: [1, 2] }),
+            body: JSON.stringify({ answers: [1, 2], maskedHobbies: [] }),
         });
         expect(harness.localStorage.setItem).toHaveBeenCalledWith("userHobby", expectedSerialized);
         expect(harness.document.cookie).toContain(`userHobby=${expectedEncoded}`);

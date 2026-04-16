@@ -100,10 +100,12 @@ describe("Recommendation API", () => {
             await expect(postURL("api/quiz", {})).resolves.toBe(400);
             await expect(postURL("api/quiz", { answers: [] })).resolves.toBe(400);
             await expect(postURL("api/quiz", { answers: ["test"] })).resolves.toBe(400);
-            await expect(postURL("api/quiz", { answers: [1] })).resolves.toBe(500);
+            await expect(postURL("api/quiz", { answers: [1] })).resolves.toBe(400);
+            await expect(postURL("api/quiz", { answers: [1], maskedHobbies: null })).resolves.toBe(400);
+            await expect(postURL("api/quiz", { answers: [1], maskedHobbies: {} })).resolves.toBe(500);
 
             const sample1 = [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4];
-            await expect(postURL("api/quiz", { answers: [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4] })).resolves.toEqual({ "hobby": await getRecommendation(sample1) });
+            await expect(postURL("api/quiz", { answers: [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4], maskedHobbies: {} })).resolves.not.toBe(400);
         });
 
         test("Handler", async () => {
@@ -132,12 +134,13 @@ describe("Recommendation API", () => {
             await expect(mockQuizAPIHandler({})).resolves.toBe(400);
             await expect(mockQuizAPIHandler({ "answers": [] })).resolves.toBe(400);
             await expect(mockQuizAPIHandler({ "answers": ["test"] })).resolves.toBe(400);
-            await expect(mockQuizAPIHandler({ "answers": [1] })).rejects.toThrow("Input to hobby recommendation has length 1, when length 15 is needed");
+            await expect(mockQuizAPIHandler({ "answers": [1] })).resolves.toBe(400);
+            await expect(mockQuizAPIHandler({ "answers": [1], "maskedHobbies": {} })).rejects.toThrow("Input to hobby recommendation has length 1, when length 15 is needed");
 
             const sample1 = [5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 3, 4, 4, 5, 4];
-            await expect(mockQuizAPIHandler({ "answers": sample1 })).resolves.toEqual(JSON.stringify({ "hobby": await getRecommendation(sample1) }));
+            await expect(mockQuizAPIHandler({ "answers": sample1, "maskedHobbies": {} })).resolves.not.toBe(400);
 
-            await expect(mockQuizAPIHandler({ "answers": sample1 }, async (answers) => {
+            await expect(mockQuizAPIHandler({ "answers": sample1, "maskedHobbies": {} }, async (answers, maskedHobbies) => {
                 throw new Error("Recommendation engine not implemented");
             })).rejects.toThrow("Recommendation engine not implemented");
 

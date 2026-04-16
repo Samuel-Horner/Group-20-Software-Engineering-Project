@@ -81,6 +81,11 @@ export function quizAPIHandler(req, res, body, recommendation = getHobbyRecommen
         const payload = body ? body : {};
         const maskedHobbies = payload["maskedHobbies"];
 
+        if (!maskedHobbies)  {
+            errorHandler(res, 400);
+            return resolve();
+        }
+
         const rawAnswers = Array.isArray(payload.answers) ? payload.answers : [];
         const answers = rawAnswers.map((value) => Number.parseInt(String(value), 10));
 
@@ -89,7 +94,7 @@ export function quizAPIHandler(req, res, body, recommendation = getHobbyRecommen
             return resolve();
         }
 
-        await recommendation(answers).then(hobby => {
+        await recommendation(answers, maskedHobbies).then(hobby => {
             res.setHeader("Content-Type", "application/json");
             res.writeHead(200).end(JSON.stringify({ hobby }));
             return resolve();
