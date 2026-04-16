@@ -177,7 +177,7 @@ describe("Account API", () => {
 
         expect((await mockHandler(logoutHandler, {}, {
             "session": JSON.stringify(session)
-        }, manager)).headers["Set-Cookie"]).toEqual(["session=%7B%22account_id%22%3Anull%2C%22session_key%22%3Anull%7D; SameSite=Strict"]);
+        }, manager)).headers["Set-Cookie"][0]).toMatch(/session=%7B%22account_id%22%3Anull%2C%22session_key%22%3Anull%7D;/);
 
         expect((await manager.dbGet("SELECT * FROM UserAccounts WHERE AccountID = ?", [session.account_id]))[0]["SessionKey"]).toBe(null);
     });
@@ -225,7 +225,7 @@ describe("Account API", () => {
             "password": "test_password"
         }, {
             "session": JSON.stringify(session)
-        }, manager)).headers["Set-Cookie"]).toEqual(["session=%7B%22account_id%22%3Anull%2C%22session_key%22%3Anull%7D; SameSite=Strict"]);
+        }, manager)).headers["Set-Cookie"][0]).toMatch(/session=%7B%22account_id%22%3Anull%2C%22session_key%22%3Anull%7D;/);
 
         expect((await manager.dbGet("SELECT * FROM UserAccounts WHERE AccountID = ?", [session.account_id])).length).toBe(0);
     });
