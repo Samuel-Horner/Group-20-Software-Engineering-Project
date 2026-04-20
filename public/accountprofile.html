@@ -9,75 +9,158 @@
     <link href="styles.css" rel="stylesheet">
 
     <style>
-        .center {
-            display: flex;
-            flex-grow: 1;
+        /* Account page — card-based layout, polished inputs + buttons */
+        body { background: var(--background-alt); }
 
-            align-items: center;
+        .account-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
             justify-content: center;
+            padding: 120px 20px 80px;
         }
 
-        .row {
-            display: flex;
-            flex-direction: row;
+        .account-card {
+            width: 100%;
+            max-width: 440px;
+            background: var(--background);
+            border: 1px solid var(--line-soft);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            padding: 44px 40px;
         }
 
-        .row>* {
-            padding: 1rem;
+        .account-card h1 {
+            font-family: var(--font-serif);
+            font-weight: 500;
+            font-size: 2rem;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+            text-align: center;
+            margin-bottom: 6px;
+            color: var(--text-dark);
+        }
+
+        .account-subtitle {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-bottom: 28px;
         }
 
         .form {
             display: flex;
             flex-direction: column;
-
-            width: 20rem
+            gap: 14px;
+            width: 100%;
         }
 
         .form-item {
             display: flex;
-            flex-direction: row;
-            justify-content: center;
-
-            padding: 0.1em;
-        }
-
-        .form-title {
-            padding: 1em;
-        }
-
-        .form-bottom {
-            padding: 1em;
-        }
-
-        .form-item button {
-            padding: 0.2em;
-            margin-left: 0.2em;
-            margin-right: 0.2em;
-            flex-grow: 1;
-        }
-
-        .form-item input {
-            flex-grow: 1;
+            flex-direction: column;
+            gap: 6px;
         }
 
         .form-item label {
-            flex-grow: 1;
-        }
-
-        .text-light {
-            color: var(--text-light);
-        }
-
-        .text-dark {
+            font-size: 13px;
+            font-weight: 600;
             color: var(--text-dark);
         }
+
+        .form-item input,
+        .form-item textarea {
+            width: 100%;
+            padding: 11px 14px;
+            font-size: 14.5px;
+            font-family: inherit;
+            background: var(--background);
+            color: var(--text-dark);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            transition: border-color .15s ease, box-shadow .15s ease;
+        }
+
+        .form-item input:focus,
+        .form-item textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px var(--primary-soft);
+        }
+
+        .form-item textarea {
+            resize: vertical;
+            min-height: 84px;
+            line-height: 1.5;
+        }
+
+        .form-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .form-actions button {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 14.5px;
+            font-weight: 500;
+            font-family: inherit;
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            transition: background .2s ease, transform .1s ease, border-color .2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: #fff;
+            border: 1px solid var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-ghost {
+            background: var(--background);
+            color: var(--text-dark);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--text-dark);
+            background: var(--background-alt);
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-danger:hover {
+            background: var(--background-alt);
+            border-color: var(--danger);
+        }
+
+        .username-display {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+        }
+
+        .text-light { color: var(--text-light); }
+        .text-dark { color: var(--text-dark); }
     </style>
 </head>
 
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <div class="logo">HobbyMatch</div>
+            <div class="logo">hobbymatch</div>
             <ul class="nav-links">
                 <li><a href="index_new.html">Home</a></li>
                 <li><a href="community.html">Community</a></li>
@@ -87,59 +170,41 @@
         </div>
     </nav>
 
-    <main class="container center" style="margin-top:100px">
-        <div>
-            <div id="signed-out-content" style="visibility: hidden; position: fixed;">
-                <div class="form">
-                    <div class="form-item form-title">
-                        <h1> Account </h1>
-                    </div>
-
-                    <div class="form-item">
-                        <label for="username">Username: </label>
-                        <input type="text" name="username" id="username-input">
-                    </div>
-
-                    <div class="form-item">
-                        <label for="password">Password: </label>
-                        <input type="password" name="password" id="password-input">
-                    </div>
-
-                    <div class="form-item form-bottom">
-                        <button id="sign-in-submit">Sign In</button>
-                        <button id="create-account-submit">Create Account</button>
-                    </div>
+    <main class="account-page">
+        <div id="signed-out-content" class="account-card" style="visibility: hidden; position: fixed;">
+            <h1>Welcome back</h1>
+            <p class="account-subtitle">Sign in to save your matches and chats.</p>
+            <div class="form">
+                <div class="form-item">
+                    <label for="username-input">Username</label>
+                    <input type="text" name="username" id="username-input" placeholder="your-name" autocomplete="username">
+                </div>
+                <div class="form-item">
+                    <label for="password-input">Password</label>
+                    <input type="password" name="password" id="password-input" placeholder="••••••••" autocomplete="current-password">
+                </div>
+                <div class="form-actions">
+                    <button id="sign-in-submit" class="btn-primary" type="button">Sign in</button>
+                    <button id="create-account-submit" class="btn-ghost" type="button">Create an account</button>
                 </div>
             </div>
+        </div>
 
-            <div id="signed-in-content" style="visibility: hidden; position: fixed;">
-                <div class="form">
-                    <div class="form-item form-title">
-                        <div class="form">
-                            <h1 class="form-item">Account</h1>
-                            <p class="form-item text-light" id="username-display"></p>
-                        </div>
-                    </div>
-
-                    <div class="form-item">
-                        <label for="fullname">Full Name: </label>
-                        <input type="text" name="fullname" id="fullname-input">
-                    </div>
-                    <div class="form-item">
-                        <div class="form">
-                            <label for="description" class="form-item">Description: </label>
-                            <textarea class="form-item" name="description" id="description-input" rows=4 cols=80>
-                        </textarea>
-                        </div>
-                    </div>
-
-                    <div class="form-item form-bottom">
-                        <button id="save-changes-submit">Save Changes</button>
-                    </div>
-
-                    <div class="form-item form-bottom">
-                        <button id="sign-out-all-submit">Sign Out (all devices)</button>
-                    </div>
+        <div id="signed-in-content" class="account-card" style="visibility: hidden; position: fixed;">
+            <h1>Your account</h1>
+            <p class="username-display" id="username-display"></p>
+            <div class="form">
+                <div class="form-item">
+                    <label for="fullname-input">Full name</label>
+                    <input type="text" name="fullname" id="fullname-input" placeholder="Your name">
+                </div>
+                <div class="form-item">
+                    <label for="description-input">About you</label>
+                    <textarea name="description" id="description-input" rows="4" placeholder="A few words about the hobbies you love..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button id="save-changes-submit" class="btn-primary" type="button">Save changes</button>
+                    <button id="sign-out-all-submit" class="btn-danger" type="button">Sign out (all devices)</button>
                 </div>
             </div>
         </div>
