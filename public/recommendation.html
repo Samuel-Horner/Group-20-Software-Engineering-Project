@@ -24,58 +24,115 @@
             width: 100%;
             max-width: 720px;
             background: var(--background);
-            border-radius: 20px;
+            border: 1px solid var(--line-soft);
+            border-radius: var(--radius-xl);
             box-shadow: var(--shadow-lg);
-            padding: 48px 40px;
+            padding: 56px 48px;
             text-align: center;
         }
 
+        .rec-eyebrow {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--primary-color);
+            margin-bottom: 14px;
+        }
+
         .rec-title {
-            font-size: 2rem;
-            margin-bottom: 10px;
+            font-family: var(--font-serif);
+            font-weight: 500;
+            font-size: 1.9rem;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        .rec-card > p {
+            color: var(--text-light);
+            font-size: 1rem;
         }
 
         .rec-hobby {
-            font-size: 2.4rem;
-            font-weight: 800;
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-weight: 500;
+            font-size: 3rem;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
             color: var(--primary-color);
-            margin: 16px 0 24px;
+            margin: 20px 0 24px;
+        }
+
+        #description {
+            color: var(--text-light);
+            line-height: 1.7;
+            font-size: 0.98rem;
+            text-align: left;
+            white-space: pre-line;
+            max-width: 560px;
+            margin: 0 auto;
         }
 
         .rec-actions {
             display: flex;
             justify-content: center;
-            gap: 16px;
+            gap: 12px;
             flex-wrap: wrap;
             margin-top: 32px;
         }
 
         .secondary-btn {
-            display: inline-block;
-            padding: 14px 28px;
-            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 13px 24px;
+            border-radius: var(--radius-pill);
             border: 1px solid var(--border-color);
             color: var(--text-dark);
-            background: var(--background);
+            background: var(--surface);
             text-decoration: none;
-            font-weight: 600;
-            box-shadow: var(--shadow);
-            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 1rem;
+            box-shadow: none;
+            transition: background .2s ease, border-color .2s ease, transform .1s ease;
         }
 
         .secondary-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+            background: var(--background-alt);
+            border-color: var(--text-dark);
+            transform: translateY(-1px);
         }
 
         .scrolly-card {
             width: 100%;
             max-width: 720px;
             background: var(--background);
-            border-radius: 20px;
-            box-shadow: var(--shadow-lg);
-            padding: 48px 40px;
+            border: 1px solid var(--line-soft);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: 48px 48px 56px;
             text-align: center;
+        }
+
+        #scrolly-description {
+            color: var(--text-light);
+            font-size: 0.98rem;
+            margin-bottom: 20px;
+        }
+
+        #scrolly-list .rec-hobby {
+            font-size: 1.9rem;
+            margin: 24px 0 4px;
+        }
+
+        #scrolly-list p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
         }
 
         @keyframes scroller {
@@ -92,7 +149,7 @@
 <body>
   <nav class="navbar">
     <div class="nav-container">
-      <div class="logo">HobbyMatch</div>
+      <div class="logo">hobbymatch</div>
       <ul class="nav-links">
         <li><a href="index_new.html">Home</a></li>
         <li><a href="community.html">Community</a></li>
@@ -104,24 +161,24 @@
 
   <main class="container rec-page">
     <div class="rec-card">
-        <h1 class="rec-title">Your Recommended Hobby</h1>
-        <p>Based on your quiz answers, we think you'll enjoy:</p>
+        <span class="rec-eyebrow">Your top match</span>
+        <h1 class="rec-title">Based on your answers, we think you'll love</h1>
         <div id="hobbyName" class="rec-hobby">Loading...</div>
         <p id="description"></p>
     </div>
 
     <!-- Information on the hobby -->
     <div class="scrolly-card animate">
-        <h1 id="scrolly-title" class="rec-title">Results</h1>
-        <!-- <p id="scrolly-description"></p>  -->
-        <p id="scrolly-description">Your top 5 reccomended hobbies were ...</p> 
+        <span class="rec-eyebrow">Runners-up</span>
+        <h2 id="scrolly-title" class="rec-title">Your other matches</h2>
+        <p id="scrolly-description">Your top 5 recommended hobbies were:</p>
 
         <div id="scrolly-list"></div>
-        
+
         <div class="rec-actions">
-            <a class="cta-button" href="data_input.html">Retake Quiz</a>
-            <a class="secondary-btn" href="index_new.html">Back to Home</a>
-        </div> 
+            <a class="cta-button" href="data_input.html">Retake quiz</a>
+            <a class="secondary-btn" href="index_new.html">Back to home</a>
+        </div>
     </div>
     
     <script>
