@@ -1,712 +1,726 @@
 /* ============================================================================
-   WEBSITE STYLESHEET
+   HOBBYMATCH — SHARED STYLESHEET (Soft Sage redesign)
 
-   TABLE OF CONTENTS:
-   1. Reset and Base Styles
-   2. CSS Variables (defined in light.css/dark.css)
-   3. Navigation
-   4. Hero Section
-   5. Content Grid Section
-   6. Step Section
-   7. CTA Section
-   8. Footer
-   9. Animations
-   10. Responsive Design
+   TABLE OF CONTENTS
+   1.  Reset, base, typography
+   2.  Container + utility
+   3.  Navigation bar
+   4.  Hero section
+   5.  Buttons (primary / ghost / dark)
+   6.  Feature pills / kicker / badges
+   7.  Content grid section
+   8.  Step section
+   9.  CTA section (dark island)
+   10. Footer
+   11. Animations
+   12. Responsive
 
-   THEME SETUP (for all pages):
-   Colours are NOT defined in this file. They live in separate palette files:
-     - light.css  (light mode colours)
-     - dark.css   (dark mode colours)
-
-   Every HTML page should link a palette file BEFORE this stylesheet:
-
-     <link id="theme-stylesheet" rel="stylesheet" href="./light.css">
-     <link rel="stylesheet" href="./Styles.css">
-
-   To switch themes via JavaScript, swap the href on the theme link:
-
-     document.getElementById('theme-stylesheet').href = './dark.css';
-
-   The settings menu toggle will handle this automatically and persist
-   the user's choice in localStorage so it applies across all pages.
+   Colour variables are defined in light.css / dark.css and linked BEFORE this.
 ============================================================================ */
 
 /* ============================================================================
-   1. RESET AND BASE STYLES
-   Removing browser default styling for consistency
+   Google Fonts — loaded once here so every page gets the new typography.
+   (If you prefer to self-host or keep fonts in <head>, remove this @import
+   and add the stylesheet link to each page's <head> instead.)
 ============================================================================ */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap');
 
 /* ============================================================================
-   2. CSS VARIABLES
-
-   Colour variables are defined in light.css and dark.css.
-   Link one of those palette files before this stylesheet.
-
-   USAGE:
-   - Buttons and CTAs: var(--primary-color)
-   - Text: var(--text-dark) or var(--text-light)
-   - Backgrounds: var(--background) or var(--background-alt)
-   - Shadows: var(--shadow) or var(--shadow-lg)
+   1. RESET + BASE TYPOGRAPHY
 ============================================================================ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    font-family: var(--font-sans);
     color: var(--text-dark);
     background-color: var(--background);
     line-height: 1.6;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
+
+h1, h2, h3, h4 {
+    color: var(--text-dark);
+    letter-spacing: -0.01em;
+}
+
+h1, h2 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+}
+
+a { color: inherit; }
 
 input, textarea, select {
     background-color: var(--input-bg);
     color: var(--text-dark);
     border: 1px solid var(--border-color);
+    font-family: inherit;
+    font-size: 14.5px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    transition: border-color .15s ease, box-shadow .15s ease;
 }
 
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px var(--primary-soft);
+}
+
+::selection { background: var(--primary-soft); color: var(--text-dark); }
+
 /* ============================================================================
-   REUSABLE CONTAINER CLASS
-   
-   Centred content wrapper with consistent padding.
-   Example: <div class="container">Content here</div>
+   2. CONTAINER + UTILITIES
 ============================================================================ */
 .container {
-    max-width: 1200px;
+    max-width: 1180px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 24px;
 }
 
 /* ============================================================================
    3. NAVIGATION BAR
-   
-   Fixed position navbar that stays at top when scrolling.
-   
-   CLASSES:
-   - .navbar: Main navigation container
-   - .nav-container: Inner container for nav content
-   - .logo: Brand/site name
-   - .nav-links: List of navigation links
-   - .nav-cta: Special styled button in nav
 ============================================================================ */
 .navbar {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     background: var(--navbar-bg);
-    backdrop-filter: blur(10px);
-    box-shadow: var(--shadow);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid transparent;
     z-index: 1000;
-    transition: all 0.3s ease;
+    transition: background .3s ease, border-color .3s ease;
 }
 
-/* Adding extra styling when scrolled */
 .navbar.scrolled {
     background: var(--navbar-bg-scrolled);
-    box-shadow: var(--shadow-lg);
+    border-bottom-color: var(--line-soft);
 }
 
 .nav-container {
-    max-width: 1200px;
+    max-width: 1180px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 70px;
+    height: 72px;
 }
 
-/* Creating gradient effect for logo */
+/* Logo — no gradient, uses serif face for distinction */
 .logo {
-    font-size: 1.5rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 1.4rem;
+    letter-spacing: -0.02em;
+    color: var(--text-dark);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: none;
+    -webkit-text-fill-color: inherit;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+}
+
+/* Little leaf/square mark that pairs with the wordmark */
+.logo::before {
+    content: "";
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: var(--primary-color);
+    display: inline-block;
+    flex-shrink: 0;
 }
 
 .nav-links {
     display: flex;
     list-style: none;
     gap: 2rem;
+    align-items: center;
 }
 
 .nav-links a {
     text-decoration: none;
     color: var(--text-dark);
     font-weight: 500;
-    transition: color 0.3s ease;
+    font-size: 14.5px;
+    transition: color .2s ease;
     position: relative;
 }
 
-/* Creating animated underline effect */
-.nav-links a::after {
+.nav-links a:hover { color: var(--primary-color); }
+
+/* Subtle animated underline — gentler than the original */
+.nav-links a:not(.nav-cta)::after {
     content: '';
     position: absolute;
-    bottom: -5px;
-    left: 0;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
     width: 0;
     height: 2px;
+    border-radius: 2px;
     background: var(--primary-color);
-    transition: width 0.3s ease;
+    transition: width .25s ease;
 }
 
-.nav-links a:hover {
-    color: var(--primary-color);
-}
-
-/* Expanding underline to full width on hover */
-.nav-links a:hover::after {
-    width: 100%;
-}
+.nav-links a:not(.nav-cta):hover::after { width: 100%; }
 
 .nav-cta {
-    background: var(--primary-color) !important;
-    color: white !important;
-    padding: 8px 20px;
-    border-radius: 50px;
-    transition: all 0.3s ease;
+    background: var(--text-dark) !important;
+    color: var(--background) !important;
+    padding: 10px 20px;
+    border-radius: var(--radius-pill);
+    font-weight: 500 !important;
+    transition: background .2s ease, transform .1s ease;
+    border: 1px solid var(--text-dark);
 }
 
-/* Removing underline from CTA button */
-.nav-cta::after {
-    display: none !important;
-}
+.nav-cta::after { display: none !important; }
 
 .nav-cta:hover {
-    background: var(--primary-dark) !important;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow);
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color);
+    color: #fff !important;
+    transform: translateY(-1px);
 }
 
 /* ============================================================================
    4. HERO SECTION
-   
-   Large banner section with gradient background.
-   
-   CLASSES:
-   - .hero: Main hero container (full viewport height)
-   - .hero-content: Text content area
-   - .hero-title: Large main heading
-   - .hero-subtitle: Descriptive text under title
-   - .cta-button: Call-to-action button (can be used anywhere)
-   - .hero-features: Container for feature pills
-   - .feature-pill: Small badge/tag with icon and text
+   Soft cream background with sage + tan radial glows — no heavy gradient.
 ============================================================================ */
 .hero {
-    min-height: 100vh;
+    min-height: 88vh;
     display: flex;
     align-items: center;
-    padding: 100px 20px 60px;
-    background: linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%);
+    padding: 120px 24px 80px;
     position: relative;
     overflow: hidden;
+    background:
+        radial-gradient(circle at 88% 18%, var(--primary-soft) 0%, transparent 42%),
+        radial-gradient(circle at 10% 92%, var(--accent-soft) 0%, transparent 46%),
+        var(--background-alt);
 }
 
-/* Creating decorative background pattern */
 .hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-    pointer-events: none;
+    /* Removed — was a white overlay on the old green gradient. Kept empty so
+       legacy pages that reference .hero::before still have a stable ruleset. */
+    content: none;
 }
 
 .hero-content {
     flex: 1;
-    max-width: 600px;
+    max-width: 640px;
     z-index: 1;
+    position: relative;
 }
 
 .hero-title {
-    font-size: 3.5rem;
-    font-weight: 800;
-    color: white;
-    margin-bottom: 1rem;
-    line-height: 1.1;
-    animation: fadeInUp 0.8s ease;
+    font-family: var(--font-serif);
+    font-size: 4rem;
+    font-weight: 500;
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    color: var(--text-dark);
+    margin-bottom: 1.25rem;
+    animation: fadeInUp 0.7s ease;
+}
+
+.hero-title em {
+    font-style: italic;
+    color: var(--primary-color);
+    font-weight: 500;
 }
 
 .hero-subtitle {
-    font-size: 1.25rem;
-    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.125rem;
+    color: var(--text-light);
     margin-bottom: 2rem;
-    animation: fadeInUp 0.8s ease 0.2s backwards;
-}
-
-/* ============================================================================
-   CALL-TO-ACTION BUTTON
-   
-   Primary action button for the site.
-   Works on both <a> tags and <button> elements.
-============================================================================ */
-.cta-button {
-    display: inline-block;
-    padding: 16px 40px;
-    background: var(--cta-bg);
-    color: var(--primary-color);
-    text-decoration: none;
-    border-radius: 50px;
-    font-weight: 600;
-    font-size: 1.1rem;
-    box-shadow: var(--shadow-lg);
-    transition: all 0.3s ease;
-    animation: fadeInUp 0.8s ease 0.4s backwards;
-}
-
-.cta-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    background: var(--cta-bg);
+    line-height: 1.55;
+    max-width: 540px;
+    animation: fadeInUp 0.7s ease 0.15s backwards;
 }
 
 .hero-features {
     display: flex;
-    gap: 1rem;
+    gap: 0.75rem;
     flex-wrap: wrap;
-    margin-top: 3rem;
-    animation: fadeInUp 0.8s ease 0.6s backwards;
+    margin-top: 2.5rem;
+    animation: fadeInUp 0.7s ease 0.45s backwards;
 }
 
+/* Feature pills — now sit on cream, not on a gradient, so they need to
+   be visible in a different way (subtle surface, not glassmorphism). */
 .feature-pill {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    border-radius: 50px;
-    color: white;
-    font-size: 0.9rem;
+    padding: 8px 16px;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-pill);
+    color: var(--text-dark);
+    font-size: 0.88rem;
     font-weight: 500;
+    box-shadow: var(--shadow);
 }
 
 .feature-pill i {
-    font-size: 1.2rem;
+    font-size: 1rem;
+    color: var(--primary-color);
 }
 
 /* ============================================================================
-   5. CONTENT GRID SECTION
-   
-   Section for displaying content in a responsive grid layout.
-   
-   CLASSES:
-   - .content-section: Main section container
-   - .section-title: Centred heading (use in any section)
-   - .content-grid: Grid container for items
-   - .grid-item: Individual item in the grid
+   5. BUTTONS
+============================================================================ */
+.cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: var(--primary-color);
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: var(--radius-pill);
+    font-weight: 500;
+    font-family: inherit;
+    font-size: 1rem;
+    border: 1px solid var(--primary-color);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease, transform .1s ease, box-shadow .2s ease;
+    animation: fadeInUp 0.7s ease 0.3s backwards;
+}
+
+.cta-button:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+    color: #ffffff;
+}
+
+.cta-button-large {
+    font-size: 1.05rem;
+    padding: 16px 34px;
+}
+
+/* Ghost button — optional, for secondary actions. Use class="cta-button cta-button-ghost" */
+.cta-button-ghost {
+    background: transparent;
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    box-shadow: none;
+}
+
+.cta-button-ghost:hover {
+    background: var(--surface);
+    border-color: var(--text-dark);
+    color: var(--text-dark);
+}
+
+/* ============================================================================
+   6. SHARED BADGES / KICKERS
+============================================================================ */
+.section-kicker {
+    display: inline-block;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--primary-color);
+    margin-bottom: 12px;
+}
+
+/* ============================================================================
+   7. CONTENT GRID SECTION
 ============================================================================ */
 .content-section {
-    padding: 100px 20px;
+    padding: 96px 24px;
     background: var(--background);
 }
 
-/* ============================================================================
-   SECTION TITLE
-   
-   Main heading for sections.
-   Example: <h2 class="section-title">Your Heading</h2>
-============================================================================ */
 .section-title {
     text-align: center;
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 3rem;
+    font-family: var(--font-serif);
+    font-size: 2.6rem;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    margin: 0 auto 3rem;
     color: var(--text-dark);
+    max-width: 720px;
+}
+
+.section-title em {
+    font-style: italic;
+    color: var(--primary-color);
+    font-weight: 500;
 }
 
 .content-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-top: 3rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 2.5rem;
 }
 
 .grid-item {
-    background: var(--background-alt);
-    padding: 40px;
-    border-radius: 20px;
-    text-align: center;
-    transition: all 0.3s ease;
+    background: var(--surface);
+    padding: 32px 28px;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-lg);
+    text-align: left;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
 }
 
 .grid-item:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
+    border-color: var(--border-color);
 }
 
 .grid-item h3 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
+    font-family: var(--font-sans);
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
     color: var(--text-dark);
+    letter-spacing: -0.01em;
 }
 
 .grid-item p {
     color: var(--text-light);
-    line-height: 1.8;
+    line-height: 1.6;
+    font-size: 0.95rem;
 }
 
-/* Icon styling for grid items */
+/* Icons inside grid items — now a soft tile instead of a big raw icon */
 .grid-item i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
+    font-size: 1.1rem;
     color: var(--primary-color);
-    display: block;
+    background: var(--primary-soft);
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+}
+
+/* Vary icon tint per card so the row doesn't look monotonous */
+.grid-item:nth-child(2) i {
+    color: var(--secondary-color);
+    background: var(--accent-soft);
+}
+
+.grid-item:nth-child(3) i {
+    color: var(--accent-color);
+    background: var(--info-soft);
 }
 
 /* ============================================================================
-   6. STEP SECTION
-   
-   Section showing content in numbered step items.
-   
-   CLASSES:
-   - .step-section: Main section container
-   - .steps: Container for step items
-   - .step: Individual step item
-   - .step-number: Circular numbered badge
-   - .step-connector: Arrow between steps
+   8. STEP SECTION
 ============================================================================ */
 .step-section {
-    padding: 100px 20px;
+    padding: 96px 24px;
     background: var(--background-alt);
+    border-top: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--line-soft);
 }
 
 .steps {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 2rem;
-    margin-top: 3rem;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 2.5rem;
+    max-width: 1080px;
+    margin-left: auto;
+    margin-right: auto;
+    align-items: stretch;
 }
 
 .step {
-    flex: 1;
-    min-width: 250px;
-    max-width: 300px;
-    background: var(--card-bg);
-    padding: 40px;
-    border-radius: 20px;
-    text-align: center;
-    box-shadow: var(--shadow);
-    transition: all 0.3s ease;
+    background: var(--surface);
+    padding: 32px 28px;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-lg);
+    text-align: left;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
 }
 
 .step:hover {
-    transform: translateY(-10px);
+    transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
 }
 
+/* Number becomes a large italic serif numeral — more editorial */
 .step-number {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0 auto 1.5rem;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 2.6rem;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--primary-color);
+    background: none;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    display: block;
+    margin: 0 0 1rem 0;
 }
 
 .step h3 {
-    font-size: 1.3rem;
-    margin-bottom: 1rem;
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
     color: var(--text-dark);
+    letter-spacing: -0.01em;
 }
 
 .step p {
     color: var(--text-light);
-    line-height: 1.8;
+    line-height: 1.6;
+    font-size: 0.95rem;
 }
 
-.step-connector {
-    width: 60px;
-    height: 2px;
-    background: var(--border-color);
-    position: relative;
-}
-
-/* Adding arrow symbol */
-.step-connector::after {
-    content: '→';
-    position: absolute;
-    right: -15px;
-    top: -10px;
-    color: var(--primary-color);
-    font-size: 1.5rem;
-}
+/* Connector hidden on the new layout — grid spacing handles the rhythm.
+   Kept rule in case existing HTML renders it, just invisible. */
+.step-connector { display: none; }
 
 /* ============================================================================
-   7. CTA SECTION
-   
-   Full-width section with gradient background for calls to action.
-   
-   CLASSES:
-   - .cta-section: Main section container
-   - .cta-button-large: Larger version of CTA button
+   9. CTA SECTION — dark island
 ============================================================================ */
 .cta-section {
-    padding: 100px 20px;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    padding: 40px 24px;
+    background: var(--background);
     text-align: center;
-    color: white;
+}
+
+.cta-section > .container {
+    background: var(--header-bg);
+    color: var(--header-text);
+    border-radius: var(--radius-xl);
+    padding: 72px 48px;
+    max-width: 1100px;
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-section > .container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.18;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 80% 20%, var(--primary-color) 0%, transparent 35%),
+        radial-gradient(circle at 15% 85%, var(--secondary-color) 0%, transparent 40%);
 }
 
 .cta-section h2 {
+    font-family: var(--font-serif);
+    font-weight: 500;
     font-size: 2.5rem;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
     margin-bottom: 1rem;
+    color: var(--header-text);
+    position: relative;
+}
+
+.cta-section h2 em {
+    font-style: italic;
+    color: var(--primary-light);
 }
 
 .cta-section p {
-    font-size: 1.2rem;
-    margin-bottom: 2rem;
-    opacity: 0.9;
+    font-size: 1.05rem;
+    color: var(--header-text);
+    opacity: 0.75;
+    margin-bottom: 1.75rem;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
 }
 
-.cta-button-large {
-    font-size: 1.2rem;
-    padding: 18px 50px;
+/* CTA button inside the dark island inverts colours */
+.cta-section .cta-button {
+    background: var(--header-text);
+    color: var(--text-dark);
+    border-color: var(--header-text);
+    position: relative;
+}
+
+.cta-section .cta-button:hover {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
 }
 
 /* ============================================================================
-   8. FOOTER
-   
-   Site footer with grid layout for content sections.
-   
-   CLASSES:
-   - .footer: Main footer container
-   - .footer-content: Grid layout for footer sections
-   - .footer-section: Individual column in footer
-   - .footer-bottom: Bottom section for legal text
+   10. FOOTER
 ============================================================================ */
 .footer {
-    background: var(--footer-bg);
-    color: white;
-    padding: 60px 20px 30px;
+    background: var(--background);
+    color: var(--text-dark);
+    padding: 64px 24px 28px;
+    border-top: 1px solid var(--line-soft);
+}
+
+.footer .container {
+    max-width: 1180px;
 }
 
 .footer-content {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 3rem;
-    margin-bottom: 3rem;
+    grid-template-columns: 1.3fr 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 2.5rem;
 }
 
 .footer-section h4 {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-light);
+    margin-bottom: 14px;
 }
 
 .footer-section p {
-    color: rgba(255, 255, 255, 0.7);
-    line-height: 1.8;
+    color: var(--text-light);
+    line-height: 1.6;
+    font-size: 14.5px;
+    max-width: 280px;
 }
 
-.footer-section ul {
-    list-style: none;
-}
+.footer-section ul { list-style: none; }
 
-.footer-section ul li {
-    margin-bottom: 0.5rem;
-}
+.footer-section ul li { margin-bottom: 8px; }
 
 .footer-section ul a {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--text-dark);
     text-decoration: none;
-    transition: color 0.3s ease;
+    transition: color .2s ease;
+    font-size: 14.5px;
 }
 
-.footer-section ul a:hover {
-    color: white;
-}
+.footer-section ul a:hover { color: var(--primary-color); }
 
 .footer-bottom {
     text-align: center;
-    padding-top: 2rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.5);
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line-soft);
+    color: var(--text-light);
+    font-size: 13px;
 }
 
 /* ============================================================================
-   9. ANIMATIONS
-   
-   Reusable keyframe animations used throughout the site.
+   11. ANIMATIONS
 ============================================================================ */
-
-/* Fading in from bottom */
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Floating animation for visual cards */
 @keyframes float {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-20px);
-    }
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-12px); }
 }
 
 /* ============================================================================
-   10. RESPONSIVE DESIGN
-   
-   Adjusting layout and sizing for optimal viewing on all devices.
-   
-   BREAKPOINTS:
-   - 768px and down: Tablet adjustments
-   - 480px and down: Mobile adjustments
+   12. RESPONSIVE
 ============================================================================ */
+@media (max-width: 960px) {
+    .hero-title { font-size: 3rem; }
+    .section-title { font-size: 2.1rem; }
+    .cta-section h2 { font-size: 2rem; }
+    .steps { grid-template-columns: 1fr; gap: 12px; max-width: 520px; }
+    .footer-content { grid-template-columns: 1fr 1fr; gap: 32px; }
+    .cta-section > .container { padding: 56px 32px; }
+}
 
-/* Adjusting for tablet and below */
 @media (max-width: 768px) {
-    .nav-links {
-        gap: 1rem;
-        font-size: 0.9rem;
-    }
+    .nav-links { gap: 1.25rem; font-size: 14px; }
 
     .hero {
-        padding: 80px 20px 40px;
-        text-align: center;
+        padding: 110px 24px 64px;
+        min-height: auto;
+        text-align: left;
     }
 
-    .hero-title {
-        font-size: 2.5rem;
-    }
+    .hero-title { font-size: 2.4rem; }
+    .hero-subtitle { font-size: 1rem; }
+    .hero-features { justify-content: flex-start; }
 
-    .hero-subtitle {
-        font-size: 1.1rem;
-    }
+    .section-title { font-size: 1.8rem; }
 
-    .hero-features {
-        justify-content: center;
-    }
+    .content-section, .step-section { padding: 72px 24px; }
 
-    .section-title {
-        font-size: 2rem;
-    }
+    .content-grid { grid-template-columns: 1fr; }
 
-    .content-grid {
-        grid-template-columns: 1fr;
-    }
-
-    /* Stacking steps vertically */
-    .steps {
-        flex-direction: column;
-    }
-
-    .step-connector {
-        width: 2px;
-        height: 60px;
-        transform: rotate(90deg);
-    }
-
-    /* Changing arrow direction */
-    .step-connector::after {
-        content: '↓';
-        right: -10px;
-        top: 20px;
-    }
-
-    .cta-section h2 {
-        font-size: 2rem;
-    }
-
-    .footer-content {
-        grid-template-columns: 1fr;
-        text-align: center;
-    }
+    .footer-content { grid-template-columns: 1fr; text-align: left; gap: 28px; }
 }
 
-/* Adjusting for mobile */
 @media (max-width: 480px) {
-    .nav-links {
-        gap: 0.5rem;
-        font-size: 0.85rem;
-    }
+    .nav-links { gap: 0.75rem; font-size: 13.5px; }
+    .logo { font-size: 1.15rem; }
+    .logo::before { width: 22px; height: 22px; }
 
-    .logo {
-        font-size: 1.2rem;
-    }
+    .hero-title { font-size: 2rem; }
 
-    .hero-title {
-        font-size: 2rem;
-    }
+    .cta-button { padding: 12px 22px; font-size: 0.95rem; }
 
-    .cta-button {
-        padding: 14px 30px;
-        font-size: 1rem;
-    }
+    .cta-section > .container { padding: 48px 24px; }
+    .cta-section h2 { font-size: 1.7rem; }
 }
 
 /* ============================================================================
-   QUICK REFERENCE FOR TEAM
-   
-   COLOUR VARIABLES (defined in light.css / dark.css):
-   - var(--primary-color): Main green
-   - var(--primary-dark): Darker green for hover states
-   - var(--primary-light): Light green for accents
-   - var(--secondary-color): Teal
-   - var(--accent-color): Cyan
-   - var(--text-dark): Primary text colour
-   - var(--text-light): Secondary text colour
-   - var(--background): Main background
-   - var(--background-alt): Alternate background
-   - var(--border-color): Border colour
-   - var(--shadow): Standard shadow
-   - var(--shadow-lg): Larger shadow
-   - var(--navbar-bg): Navbar background
-   - var(--navbar-bg-scrolled): Navbar background when scrolled
-   - var(--card-bg): Card/step background
-   
-   REUSABLE CLASSES:
-   - .container: Centred content wrapper (max-width 1200px)
-   - .section-title: Large centred headings (2.5rem)
-   - .cta-button: Primary action buttons
-   - .cta-button-large: Larger version of CTA button
-   - .grid-item: Grid item with background and padding
-   - .step: Numbered step item with circular badge
-   - .feature-pill: Small rounded badge with icon and text
-   - .nav-cta: Special styled button in navigation
-   
-   SPACING STANDARDS:
-   - Section padding: 100px top/bottom, 20px left/right
-   - Card padding: 40px all around
-   - Gap between items: 2rem (32px)
-   - Navbar height: 70px
-   
-   BORDER RADIUS STANDARDS:
-   - Buttons/pills: 50px (fully rounded pill shape)
-   - Cards: 20px (rounded corners)
-   - Circular badges: 50% (perfect circle)
-   
-   FONT SIZES:
-   - Hero title: 3.5rem (desktop), 2.5rem (tablet), 2rem (mobile)
-   - Section titles: 2.5rem (desktop), 2rem (tablet)
-   - Body text: 1rem (inherited from browser default)
-   - CTA buttons: 1.1rem (standard), 1.2rem (large)
-   
-   RESPONSIVE BREAKPOINTS:
-   - Tablet: 768px and below
-   - Mobile: 480px and below
+   QUICK REFERENCE — for anyone extending the design system later
+
+   ORIGINAL COLOUR VARIABLES (still work):
+     --primary-color, --primary-dark, --primary-light, --secondary-color,
+     --accent-color, --text-dark, --text-light, --background,
+     --background-alt, --border-color, --shadow, --shadow-lg,
+     --navbar-bg, --navbar-bg-scrolled, --card-bg,
+     --header-bg, --header-text, --footer-bg, --cta-bg, --input-bg
+
+   NEW DESIGN TOKENS:
+     --surface, --surface-muted, --line-soft
+     --primary-soft, --accent-soft, --info-soft
+     --radius-xs | sm | md | lg | xl | pill
+     --font-serif, --font-sans
+     --success, --warning, --danger
+
+   USE IN HTML:
+     <h1 class="hero-title">Heading <em>with emphasis</em></h1>
+     <span class="section-kicker">How it works</span>
+     <a class="cta-button">Primary action</a>
+     <a class="cta-button cta-button-ghost">Secondary</a>
+
+   TYPOGRAPHY:
+     - Headings (h1, h2, .hero-title, .section-title, .cta-section h2):
+       Fraunces serif, weight 500, italic for accent words via <em>.
+     - Body, buttons, nav, cards: Inter, 400–600.
+     - Step numbers: Fraunces italic, 2.6rem.
+
+   RADIUS PHILOSOPHY:
+     - Pills (50px) only for buttons + the navbar CTA.
+     - Cards, inputs: 14–20px rounded corners.
+     - Dark CTA block: 28px for extra softness.
 ============================================================================ */
