@@ -18,18 +18,24 @@
     }
 
     .quiz-header h1 {
+      font-family: var(--font-serif);
+      font-weight: 500;
+      font-size: 2.4rem;
+      letter-spacing: -0.025em;
+      line-height: 1.1;
       color: var(--text-dark);
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .quiz-header p {
       color: var(--text-light);
+      font-size: 1.02rem;
     }
 
     .quiz-error {
       display: none;
       text-align: center;
-      color: #b91c1c;
+      color: var(--danger);
       margin-top: 10px;
       font-weight: 600;
     }
@@ -52,20 +58,31 @@
     }
 
     .question-box {
-      background: var(--background-alt);
+      background: var(--background);
       width: 100%;
-      max-width: 900px;
-      padding: 55px 40px;
-      border-radius: 14px;
-      box-shadow: var(--shadow-lg);
+      max-width: 800px;
+      padding: 48px 40px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
       text-align: center;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--line-soft);
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .question-box:hover{
+      border-color: var(--border-color);
+      box-shadow: var(--shadow-lg);
     }
 
     .question-box h2 {
-      font-size: 1.8rem;
-      margin-bottom: 24px;
+      font-family: var(--front-serif);
+      font-weight: 500;
+      font-size: 1.7rem;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 28px;
       color: var(--text-dark);
+      
     }
 
     .scale-row {
@@ -306,7 +323,7 @@
 <body>
   <nav class="navbar">
     <div class="nav-container">
-      <div class="logo">HobbyMatch</div>
+      <div class="logo">hobbymatch</div>
       <ul class="nav-links">
         <li><a href="index_new.html">Home</a></li>
         <li><a href="community.html">Community</a></li>
