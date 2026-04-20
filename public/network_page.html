@@ -11,7 +11,7 @@
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <div class="logo">HobbyMatch</div>
+            <div class="logo">hobbymatch</div>
             <ul class="nav-links">
                 <li><a href="index_new.html">Home</a></li>
                 <li><a href="community.html">Community</a></li>
@@ -22,6 +22,12 @@
     </nav>
 
   <div class="app-shell">
+
+    <header class="connect-header">
+      <span class="section-kicker">Connect</span>
+      <h1>Meet people already <em>loving</em> your matches.</h1>
+      <p>Search by hobby, skill level, or where they live — then start a chat when someone looks like your kind of person.</p>
+    </header>
 
     <!-- Main layout -->
     <main class="layout">
@@ -118,12 +124,7 @@
           <!-- Card 1 -->
           <article class="profile-card">
             <header class="profile-header">
-              <div class="avatar">
-                <img
-                  src="https://via.placeholder.com/80x80.png?text=S"
-                  alt="Sarah Chen"
-                />
-              </div>
+              <div class="avatar avatar-sage" aria-label="Sarah Chen">S</div>
               <div class="profile-main">
                 <div class="profile-topline">
                   <h3>Sarah Chen</h3>
@@ -150,12 +151,7 @@
           <!-- Card 2 -->
           <article class="profile-card">
             <header class="profile-header">
-              <div class="avatar">
-                <img
-                  src="https://via.placeholder.com/80x80.png?text=M"
-                  alt="Marcus Johnson"
-                />
-              </div>
+              <div class="avatar avatar-tan" aria-label="Marcus Johnson">M</div>
               <div class="profile-main">
                 <div class="profile-topline">
                   <h3>Marcus Johnson</h3>
@@ -183,12 +179,7 @@
           <!-- Card 3 -->
           <article class="profile-card">
             <header class="profile-header">
-              <div class="avatar">
-                <img
-                  src="https://via.placeholder.com/80x80.png?text=E"
-                  alt="Emily Rodriguez"
-                />
-              </div>
+              <div class="avatar avatar-slate" aria-label="Emily Rodriguez">E</div>
               <div class="profile-main">
                 <div class="profile-topline">
                   <h3>Emily Rodriguez</h3>
@@ -214,12 +205,7 @@
           <!-- Card 4 -->
           <article class="profile-card">
             <header class="profile-header">
-              <div class="avatar">
-                <img
-                  src="https://via.placeholder.com/80x80.png?text=D"
-                  alt="David Kim"
-                />
-              </div>
+              <div class="avatar avatar-clay" aria-label="David Kim">D</div>
               <div class="profile-main">
                 <div class="profile-topline">
                   <h3>David Kim</h3>
@@ -255,7 +241,43 @@
   .app-shell {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 100px 16px 40px;
+    padding: 120px 24px 64px;
+  }
+
+  /* Page header */
+  .connect-header {
+    text-align: center;
+    margin-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .connect-header h1 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 2.6rem;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    color: var(--text-dark);
+    max-width: 720px;
+  }
+
+  .connect-header h1 em {
+    font-style: italic;
+    color: var(--primary-color);
+  }
+
+  .connect-header p {
+    color: var(--text-light);
+    font-size: 1rem;
+    max-width: 540px;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 640px) {
+    .connect-header h1 { font-size: 1.9rem; }
   }
 
   /* Header / Topbar */
@@ -444,18 +466,33 @@
     width: 56px;
     height: 56px;
     border-radius: 999px;
-    overflow: hidden;
     flex-shrink: 0;
-    border: 2px solid var(--background-alt);
+    border: 2px solid var(--background);
     box-shadow: var(--shadow);
     background: var(--background-alt);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-style: italic;
+    font-size: 1.5rem;
+    color: #fff;
+    letter-spacing: 0;
+    user-select: none;
   }
+
+  .avatar-sage  { background: linear-gradient(135deg, #8EAA8D 0%, #527052 100%); }
+  .avatar-tan   { background: linear-gradient(135deg, #D8B48A 0%, #A57A4A 100%); }
+  .avatar-slate { background: linear-gradient(135deg, #9BB3C0 0%, #5E7684 100%); }
+  .avatar-clay  { background: linear-gradient(135deg, #C98B82 0%, #8E4E46 100%); }
 
   .avatar img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
+    border-radius: inherit;
   }
 
   .profile-main {
@@ -472,8 +509,9 @@
   }
 
   .profile-topline h3 {
-    font-size: 15px;
-    font-weight: 800;
+    font-size: 15.5px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
     color: var(--text-dark);
   }
 
@@ -495,21 +533,21 @@
   }
 
   .level-intermediate {
-    background: rgba(16, 185, 129, 0.12);
-    border-color: rgba(16, 185, 129, 0.35);
+    background: var(--primary-soft);
+    border-color: var(--primary-soft);
     color: var(--primary-dark);
   }
 
   .level-advanced {
-    background: rgba(20, 184, 166, 0.12);
-    border-color: rgba(20, 184, 166, 0.35);
-    color: #0f766e;
+    background: var(--accent-soft);
+    border-color: var(--accent-soft);
+    color: var(--secondary-color);
   }
 
   .level-beginner {
-    background: rgba(6, 182, 212, 0.12);
-    border-color: rgba(6, 182, 212, 0.35);
-    color: #0e7490;
+    background: var(--info-soft);
+    border-color: var(--info-soft);
+    color: var(--accent-color);
   }
 
   .bio {
@@ -539,25 +577,26 @@
   .connect-btn {
     margin-top: 10px;
     width: 100%;
-    border: none;
+    border: 1px solid var(--primary-color);
     cursor: pointer;
-    padding: 12px 16px;
-    border-radius: 999px;
+    padding: 11px 16px;
+    border-radius: var(--radius-pill);
     background: var(--primary-color);
     color: white;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 500;
+    font-family: inherit;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    transition: transform 0.06s ease, box-shadow 0.12s ease,
-      background 0.12s ease;
+    transition: transform 0.06s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
     box-shadow: var(--shadow);
   }
 
   .connect-btn:hover {
     background: var(--primary-dark);
+    border-color: var(--primary-dark);
     transform: translateY(-1px);
     box-shadow: var(--shadow-lg);
   }
@@ -604,7 +643,7 @@
             <div class="footer-content">
                 <div class="footer-section">
                     <h4>HobbyMatch</h4>
-                    <p>Connecting people with their perfect hobbies</p>
+                    <p>Helping people find hobbies that fit — and the people already loving them.</p>
                 </div>
                 <div class="footer-section">
                     <h4>Quick Links</h4>
