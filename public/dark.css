@@ -1,50 +1,70 @@
 /* ============================================================================
-   DARK THEME COLOUR PALETTE
-
-   Dark mode colour variables.
-   Link this stylesheet before Styles.css to apply the dark theme.
-   Swap with light.css to toggle between themes.
-
-   USAGE:
-   - Buttons and CTAs: var(--primary-color)
-   - Text: var(--text-dark) or var(--text-light)
-   - Backgrounds: var(--background) or var(--background-alt)
-   - Shadows: var(--shadow) or var(--shadow-lg)
+   DARK THEME — SOFT SAGE PALETTE
+   Drop-in replacement for the original dark.css.
+   Warm charcoal base with brighter sage for contrast on dark backgrounds.
 ============================================================================ */
 :root {
-    /* Primary colours — brighter variants for contrast on dark backgrounds */
-    --primary-color: #34d399;
-    --primary-dark: #10b981;
-    --primary-light: #6ee7b7;
-    --secondary-color: #2dd4bf;
-    --accent-color: #22d3ee;
+    /* ---------- Primary (brighter sage for dark bg) ---------- */
+    --primary-color: #9CBB9B;
+    --primary-dark:  #7FA07E;
+    --primary-light: #BDD3BC;
 
-    /* Text colours — inverted for dark backgrounds */
-    --text-dark: #f3f4f6;
-    --text-light: #9ca3af;
+    /* ---------- Secondary / accents ---------- */
+    --secondary-color: #DDB07C;
+    --accent-color:    #9BB5C1;
 
-    /* Background colours — dark grays */
-    --background: #111827;
-    --background-alt: #1f2937;
+    /* ---------- Text (inverted for dark bg) ---------- */
+    --text-dark:  #E8E6DE;
+    --text-light: #9BA39A;
 
-    /* Borders and shadows */
-    --border-color: #374151;
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+    /* ---------- Backgrounds (warm charcoal, not pure gray) ----------
+       Mirrors light.css semantics: --background is the default surface,
+       --background-alt is slightly different for alternating sections. */
+    --background:     #262B26;  /* default card / page surface */
+    --background-alt: #1C201B;  /* deeper cream-equivalent for alt sections */
 
-    /* Navbar */
-    --navbar-bg: rgba(17, 24, 39, 0.95);
-    --navbar-bg-scrolled: rgba(17, 24, 39, 0.98);
+    /* ---------- Borders & shadows ---------- */
+    --border-color: #3A423A;
+    --shadow:    0 1px 2px rgba(0, 0, 0, 0.30), 0 2px 6px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 24px 48px -16px rgba(0, 0, 0, 0.45), 0 6px 16px -8px rgba(0, 0, 0, 0.30);
 
-    /* Cards */
-    --card-bg: #283548;
+    /* ---------- Navbar ---------- */
+    --navbar-bg:          rgba(28, 32, 27, 0.82);
+    --navbar-bg-scrolled: rgba(28, 32, 27, 0.95);
 
-    /* Header bar and footer */
-    --header-bg: #1e293b;
-    --header-text: #e2e8f0;
-    --footer-bg: #0f172a;
+    /* ---------- Cards ---------- */
+    --card-bg: #262B26;
 
-    /* Buttons and inputs */
-    --cta-bg: #1f2937;
-    --input-bg: #374151;
+    /* ---------- Header / footer ---------- */
+    --header-bg:   #161A15;
+    --header-text: #E8E6DE;
+    --footer-bg:   #161A15;
+
+    /* ---------- Buttons & inputs ---------- */
+    --cta-bg:   #262B26;
+    --input-bg: #2F342F;
+
+    /* ============================================================
+       NEW DESIGN (dark)
+       ============================================================ */
+    --surface:       #262B26;
+    --surface-muted: #1F241F;
+    --line-soft:     #323A32;
+    --primary-soft:  #2F3A2F;
+    --accent-soft:   #3A322A;
+    --info-soft:     #2B353B;
+
+    --success: #9CBB9B;
+    --warning: #DDB07C;
+    --danger:  #D48B80;
+
+    --radius-xs: 6px;
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --radius-pill: 999px;
+
+    --font-serif: 'Fraunces', 'Georgia', serif;
+    --font-sans:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
